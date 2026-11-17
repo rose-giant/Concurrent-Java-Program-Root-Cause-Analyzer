@@ -1,0 +1,6 @@
+{
+  "id": "1-rm_sync_block-0",
+  "safe_id": "1-rm_sync_block-0",
+  "class": "CountingLanterns",
+  "classification": "Race Condition"
+}

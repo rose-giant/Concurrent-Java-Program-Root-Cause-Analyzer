@@ -1,0 +1,6 @@
+{
+  "id": "1-wrong_lock-0",
+  "safe_id": "1-wrong_lock-0",
+  "class": "CountingLanterns",
+  "classification": "Race Condition"
+}

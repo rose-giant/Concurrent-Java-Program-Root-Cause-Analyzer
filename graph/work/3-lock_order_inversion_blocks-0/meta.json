@@ -1,0 +1,6 @@
+{
+  "id": "3-lock_order_inversion_blocks-0",
+  "safe_id": "3-lock_order_inversion_blocks-0",
+  "class": "CountingFireflies",
+  "classification": "Deadlock"
+}

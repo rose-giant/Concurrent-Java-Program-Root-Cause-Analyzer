@@ -1,0 +1,6 @@
+{
+  "id": "2-wrong_lock-0",
+  "safe_id": "2-wrong_lock-0",
+  "class": "CountingComets",
+  "classification": "Race Condition"
+}

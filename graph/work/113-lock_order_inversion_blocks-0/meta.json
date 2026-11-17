@@ -1,0 +1,6 @@
+{
+  "id": "113-lock_order_inversion_blocks-0",
+  "safe_id": "113-lock_order_inversion_blocks-0",
+  "class": "ServerStatusAfterSplit",
+  "classification": "Deadlock"
+}

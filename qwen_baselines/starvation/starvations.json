@@ -1,0 +1,17 @@
+[
+  {
+    "id": 1,
+    "topic": "Starvation Barging Lock",
+    "code": "public class StarvationBarging {\n    static final Object lock = new Object();\n    static volatile boolean victimDone = false;\n    static int served = 0;\n\n    static class Greedy extends Thread {\n        public void run() {\n            // re-acquires the lock in a tight loop; never yields to the victim on purpose\n            while (!victimDone) {\n                synchronized (lock) {\n                    served++;\n                }\n            }\n        }\n    }\n\n    static class Victim extends Thread {\n        public void run() {\n            // needs the lock once, but the intrinsic lock is not fair\n            synchronized (lock) {\n                victimDone = true;\n            }\n        }\n    }\n\n    public static void main(String[] args) throws InterruptedException {\n        Thread greedy = new Greedy();\n        Thread victim = new Victim();\n        greedy.start();\n        victim.start();\n        greedy.join();\n        victim.join();\n    }\n}\n"
+  },
+  {
+    "id": 2,
+    "topic": "Starvation Priority Queue",
+    "code": "import java.util.LinkedList;\n\npublic class PriorityStarvation {\n    static final LinkedList<Integer> high = new LinkedList<Integer>();\n    static final LinkedList<Integer> low = new LinkedList<Integer>();\n    static volatile boolean lowServed = false;\n\n    static class Producer extends Thread {\n        public void run() {\n            int i = 0;\n            // keeps the high-priority queue non-empty\n            while (!lowServed) {\n                synchronized (high) {\n                    if (high.size() < 2) {\n                        high.add(i++);\n                    }\n                }\n            }\n        }\n    }\n\n    static class Server extends Thread {\n        public void run() {\n            // strict priority: low-priority work is only served when the high queue is empty\n            while (!lowServed) {\n                boolean handledHigh = false;\n                synchronized (high) {\n                    if (!high.isEmpty()) {\n                        high.removeFirst();\n                        handledHigh = true;\n                    }\n                }\n                if (handledHigh) {\n                    continue;\n                }\n                synchronized (low) {\n                    if (!low.isEmpty()) {\n                        low.removeFirst();\n                        lowServed = true;\n                    }\n                }\n            }\n        }\n    }\n\n    public static void main(String[] args) throws InterruptedException {\n        low.add(1);\n        Thread p = new Producer();\n        Thread s = new Server();\n        p.start();\n        s.start();\n        p.join();\n        s.join();\n    }\n}\n"
+  },
+  {
+    "id": 3,
+    "topic": "Control Fair Counter",
+    "code": "public class FairCounter {\n    static final Object lock = new Object();\n    static int counter = 0;\n\n    static class Worker extends Thread {\n        public void run() {\n            for (int i = 0; i < 3; i++) {\n                synchronized (lock) {\n                    counter++;\n                }\n            }\n        }\n    }\n\n    public static void main(String[] args) throws InterruptedException {\n        Thread a = new Worker();\n        Thread b = new Worker();\n        a.start();\n        b.start();\n        a.join();\n        b.join();\n        assert counter == 6;\n    }\n}\n"
+  }
+]

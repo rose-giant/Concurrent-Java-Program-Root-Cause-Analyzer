@@ -1,0 +1,6 @@
+{
+  "id": "2-lock_order_inversion_blocks-0",
+  "safe_id": "2-lock_order_inversion_blocks-0",
+  "class": "CountingComets",
+  "classification": "Deadlock"
+}

@@ -1,0 +1,14 @@
+digraph statespace {
+  rankdir=TB;
+  node [shape=circle,fontsize=9];
+  s0 [shape=box,style=filled,fillcolor=lightgray];
+  s7 [shape=doublecircle];
+  s7 [style=filled,fillcolor=tomato,shape=octagon];
+  s0 -> s1 [label="main"];
+  s1 -> s2 [label="main"];
+  s2 -> s3 [label="Thread-1"];
+  s3 -> s4 [label="Thread-1"];
+  s4 -> s5 [label="Thread-1"];
+  s5 -> s6 [label="Thread-1"];
+  s6 -> s7 [label="Thread-2"];
+}

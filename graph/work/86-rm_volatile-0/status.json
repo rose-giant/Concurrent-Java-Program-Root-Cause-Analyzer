@@ -1,0 +1,11 @@
+{
+  "id": "86-rm_volatile-0",
+  "class": "Main",
+  "compiled": true,
+  "ran": true,
+  "returncode": null,
+  "timed_out": true,
+  "violation": false,
+  "has_trace": false,
+  "seconds": 300.1
+}

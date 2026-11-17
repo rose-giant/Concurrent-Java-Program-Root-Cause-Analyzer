@@ -1,0 +1,494 @@
+JavaPathfinder core system v8.0 (rev 2345caaa002e15c6147d001d1ccd71e4b538f8e9) - (C) 2005-2014 United States Government. All rights reserved.
+
+
+====================================================== system under test
+BuggyProgram.main()
+
+====================================================== search started: 11/1/26 4:02 PM
+985
+user 0 assigned 985.
+985
+588
+user 1 assigned 588.
+985
+588
+847
+user 2 assigned 847.
+239865
+985
+588
+847
+user 2 assigned 847.
+985
+588
+847
+user 2 assigned 847.
+985
+588
+847
+user 2 assigned 847.
+985
+588
+847
+user 2 assigned 847.
+985
+588
+847
+user 2 assigned 847.
+985
+588
+847
+user 2 assigned 847.
+985
+588
+847
+user 2 assigned 847.
+985
+588
+847
+user 2 assigned 847.
+985
+588
+847
+user 2 assigned 847.
+588
+847
+user 2 assigned 847.
+588
+847
+user 2 assigned 847.
+588
+847
+user 2 assigned 847.
+588
+847
+user 2 assigned 847.
+588
+847
+user 2 assigned 847.
+588
+847
+user 2 assigned 847.
+588
+847
+user 2 assigned 847.
+588
+847
+user 2 assigned 847.
+588
+847
+user 2 assigned 847.
+588
+847
+user 2 assigned 847.
+588
+847
+user 2 assigned 847.
+588
+847
+user 2 assigned 847.
+847
+user 2 assigned 847.
+847
+user 2 assigned 847.
+847
+user 2 assigned 847.
+847
+user 2 assigned 847.
+847
+user 2 assigned 847.
+847
+user 2 assigned 847.
+847
+user 2 assigned 847.
+847
+user 2 assigned 847.
+847
+user 2 assigned 847.
+847
+user 2 assigned 847.
+847
+user 2 assigned 847.
+847
+user 2 assigned 847.
+847
+user 2 assigned 847.
+847
+user 2 assigned 847.
+847
+user 2 assigned 847.
+847
+user 2 assigned 847.
+user 2 assigned 847.
+user 2 assigned 847.
+user 2 assigned 847.
+user 2 assigned 847.
+user 2 assigned 847.
+user 2 assigned 847.
+user 2 assigned 847.
+user 2 assigned 847.
+user 2 assigned 847.
+user 2 assigned 847.
+user 2 assigned 847.
+user 2 assigned 847.
+user 2 assigned 847.
+user 2 assigned 847.
+user 2 assigned 847.
+user 2 assigned 847.
+user 2 assigned 847.
+user 2 assigned 847.
+user 2 assigned 847.
+user 2 assigned 847.
+492983
+985
+588
+847
+user 2 assigned 847.
+553268
+985
+588
+user 2 assigned 588.
+574054
+user 2 assigned 588.
+user 2 assigned 588.
+user 2 assigned 588.
+user 2 assigned 588.
+user 2 assigned 588.
+user 2 assigned 588.
+user 2 assigned 588.
+user 2 assigned 588.
+user 2 assigned 588.
+user 2 assigned 588.
+user 2 assigned 588.
+user 2 assigned 588.
+user 2 assigned 588.
+594245
+user 2 assigned 588.
+607163
+user 2 assigned 588.
+985
+588
+user 2 assigned 588.
+
+====================================================== error 1
+gov.nasa.jpf.vm.NoUncaughtExceptionsProperty
+java.lang.RuntimeException: error
+	at BuggyProgram.go(BuggyProgram.java:82)
+	at BuggyProgram.main(BuggyProgram.java:135)
+
+
+====================================================== trace #1
+------------------------------------------------------ transition #0 thread: 0
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"ROOT" ,1/1,isCascaded:false}
+      [6739 insn w/o sources]
+------------------------------------------------------ transition #1 thread: 0
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"START" ,1/2,isCascaded:false}
+      [12 insn w/o sources]
+------------------------------------------------------ transition #2 thread: 0
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"START" ,1/3,isCascaded:false}
+      [12 insn w/o sources]
+------------------------------------------------------ transition #3 thread: 0
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"START" ,1/4,isCascaded:false}
+      [17 insn w/o sources]
+------------------------------------------------------ transition #4 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"JOIN" ,1/3,isCascaded:false}
+      [6 insn w/o sources]
+------------------------------------------------------ transition #5 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_CLASS" ,1/3,isCascaded:false}
+      [4 insn w/o sources]
+------------------------------------------------------ transition #6 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"LOCK" ,1/3,isCascaded:false}
+      [2 insn w/o sources]
+------------------------------------------------------ transition #7 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_CLASS" ,1/3,isCascaded:false}
+      [3 insn w/o sources]
+------------------------------------------------------ transition #8 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_OBJECT" ,1/3,isCascaded:false}
+      [5 insn w/o sources]
+------------------------------------------------------ transition #9 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_OBJECT" ,1/3,isCascaded:false}
+      [8 insn w/o sources]
+------------------------------------------------------ transition #10 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_OBJECT" ,1/3,isCascaded:false}
+      [2 insn w/o sources]
+------------------------------------------------------ transition #11 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_ARRAY" ,1/3,isCascaded:false}
+      [5 insn w/o sources]
+------------------------------------------------------ transition #12 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_OBJECT" ,1/3,isCascaded:false}
+      [9 insn w/o sources]
+------------------------------------------------------ transition #13 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_CLASS" ,1/3,isCascaded:false}
+      [3 insn w/o sources]
+------------------------------------------------------ transition #14 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_CLASS" ,1/3,isCascaded:false}
+      [3 insn w/o sources]
+------------------------------------------------------ transition #15 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_ARRAY" ,1/3,isCascaded:false}
+      [4 insn w/o sources]
+------------------------------------------------------ transition #16 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_OBJECT" ,1/3,isCascaded:false}
+      [7 insn w/o sources]
+------------------------------------------------------ transition #17 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_CLASS" ,1/3,isCascaded:false}
+      [3 insn w/o sources]
+------------------------------------------------------ transition #18 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_CLASS" ,1/3,isCascaded:false}
+      [3 insn w/o sources]
+------------------------------------------------------ transition #19 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_ARRAY" ,1/3,isCascaded:false}
+      [4 insn w/o sources]
+------------------------------------------------------ transition #20 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_OBJECT" ,1/3,isCascaded:false}
+      [7 insn w/o sources]
+------------------------------------------------------ transition #21 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_CLASS" ,1/3,isCascaded:false}
+      [3 insn w/o sources]
+------------------------------------------------------ transition #22 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_CLASS" ,1/3,isCascaded:false}
+      [3 insn w/o sources]
+------------------------------------------------------ transition #23 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_ARRAY" ,1/3,isCascaded:false}
+      [4 insn w/o sources]
+------------------------------------------------------ transition #24 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_OBJECT" ,1/3,isCascaded:false}
+      [7 insn w/o sources]
+------------------------------------------------------ transition #25 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_CLASS" ,1/3,isCascaded:false}
+      [4 insn w/o sources]
+------------------------------------------------------ transition #26 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_CLASS" ,1/3,isCascaded:false}
+      [4 insn w/o sources]
+------------------------------------------------------ transition #27 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"LOCK" ,1/3,isCascaded:false}
+      [13 insn w/o sources]
+------------------------------------------------------ transition #28 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_OBJECT" ,1/3,isCascaded:false}
+      [9 insn w/o sources]
+------------------------------------------------------ transition #29 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_CLASS" ,1/3,isCascaded:false}
+      [3 insn w/o sources]
+------------------------------------------------------ transition #30 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_OBJECT" ,1/3,isCascaded:false}
+      [4 insn w/o sources]
+------------------------------------------------------ transition #31 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_OBJECT" ,1/3,isCascaded:false}
+      [3 insn w/o sources]
+------------------------------------------------------ transition #32 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_ARRAY" ,1/3,isCascaded:false}
+      [17 insn w/o sources]
+------------------------------------------------------ transition #33 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"LOCK" ,1/3,isCascaded:false}
+      [2 insn w/o sources]
+------------------------------------------------------ transition #34 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_CLASS" ,1/3,isCascaded:false}
+      [3 insn w/o sources]
+------------------------------------------------------ transition #35 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_OBJECT" ,1/3,isCascaded:false}
+      [4 insn w/o sources]
+------------------------------------------------------ transition #36 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_OBJECT" ,1/3,isCascaded:false}
+      [2 insn w/o sources]
+------------------------------------------------------ transition #37 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_ARRAY" ,1/3,isCascaded:false}
+      [4 insn w/o sources]
+------------------------------------------------------ transition #38 thread: 0
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"TERMINATE" ,1/3,isCascaded:false}
+      [7 insn w/o sources]
+------------------------------------------------------ transition #39 thread: 0
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_CLASS" ,1/3,isCascaded:false}
+      [7 insn w/o sources]
+------------------------------------------------------ transition #40 thread: 2
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"JOIN" ,1/2,isCascaded:false}
+      [6 insn w/o sources]
+------------------------------------------------------ transition #41 thread: 2
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_CLASS" ,1/2,isCascaded:false}
+      [4 insn w/o sources]
+------------------------------------------------------ transition #42 thread: 2
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"LOCK" ,1/2,isCascaded:false}
+      [2 insn w/o sources]
+------------------------------------------------------ transition #43 thread: 2
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_CLASS" ,1/2,isCascaded:false}
+      [3 insn w/o sources]
+------------------------------------------------------ transition #44 thread: 2
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_OBJECT" ,1/2,isCascaded:false}
+      [5 insn w/o sources]
+------------------------------------------------------ transition #45 thread: 2
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_OBJECT" ,1/2,isCascaded:false}
+      [8 insn w/o sources]
+------------------------------------------------------ transition #46 thread: 2
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_OBJECT" ,1/2,isCascaded:false}
+      [2 insn w/o sources]
+------------------------------------------------------ transition #47 thread: 2
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_ARRAY" ,1/2,isCascaded:false}
+      [5 insn w/o sources]
+------------------------------------------------------ transition #48 thread: 2
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_OBJECT" ,1/2,isCascaded:false}
+      [9 insn w/o sources]
+------------------------------------------------------ transition #49 thread: 2
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_CLASS" ,1/2,isCascaded:false}
+      [3 insn w/o sources]
+------------------------------------------------------ transition #50 thread: 2
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_CLASS" ,1/2,isCascaded:false}
+      [3 insn w/o sources]
+------------------------------------------------------ transition #51 thread: 2
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_ARRAY" ,1/2,isCascaded:false}
+      [4 insn w/o sources]
+------------------------------------------------------ transition #52 thread: 2
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_OBJECT" ,1/2,isCascaded:false}
+      [6 insn w/o sources]
+------------------------------------------------------ transition #53 thread: 2
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_CLASS" ,1/2,isCascaded:false}
+      [4 insn w/o sources]
+------------------------------------------------------ transition #54 thread: 2
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"LOCK" ,1/2,isCascaded:false}
+      [2 insn w/o sources]
+------------------------------------------------------ transition #55 thread: 2
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_CLASS" ,1/2,isCascaded:false}
+      [3 insn w/o sources]
+------------------------------------------------------ transition #56 thread: 2
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_OBJECT" ,1/2,isCascaded:false}
+      [5 insn w/o sources]
+------------------------------------------------------ transition #57 thread: 2
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_OBJECT" ,1/2,isCascaded:false}
+      [8 insn w/o sources]
+------------------------------------------------------ transition #58 thread: 2
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_OBJECT" ,1/2,isCascaded:false}
+      [2 insn w/o sources]
+------------------------------------------------------ transition #59 thread: 2
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_ARRAY" ,1/2,isCascaded:false}
+      [5 insn w/o sources]
+------------------------------------------------------ transition #60 thread: 2
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_OBJECT" ,1/2,isCascaded:false}
+      [9 insn w/o sources]
+------------------------------------------------------ transition #61 thread: 2
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_CLASS" ,1/2,isCascaded:false}
+      [3 insn w/o sources]
+------------------------------------------------------ transition #62 thread: 2
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_CLASS" ,1/2,isCascaded:false}
+      [3 insn w/o sources]
+------------------------------------------------------ transition #63 thread: 2
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_ARRAY" ,1/2,isCascaded:false}
+      [4 insn w/o sources]
+------------------------------------------------------ transition #64 thread: 2
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_OBJECT" ,1/2,isCascaded:false}
+      [7 insn w/o sources]
+------------------------------------------------------ transition #65 thread: 2
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_CLASS" ,1/2,isCascaded:false}
+      [3 insn w/o sources]
+------------------------------------------------------ transition #66 thread: 2
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_CLASS" ,1/2,isCascaded:false}
+      [3 insn w/o sources]
+------------------------------------------------------ transition #67 thread: 2
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_ARRAY" ,1/2,isCascaded:false}
+      [4 insn w/o sources]
+------------------------------------------------------ transition #68 thread: 2
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_OBJECT" ,1/2,isCascaded:false}
+      [7 insn w/o sources]
+------------------------------------------------------ transition #69 thread: 2
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_CLASS" ,1/2,isCascaded:false}
+      [3 insn w/o sources]
+------------------------------------------------------ transition #70 thread: 2
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_CLASS" ,1/2,isCascaded:false}
+      [3 insn w/o sources]
+------------------------------------------------------ transition #71 thread: 2
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_ARRAY" ,1/2,isCascaded:false}
+      [4 insn w/o sources]
+------------------------------------------------------ transition #72 thread: 2
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_OBJECT" ,1/2,isCascaded:false}
+      [7 insn w/o sources]
+------------------------------------------------------ transition #73 thread: 2
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_CLASS" ,1/2,isCascaded:false}
+      [4 insn w/o sources]
+------------------------------------------------------ transition #74 thread: 2
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_CLASS" ,1/2,isCascaded:false}
+      [4 insn w/o sources]
+------------------------------------------------------ transition #75 thread: 2
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"LOCK" ,1/2,isCascaded:false}
+      [13 insn w/o sources]
+------------------------------------------------------ transition #76 thread: 2
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_OBJECT" ,1/2,isCascaded:false}
+      [9 insn w/o sources]
+------------------------------------------------------ transition #77 thread: 2
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_CLASS" ,1/2,isCascaded:false}
+      [3 insn w/o sources]
+------------------------------------------------------ transition #78 thread: 2
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_OBJECT" ,1/2,isCascaded:false}
+      [4 insn w/o sources]
+------------------------------------------------------ transition #79 thread: 2
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_OBJECT" ,1/2,isCascaded:false}
+      [3 insn w/o sources]
+------------------------------------------------------ transition #80 thread: 2
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_ARRAY" ,1/2,isCascaded:false}
+      [17 insn w/o sources]
+------------------------------------------------------ transition #81 thread: 2
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"LOCK" ,1/2,isCascaded:false}
+      [2 insn w/o sources]
+------------------------------------------------------ transition #82 thread: 2
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_CLASS" ,1/2,isCascaded:false}
+      [3 insn w/o sources]
+------------------------------------------------------ transition #83 thread: 2
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_OBJECT" ,1/2,isCascaded:false}
+      [4 insn w/o sources]
+------------------------------------------------------ transition #84 thread: 3
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_OBJECT" ,2/2,isCascaded:false}
+      [6 insn w/o sources]
+------------------------------------------------------ transition #85 thread: 3
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_CLASS" ,2/2,isCascaded:false}
+      [4 insn w/o sources]
+------------------------------------------------------ transition #86 thread: 3
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"LOCK" ,2/2,isCascaded:false}
+      [2 insn w/o sources]
+------------------------------------------------------ transition #87 thread: 3
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_CLASS" ,2/2,isCascaded:false}
+      [3 insn w/o sources]
+------------------------------------------------------ transition #88 thread: 3
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_OBJECT" ,2/2,isCascaded:false}
+      [5 insn w/o sources]
+------------------------------------------------------ transition #89 thread: 3
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_OBJECT" ,2/2,isCascaded:false}
+      [8 insn w/o sources]
+------------------------------------------------------ transition #90 thread: 3
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_OBJECT" ,2/2,isCascaded:false}
+      [2 insn w/o sources]
+------------------------------------------------------ transition #91 thread: 2
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_ARRAY" ,1/2,isCascaded:false}
+      [2 insn w/o sources]
+------------------------------------------------------ transition #92 thread: 2
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_ARRAY" ,1/2,isCascaded:false}
+      [4 insn w/o sources]
+------------------------------------------------------ transition #93 thread: 0
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"TERMINATE" ,1/2,isCascaded:false}
+      [7 insn w/o sources]
+------------------------------------------------------ transition #94 thread: 0
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_CLASS" ,1/2,isCascaded:false}
+      [7 insn w/o sources]
+------------------------------------------------------ transition #95 thread: 3
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"JOIN" ,1/1,isCascaded:false}
+      [153 insn w/o sources]
+------------------------------------------------------ transition #96 thread: 0
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"TERMINATE" ,1/1,isCascaded:false}
+      [271 insn w/o sources]
+
+====================================================== snapshot #1
+thread java.lang.Thread:{id:0,name:main,status:RUNNING,priority:5,isDaemon:false,lockCount:0,suspendCount:0}
+  call stack:
+	at BuggyProgram.go(BuggyProgram.java:82)
+	at BuggyProgram.main(BuggyProgram.java:135)
+
+
+====================================================== results
+error #1: gov.nasa.jpf.vm.NoUncaughtExceptionsProperty "java.lang.RuntimeException: error  at BuggyProgram..."
+
+====================================================== statistics
+elapsed time:       00:00:01
+states:             new=392,visited=211,backtracked=506,end=6
+search:             maxDepth=149,constraints=0
+choice generators:  thread=390 (signal=0,lock=27,sharedRef=213,threadApi=86,reschedule=64), data=0
+heap:               new=1359,released=785,maxLive=506,gcCycles=526
+instructions:       21930
+max memory:         117MB
+loaded code:        classes=97,methods=2299
+
+====================================================== search finished: 11/1/26 4:02 PM
+

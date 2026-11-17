@@ -1,0 +1,113 @@
+JavaPathfinder core system v8.0 (rev 2345caaa002e15c6147d001d1ccd71e4b538f8e9) - (C) 2005-2014 United States Government. All rights reserved.
+
+
+====================================================== system under test
+Main.main()
+
+====================================================== search started: 11/1/26 4:02 PM
+a = 2, b = 2
+a = 2, b = 2
+a = 2, b = 2
+a = 2, b = 1
+
+====================================================== error 1
+gov.nasa.jpf.vm.NoUncaughtExceptionsProperty
+java.lang.Exception: bug found.
+	at Main.main(Main.java:25)
+
+
+====================================================== trace #1
+------------------------------------------------------ transition #0 thread: 0
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"ROOT" ,1/1,isCascaded:false}
+      [6206 insn w/o sources]
+------------------------------------------------------ transition #1 thread: 0
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"START" ,1/2,isCascaded:false}
+      [50 insn w/o sources]
+------------------------------------------------------ transition #2 thread: 0
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"LOCK" ,1/2,isCascaded:false}
+      [125 insn w/o sources]
+------------------------------------------------------ transition #3 thread: 0
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"START" ,1/3,isCascaded:false}
+      [50 insn w/o sources]
+------------------------------------------------------ transition #4 thread: 0
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"LOCK" ,1/3,isCascaded:false}
+      [125 insn w/o sources]
+------------------------------------------------------ transition #5 thread: 0
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"START" ,1/4,isCascaded:false}
+      [17 insn w/o sources]
+------------------------------------------------------ transition #6 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"JOIN" ,1/3,isCascaded:false}
+      [4 insn w/o sources]
+------------------------------------------------------ transition #7 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_OBJECT" ,1/3,isCascaded:false}
+      [2 insn w/o sources]
+------------------------------------------------------ transition #8 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_CLASS" ,1/3,isCascaded:false}
+      [3 insn w/o sources]
+------------------------------------------------------ transition #9 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_OBJECT" ,1/3,isCascaded:false}
+      [2 insn w/o sources]
+------------------------------------------------------ transition #10 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_CLASS" ,1/3,isCascaded:false}
+      [3 insn w/o sources]
+------------------------------------------------------ transition #11 thread: 0
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"TERMINATE" ,1/3,isCascaded:false}
+      [6 insn w/o sources]
+------------------------------------------------------ transition #12 thread: 0
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_CLASS" ,1/3,isCascaded:false}
+      [7 insn w/o sources]
+------------------------------------------------------ transition #13 thread: 2
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"JOIN" ,1/2,isCascaded:false}
+      [4 insn w/o sources]
+------------------------------------------------------ transition #14 thread: 2
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_OBJECT" ,1/2,isCascaded:false}
+      [2 insn w/o sources]
+------------------------------------------------------ transition #15 thread: 2
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_CLASS" ,1/2,isCascaded:false}
+      [3 insn w/o sources]
+------------------------------------------------------ transition #16 thread: 2
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_OBJECT" ,1/2,isCascaded:false}
+      [2 insn w/o sources]
+------------------------------------------------------ transition #17 thread: 3
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_CLASS" ,2/2,isCascaded:false}
+      [4 insn w/o sources]
+------------------------------------------------------ transition #18 thread: 3
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_OBJECT" ,2/2,isCascaded:false}
+      [2 insn w/o sources]
+------------------------------------------------------ transition #19 thread: 3
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_CLASS" ,2/2,isCascaded:false}
+      [3 insn w/o sources]
+------------------------------------------------------ transition #20 thread: 3
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_OBJECT" ,2/2,isCascaded:false}
+      [2 insn w/o sources]
+------------------------------------------------------ transition #21 thread: 3
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_CLASS" ,2/2,isCascaded:false}
+      [3 insn w/o sources]
+------------------------------------------------------ transition #22 thread: 2
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"TERMINATE" ,1/1,isCascaded:false}
+      [3 insn w/o sources]
+------------------------------------------------------ transition #23 thread: 0
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"TERMINATE" ,1/1,isCascaded:false}
+      [84 insn w/o sources]
+
+====================================================== snapshot #1
+thread java.lang.Thread:{id:0,name:main,status:RUNNING,priority:5,isDaemon:false,lockCount:0,suspendCount:0}
+  call stack:
+	at Main.main(Main.java:25)
+
+
+====================================================== results
+error #1: gov.nasa.jpf.vm.NoUncaughtExceptionsProperty "java.lang.Exception: bug found.  at Main.main(Main..."
+
+====================================================== statistics
+elapsed time:       00:00:00
+states:             new=43,visited=14,backtracked=33,end=3
+search:             maxDepth=24,constraints=0
+choice generators:  thread=42 (signal=0,lock=3,sharedRef=22,threadApi=10,reschedule=7), data=0
+heap:               new=524,released=100,maxLive=464,gcCycles=46
+instructions:       6987
+max memory:         117MB
+loaded code:        classes=86,methods=1847
+
+====================================================== search finished: 11/1/26 4:02 PM
+

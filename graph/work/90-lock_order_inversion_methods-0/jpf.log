@@ -1,0 +1,142 @@
+JavaPathfinder core system v8.0 (rev 2345caaa002e15c6147d001d1ccd71e4b538f8e9) - (C) 2005-2014 United States Government. All rights reserved.
+
+
+====================================================== system under test
+Main.main()
+
+====================================================== search started: 11/1/26 3:52 PM
+
+====================================================== error 1
+gov.nasa.jpf.vm.NotDeadlockedProperty
+deadlock encountered:
+  thread java.lang.Thread:{id:0,name:main,status:BLOCKED,priority:5,isDaemon:false,lockCount:0,suspendCount:0}
+  thread java.lang.Thread:{id:1,name:pool-1-thread-1,status:BLOCKED,priority:5,isDaemon:false,lockCount:0,suspendCount:0}
+
+
+====================================================== trace #1
+------------------------------------------------------ transition #0 thread: 0
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"ROOT" ,1/1,isCascaded:false}
+      [7591 insn w/o sources]
+------------------------------------------------------ transition #1 thread: 0
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"START" ,1/2,isCascaded:false}
+      [19 insn w/o sources]
+------------------------------------------------------ transition #2 thread: 0
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SLEEP" ,1/2,isCascaded:false}
+      [9 insn w/o sources]
+------------------------------------------------------ transition #3 thread: 0
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"LOCK" ,1/2,isCascaded:false}
+      [5 insn w/o sources]
+------------------------------------------------------ transition #4 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"LOCK" ,2/2,isCascaded:false}
+      [119 insn w/o sources]
+------------------------------------------------------ transition #5 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_OBJECT" ,2/2,isCascaded:false}
+      [3 insn w/o sources]
+------------------------------------------------------ transition #6 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_CLASS" ,2/2,isCascaded:false}
+      [3 insn w/o sources]
+------------------------------------------------------ transition #7 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_CLASS" ,2/2,isCascaded:false}
+      [11 insn w/o sources]
+------------------------------------------------------ transition #8 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_OBJECT" ,2/2,isCascaded:false}
+      [6 insn w/o sources]
+------------------------------------------------------ transition #9 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_OBJECT" ,2/2,isCascaded:false}
+      [9 insn w/o sources]
+------------------------------------------------------ transition #10 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"LOCK" ,2/2,isCascaded:false}
+      [219 insn w/o sources]
+------------------------------------------------------ transition #11 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"EXPOSE" ,2/2,isCascaded:false}
+      [4 insn w/o sources]
+------------------------------------------------------ transition #12 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"EXPOSE" ,2/2,isCascaded:false}
+      [4 insn w/o sources]
+------------------------------------------------------ transition #13 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"EXPOSE" ,2/2,isCascaded:false}
+      [1134 insn w/o sources]
+------------------------------------------------------ transition #14 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"EXPOSE" ,2/2,isCascaded:false}
+      [2193 insn w/o sources]
+------------------------------------------------------ transition #15 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"EXPOSE" ,2/2,isCascaded:false}
+      [21 insn w/o sources]
+------------------------------------------------------ transition #16 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"EXPOSE" ,2/2,isCascaded:false}
+      [21 insn w/o sources]
+------------------------------------------------------ transition #17 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"EXPOSE" ,2/2,isCascaded:false}
+      [26 insn w/o sources]
+------------------------------------------------------ transition #18 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"EXPOSE" ,2/2,isCascaded:false}
+      [21 insn w/o sources]
+------------------------------------------------------ transition #19 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"EXPOSE" ,2/2,isCascaded:false}
+      [35 insn w/o sources]
+------------------------------------------------------ transition #20 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"EXPOSE" ,2/2,isCascaded:false}
+      [3350 insn w/o sources]
+------------------------------------------------------ transition #21 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"EXPOSE" ,2/2,isCascaded:false}
+      [352 insn w/o sources]
+------------------------------------------------------ transition #22 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_OBJECT" ,2/2,isCascaded:false}
+      [92 insn w/o sources]
+------------------------------------------------------ transition #23 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_OBJECT" ,2/2,isCascaded:false}
+      [78 insn w/o sources]
+------------------------------------------------------ transition #24 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_OBJECT" ,2/2,isCascaded:false}
+      [75 insn w/o sources]
+------------------------------------------------------ transition #25 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_OBJECT" ,2/2,isCascaded:false}
+      [75 insn w/o sources]
+------------------------------------------------------ transition #26 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_OBJECT" ,2/2,isCascaded:false}
+      [75 insn w/o sources]
+------------------------------------------------------ transition #27 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_OBJECT" ,2/2,isCascaded:false}
+      [29 insn w/o sources]
+------------------------------------------------------ transition #28 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"EXPOSE" ,2/2,isCascaded:false}
+      [13 insn w/o sources]
+------------------------------------------------------ transition #29 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"LOCK" ,2/2,isCascaded:false}
+      [5 insn w/o sources]
+
+====================================================== snapshot #1
+thread java.lang.Thread:{id:0,name:main,status:BLOCKED,priority:5,isDaemon:false,lockCount:0,suspendCount:0}
+  owned locks:java.lang.Object@28b
+  blocked on: PrimeGenerator@28c
+  call stack:
+	at PrimeGenerator.cancel(Main.java:23)
+	at Main.main(Main.java:38)
+
+thread java.lang.Thread:{id:1,name:pool-1-thread-1,status:BLOCKED,priority:5,isDaemon:false,lockCount:0,suspendCount:0}
+  owned locks:PrimeGenerator@28c
+  blocked on: java.lang.Object@28b
+  call stack:
+	at PrimeGenerator.isCancelled(Main.java:17)
+	at PrimeGenerator.run(Main.java:11)
+	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:511)
+	at java.util.concurrent.FutureTask.run(FutureTask.java:266)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+
+
+====================================================== results
+error #1: gov.nasa.jpf.vm.NotDeadlockedProperty "deadlock encountered:   thread java.lang.Thread:{i..."
+
+====================================================== statistics
+elapsed time:       00:00:01
+states:             new=912,visited=748,backtracked=1630,end=36
+search:             maxDepth=60,constraints=0
+choice generators:  thread=907 (signal=0,lock=145,sharedRef=601,threadApi=10,reschedule=37), data=0
+heap:               new=13047,released=3289,maxLive=1089,gcCycles=1515
+instructions:       357677
+max memory:         147MB
+loaded code:        classes=146,methods=2664
+
+====================================================== search finished: 11/1/26 3:52 PM
+

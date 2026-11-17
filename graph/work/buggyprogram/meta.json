@@ -1,0 +1,6 @@
+{
+  "id": "buggyprogram",
+  "safe_id": "buggyprogram",
+  "class": "BuggyProgram",
+  "classification": "Termination Error"
+}

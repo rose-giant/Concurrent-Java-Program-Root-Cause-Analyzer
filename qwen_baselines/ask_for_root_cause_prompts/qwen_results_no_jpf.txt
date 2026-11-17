@@ -1,0 +1,890 @@
+Case 1: 1-lock_order_inversion_blocks-0
+Root cause analysis
+1. Classification
+Bug type: resource_deadlock
+Family: Deadlock
+Deadlock type: Resource
+2. Root cause
+Shared state: asleepLock, monitorC
+Accesses involved:
+
+    t1 | CountingLanterns.tryToSleep | lock asleepLock, lock monitorC
+    t2 | CountingLanterns.setAsleep | lock monitorC, lock asleepLock
+    Missing guarantee: Consistent lock acquisition order
+    Buggy interleaving:
+
+    Thread t1 acquires asleepLock in tryToSleep.
+    Thread t2 acquires monitorC in setAsleep.
+    Why it fails: Thread t1 waits for monitorC held by t2, and thread t2 waits for asleepLock held by t1, causing a circular wait and deadlock.
+
+3. Suggested fix (description only, no code)
+Fix type: change_lock_order_or_granularity
+Where to apply: CountingLanterns.tryToSleep, CountingLanterns.setAsleep
+Fix description: Acquire locks in the exact same order in both methods, or use a single lock to protect the shared state.
+Confidence: high
+Case 2: 1-rm_sync_block-0
+Root cause analysis
+1. Classification
+Bug type: data_race
+Family: Non-deadlock
+Deadlock type: n/a
+2. Root cause
+Shared state: asleep
+Accesses involved:
+
+    t1 | CountingLanterns.tryToSleep | R
+    t2 | CountingLanterns.setAsleep | W, lock asleepLock
+    Missing guarantee: Mutual exclusion and memory visibility for the shared variable asleep
+    Buggy interleaving:
+
+    Thread t2 updates asleep to true inside the synchronized block.
+    Thread t1 reads asleep outside any synchronized block and may see a stale value.
+    Why it fails: The read of asleep is not protected by the same lock as the write, leading to a data race where the reading thread might never see the updated value and loop infinitely.
+
+3. Suggested fix (description only, no code)
+Fix type: add_or_widen_synchronization
+Where to apply: CountingLanterns.tryToSleep
+Fix description: Wrap the read of asleep in a synchronized block on asleepLock, or declare asleep as volatile.
+Confidence: high
+Case 3: 1-rm_sync_block-1
+Root cause analysis
+1. Classification
+Bug type: data_race
+Family: Non-deadlock
+Deadlock type: n/a
+2. Root cause
+Shared state: asleep
+Accesses involved:
+
+    t1 | CountingLanterns.tryToSleep | R, lock asleepLock
+    t2 | CountingLanterns.setAsleep | W
+    Missing guarantee: Mutual exclusion and memory visibility for the shared variable asleep
+    Buggy interleaving:
+
+    Thread t1 reads asleep inside the synchronized block.
+    Thread t2 writes to asleep outside any synchronized block, bypassing memory visibility guarantees.
+    Why it fails: The write to asleep is not protected by the same lock as the read, causing a data race where the reading thread may not see the updated value.
+
+3. Suggested fix (description only, no code)
+Fix type: add_or_widen_synchronization
+Where to apply: CountingLanterns.setAsleep
+Fix description: Wrap the write to asleep in a synchronized block on asleepLock, or declare asleep as volatile.
+Confidence: high
+Case 4: 1-wrong_lock-0
+Root cause analysis
+1. Classification
+Bug type: data_race
+Family: Non-deadlock
+Deadlock type: n/a
+2. Root cause
+Shared state: asleep
+Accesses involved:
+
+    t1 | CountingLanterns.tryToSleep | R, lock monitorB
+    t2 | CountingLanterns.setAsleep | W, lock asleepLock
+    Missing guarantee: Mutual exclusion using the same lock for both read and write
+    Buggy interleaving:
+
+    Thread t2 acquires asleepLock and writes to asleep.
+    Thread t1 acquires monitorB and reads asleep concurrently, since they use different locks.
+    Why it fails: Using different locks for reading and writing the same shared variable provides no mutual exclusion or memory visibility guarantees, resulting in a data race.
+
+3. Suggested fix (description only, no code)
+Fix type: change_lock_order_or_granularity
+Where to apply: CountingLanterns.tryToSleep, CountingLanterns.setAsleep
+Fix description: Use the exact same lock object to synchronize both the read and write accesses to asleep.
+Confidence: high
+Case 5: 1-wrong_lock-1
+Root cause analysis
+1. Classification
+Bug type: data_race
+Family: Non-deadlock
+Deadlock type: n/a
+2. Root cause
+Shared state: asleep
+Accesses involved:
+
+    t1 | CountingLanterns.tryToSleep | R, lock asleepLock
+    t2 | CountingLanterns.setAsleep | W, lock monitorB
+    Missing guarantee: Mutual exclusion using the same lock for both read and write
+    Buggy interleaving:
+
+    Thread t1 acquires asleepLock and reads asleep.
+    Thread t2 acquires monitorB and writes to asleep concurrently, since they use different locks.
+    Why it fails: Using different locks for reading and writing the same shared variable provides no mutual exclusion or memory visibility guarantees, resulting in a data race.
+
+3. Suggested fix (description only, no code)
+Fix type: change_lock_order_or_granularity
+Where to apply: CountingLanterns.tryToSleep, CountingLanterns.setAsleep
+Fix description: Use the exact same lock object to synchronize both the read and write accesses to asleep.
+Confidence: high
+Case 6: 115-lock_order_inversion_methods-0
+Root cause analysis
+1. Classification
+Bug type: resource_deadlock
+Family: Deadlock
+Deadlock type: Resource
+2. Root cause
+Shared state: this (SimulatedCAS instance), monitorC
+Accesses involved:
+
+    t1 | SimulatedCAS.get | lock this, lock monitorC
+    t2 | SimulatedCAS.compareAndSwap | lock monitorC, lock this
+    Missing guarantee: Consistent lock acquisition order
+    Buggy interleaving:
+
+    Thread t1 calls get() and acquires the intrinsic lock (this).
+    Thread t2 calls compareAndSwap() and acquires monitorC.
+    Why it fails: Thread t1 waits for monitorC held by t2, and thread t2 waits for the intrinsic lock held by t1, causing a circular wait and deadlock.
+
+3. Suggested fix (description only, no code)
+Fix type: change_lock_order_or_granularity
+Where to apply: SimulatedCAS.get, SimulatedCAS.compareAndSwap
+Fix description: Acquire locks in the same order in both methods, or remove the redundant nested locking and use a single lock for the CAS operations.
+Confidence: high
+Case 7: 115-rm_sync_one-0
+Root cause analysis
+1. Classification
+Bug type: atomicity_violation
+Family: Non-deadlock
+Deadlock type: n/a
+2. Root cause
+Shared state: value
+Accesses involved:
+
+    t1 | SimulatedCAS.get | R, lock this
+    t2 | SimulatedCAS.compareAndSwap | R, W
+    Missing guarantee: Atomicity of the check-then-act sequence and mutual exclusion for value
+    Buggy interleaving:
+
+    Thread t2 reads value in compareAndSwap.
+    Another thread modifies value before t2 can complete the check and write.
+    Why it fails: The compareAndSwap method lacks synchronization, making the read-check-write sequence non-atomic and allowing lost updates or inconsistent reads.
+
+3. Suggested fix (description only, no code)
+Fix type: add_or_widen_synchronization
+Where to apply: SimulatedCAS.compareAndSwap
+Fix description: Add the synchronized keyword to the compareAndSwap method to ensure atomicity and mutual exclusion with get.
+Confidence: high
+Case 8: 115-rm_sync_one-1
+Root cause analysis
+1. Classification
+Bug type: data_race
+Family: Non-deadlock
+Deadlock type: n/a
+2. Root cause
+Shared state: value
+Accesses involved:
+
+    t1 | SimulatedCAS.get | R
+    t2 | SimulatedCAS.compareAndSwap | R, W, lock this
+    Missing guarantee: Memory visibility and mutual exclusion for value
+    Buggy interleaving:
+
+    Thread t2 updates value inside synchronized compareAndSwap.
+    Thread t1 reads value in unsynchronized get() and may see a stale value.
+    Why it fails: The read in get is not synchronized, lacking a happens-before relationship with the write in compareAndSwap, leading to a data race.
+
+3. Suggested fix (description only, no code)
+Fix type: add_or_widen_synchronization
+Where to apply: SimulatedCAS.get
+Fix description: Add the synchronized keyword to the get method or declare value as volatile.
+Confidence: high
+Case 9: 115-wrong_lock-0
+Root cause analysis
+1. Classification
+Bug type: data_race
+Family: Non-deadlock
+Deadlock type: n/a
+2. Root cause
+Shared state: value
+Accesses involved:
+
+    t1 | SimulatedCAS.get | R, lock monitorB
+    t2 | SimulatedCAS.compareAndSwap | R, W, lock this
+    Missing guarantee: Mutual exclusion using the same lock for both read and write
+    Buggy interleaving:
+
+    Thread t2 acquires intrinsic lock (this) and modifies value.
+    Thread t1 acquires monitorB and reads value concurrently, since they use different locks.
+    Why it fails: Using different locks for reading and writing the same shared variable provides no mutual exclusion or memory visibility guarantees, resulting in a data race.
+
+3. Suggested fix (description only, no code)
+Fix type: change_lock_order_or_granularity
+Where to apply: SimulatedCAS.get, SimulatedCAS.compareAndSwap
+Fix description: Use the exact same lock object (either the intrinsic lock or monitorB) to synchronize both methods.
+Confidence: high
+Case 10: 115-wrong_lock-1
+Root cause analysis
+1. Classification
+Bug type: data_race
+Family: Non-deadlock
+Deadlock type: n/a
+2. Root cause
+Shared state: value
+Accesses involved:
+
+    t1 | SimulatedCAS.get | R, lock this
+    t2 | SimulatedCAS.compareAndSwap | R, W, lock monitorB
+    Missing guarantee: Mutual exclusion using the same lock for both read and write
+    Buggy interleaving:
+
+    Thread t1 acquires intrinsic lock (this) and reads value.
+    Thread t2 acquires monitorB and modifies value concurrently, since they use different locks.
+    Why it fails: Using different locks for reading and writing the same shared variable provides no mutual exclusion or memory visibility guarantees, resulting in a data race.
+
+3. Suggested fix (description only, no code)
+Fix type: change_lock_order_or_granularity
+Where to apply: SimulatedCAS.get, SimulatedCAS.compareAndSwap
+Fix description: Use the exact same lock object (either the intrinsic lock or monitorB) to synchronize both methods.
+Confidence: high
+
+Case 11: 2-lock_order_inversion_blocks-0
+Root cause analysis
+1. Classification
+Bug type: resource_deadlock
+Family: Deadlock
+Deadlock type: Resource
+2. Root cause
+Shared state: asleepLock, monitorC
+Accesses involved:
+
+    t1 | CountingComets.tryToSleep | lock asleepLock, lock monitorC
+    t2 | CountingComets.setAsleep | lock monitorC, lock asleepLock
+    Missing guarantee: Consistent lock acquisition order
+    Buggy interleaving:
+
+    t1 acquires asleepLock in CountingComets.tryToSleep.
+    t2 acquires monitorC in CountingComets.setAsleep.
+    Why it fails: t1 waits for monitorC held by t2, while t2 waits for asleepLock held by t1, creating a circular wait and causing deadlock.
+
+3. Suggested fix (description only, no code)
+Fix type: change_lock_order_or_granularity
+Where to apply: CountingComets.tryToSleep, CountingComets.setAsleep
+Fix description: Use the same lock order in both methods, or protect the shared state with a single lock.
+Confidence: high
+Case 12: 2-rm_sync_block-0
+Root cause analysis
+1. Classification
+Bug type: data_race
+Family: Non-deadlock
+Deadlock type: n/a
+2. Root cause
+Shared state: asleep
+Accesses involved:
+
+    t1 | CountingComets.tryToSleep | R
+    t2 | CountingComets.setAsleep | W, lock asleepLock
+    Missing guarantee: Mutual exclusion and visibility for asleep
+    Buggy interleaving:
+
+    t2 writes asleep inside a synchronized block in CountingComets.setAsleep.
+    t1 reads asleep without synchronization in CountingComets.tryToSleep.
+    Why it fails: The unsynchronized read can observe a stale value because there is no happens-before relationship between the write and the read.
+
+3. Suggested fix (description only, no code)
+Fix type: add_or_widen_synchronization
+Where to apply: CountingComets.tryToSleep
+Fix description: Synchronize the read of asleep with the same lock used by the write, or make asleep visible across threads.
+Confidence: high
+Case 13: 2-rm_sync_block-1
+Root cause analysis
+1. Classification
+Bug type: data_race
+Family: Non-deadlock
+Deadlock type: n/a
+2. Root cause
+Shared state: asleep
+Accesses involved:
+
+    t1 | CountingComets.tryToSleep | R, lock asleepLock
+    t2 | CountingComets.setAsleep | W
+    Missing guarantee: Mutual exclusion and visibility for asleep
+    Buggy interleaving:
+
+    t2 writes asleep without synchronization in CountingComets.setAsleep.
+    t1 reads asleep inside a synchronized block in CountingComets.tryToSleep.
+    Why it fails: The write is not protected by the same lock as the read, so the reading thread may not observe the updated value.
+
+3. Suggested fix (description only, no code)
+Fix type: add_or_widen_synchronization
+Where to apply: CountingComets.setAsleep
+Fix description: Synchronize the write to asleep with the same lock used by the read, or make asleep visible across threads.
+Confidence: high
+Case 14: 2-wrong_lock-0
+Root cause analysis
+1. Classification
+Bug type: data_race
+Family: Non-deadlock
+Deadlock type: n/a
+2. Root cause
+Shared state: asleep
+Accesses involved:
+
+    t1 | CountingComets.tryToSleep | R, lock monitorB
+    t2 | CountingComets.setAsleep | W, lock asleepLock
+    Missing guarantee: Mutual exclusion using the same lock for both accesses
+    Buggy interleaving:
+
+    t1 acquires monitorB and reads asleep in CountingComets.tryToSleep.
+    t2 acquires asleepLock and writes asleep in CountingComets.setAsleep.
+    Why it fails: The read and write are guarded by different locks, so they do not exclude each other and can race.
+
+3. Suggested fix (description only, no code)
+Fix type: change_lock_order_or_granularity
+Where to apply: CountingComets.tryToSleep, CountingComets.setAsleep
+Fix description: Use the same lock object for both the read and write of asleep.
+Confidence: high
+Case 15: 2-wrong_lock-1
+Root cause analysis
+1. Classification
+Bug type: data_race
+Family: Non-deadlock
+Deadlock type: n/a
+2. Root cause
+Shared state: asleep
+Accesses involved:
+
+    t1 | CountingComets.tryToSleep | R, lock asleepLock
+    t2 | CountingComets.setAsleep | W, lock monitorB
+    Missing guarantee: Mutual exclusion using the same lock for both accesses
+    Buggy interleaving:
+
+    t1 acquires asleepLock and reads asleep in CountingComets.tryToSleep.
+    t2 acquires monitorB and writes asleep in CountingComets.setAsleep.
+    Why it fails: The read and write are guarded by different locks, so they do not exclude each other and can race.
+
+3. Suggested fix (description only, no code)
+Fix type: change_lock_order_or_granularity
+Where to apply: CountingComets.tryToSleep, CountingComets.setAsleep
+Fix description: Use the same lock object for both the read and write of asleep.
+Confidence: high
+Case 16: 3-lock_order_inversion_blocks-0
+Root cause analysis
+1. Classification
+Bug type: resource_deadlock
+Family: Deadlock
+Deadlock type: Resource
+2. Root cause
+Shared state: asleepLock, monitorC
+Accesses involved:
+
+    t1 | CountingFireflies.tryToSleep | lock asleepLock, lock monitorC
+    t2 | CountingFireflies.setAsleep | lock monitorC, lock asleepLock
+    Missing guarantee: Consistent lock acquisition order
+    Buggy interleaving:
+
+    t1 acquires asleepLock in CountingFireflies.tryToSleep.
+    t2 acquires monitorC in CountingFireflies.setAsleep.
+    Why it fails: t1 waits for monitorC held by t2, while t2 waits for asleepLock held by t1, creating a circular wait and causing deadlock.
+
+3. Suggested fix (description only, no code)
+Fix type: change_lock_order_or_granularity
+Where to apply: CountingFireflies.tryToSleep, CountingFireflies.setAsleep
+Fix description: Use the same lock order in both methods, or protect the shared state with a single lock.
+Confidence: high
+Case 17: 3-rm_sync_block-0
+Root cause analysis
+1. Classification
+Bug type: data_race
+Family: Non-deadlock
+Deadlock type: n/a
+2. Root cause
+Shared state: asleep
+Accesses involved:
+
+    t1 | CountingFireflies.tryToSleep | R
+    t2 | CountingFireflies.setAsleep | W, lock asleepLock
+    Missing guarantee: Mutual exclusion and visibility for asleep
+    Buggy interleaving:
+
+    t2 writes asleep inside a synchronized block in CountingFireflies.setAsleep.
+    t1 reads asleep without synchronization in CountingFireflies.tryToSleep.
+    Why it fails: The unsynchronized read can observe a stale value because there is no happens-before relationship between the write and the read.
+
+3. Suggested fix (description only, no code)
+Fix type: add_or_widen_synchronization
+Where to apply: CountingFireflies.tryToSleep
+Fix description: Synchronize the read of asleep with the same lock used by the write, or make asleep visible across threads.
+Confidence: high
+Case 18: 3-rm_sync_block-1
+Root cause analysis
+1. Classification
+Bug type: data_race
+Family: Non-deadlock
+Deadlock type: n/a
+2. Root cause
+Shared state: asleep
+Accesses involved:
+
+    t1 | CountingFireflies.tryToSleep | R, lock asleepLock
+    t2 | CountingFireflies.setAsleep | W
+    Missing guarantee: Mutual exclusion and visibility for asleep
+    Buggy interleaving:
+
+    t2 writes asleep without synchronization in CountingFireflies.setAsleep.
+    t1 reads asleep inside a synchronized block in CountingFireflies.tryToSleep.
+    Why it fails: The write is not protected by the same lock as the read, so the reading thread may not observe the updated value.
+
+3. Suggested fix (description only, no code)
+Fix type: add_or_widen_synchronization
+Where to apply: CountingFireflies.setAsleep
+Fix description: Synchronize the write to asleep with the same lock used by the read, or make asleep visible across threads.
+Confidence: high
+Case 19: 3-wrong_lock-0
+Root cause analysis
+1. Classification
+Bug type: data_race
+Family: Non-deadlock
+Deadlock type: n/a
+2. Root cause
+Shared state: asleep
+Accesses involved:
+
+    t1 | CountingFireflies.tryToSleep | R, lock monitorB
+    t2 | CountingFireflies.setAsleep | W, lock asleepLock
+    Missing guarantee: Mutual exclusion using the same lock for both accesses
+    Buggy interleaving:
+
+    t1 acquires monitorB and reads asleep in CountingFireflies.tryToSleep.
+    t2 acquires asleepLock and writes asleep in CountingFireflies.setAsleep.
+    Why it fails: The read and write are guarded by different locks, so they do not exclude each other and can race.
+
+3. Suggested fix (description only, no code)
+Fix type: change_lock_order_or_granularity
+Where to apply: CountingFireflies.tryToSleep, CountingFireflies.setAsleep
+Fix description: Use the same lock object for both the read and write of asleep.
+Confidence: high
+Case 20: 3-wrong_lock-1
+Root cause analysis
+1. Classification
+Bug type: data_race
+Family: Non-deadlock
+Deadlock type: n/a
+2. Root cause
+Shared state: asleep
+Accesses involved:
+
+    t1 | CountingFireflies.tryToSleep | R, lock asleepLock
+    t2 | CountingFireflies.setAsleep | W, lock monitorB
+    Missing guarantee: Mutual exclusion using the same lock for both accesses
+    Buggy interleaving:
+
+    t1 acquires asleepLock and reads asleep in CountingFireflies.tryToSleep.
+    t2 acquires monitorB and writes asleep in CountingFireflies.setAsleep.
+    Why it fails: The read and write are guarded by different locks, so they do not exclude each other and can race.
+
+3. Suggested fix (description only, no code)
+Fix type: change_lock_order_or_granularity
+Where to apply: CountingFireflies.tryToSleep, CountingFireflies.setAsleep
+Fix description: Use the same lock object for both the read and write of asleep.
+Confidence: high
+
+Case 21: 68-lock_order_inversion_methods-0
+Root cause analysis
+1. Classification
+Bug type: resource_deadlock
+Family: Deadlock
+Deadlock type: Resource
+2. Root cause
+Shared state: MysticCAS instance lock, monitorC
+Accesses involved:
+
+    t1 | MysticCAS.get | lock this, lock monitorC
+    t2 | MysticCAS.compareAndSwap | lock monitorC, lock this
+    Missing guarantee: Consistent lock acquisition order
+    Buggy interleaving:
+
+    t1 acquires the MysticCAS instance lock in MysticCAS.get.
+    t2 acquires monitorC in MysticCAS.compareAndSwap.
+    Why it fails: t1 waits for monitorC held by t2, while t2 waits for the MysticCAS instance lock held by t1, causing a circular wait.
+
+3. Suggested fix (description only, no code)
+Fix type: change_lock_order_or_granularity
+Where to apply: MysticCAS.get, MysticCAS.compareAndSwap
+Fix description: Acquire both locks in the same order in both methods, or use a single lock.
+Confidence: high
+Case 22: 68-rm_sync_one-0
+Root cause analysis
+1. Classification
+Bug type: data_race
+Family: Non-deadlock
+Deadlock type: n/a
+2. Root cause
+Shared state: value
+Accesses involved:
+
+    t1 | MysticCAS.get | R
+    t2 | MysticCAS.compareAndSwap | R, W, lock this
+    Missing guarantee: Visibility and mutual exclusion for value
+    Buggy interleaving:
+
+    t2 updates value inside synchronized MysticCAS.compareAndSwap.
+    t1 reads value through unsynchronized MysticCAS.get.
+    Why it fails: The unsynchronized read has no happens-before relationship with the synchronized write, so it may observe a stale value.
+
+3. Suggested fix (description only, no code)
+Fix type: add_or_widen_synchronization
+Where to apply: MysticCAS.get
+Fix description: Protect the read of value with the same synchronization used by compareAndSwap.
+Confidence: high
+Case 23: 68-rm_sync_one-1
+Root cause analysis
+1. Classification
+Bug type: atomicity_violation
+Family: Non-deadlock
+Deadlock type: n/a
+2. Root cause
+Shared state: value
+Accesses involved:
+
+    t1 | MysticCAS.compareAndSwap | R, W
+    t2 | MysticCAS.compareAndSwap | R, W
+    Missing guarantee: Atomicity of the compare-and-swap operation
+    Buggy interleaving:
+
+    t1 reads value in MysticCAS.compareAndSwap.
+    t2 reads the same value and updates it before t1 completes its own update.
+    Why it fails: The check-then-act sequence in compareAndSwap is not atomic, so updates can be lost.
+
+3. Suggested fix (description only, no code)
+Fix type: add_or_widen_synchronization
+Where to apply: MysticCAS.compareAndSwap
+Fix description: Make the compare-and-swap sequence atomic by protecting it with synchronization.
+Confidence: high
+Case 24: 68-wrong_lock-0
+Root cause analysis
+1. Classification
+Bug type: data_race
+Family: Non-deadlock
+Deadlock type: n/a
+2. Root cause
+Shared state: value
+Accesses involved:
+
+    t1 | MysticCAS.get | R, lock this
+    t2 | MysticCAS.compareAndSwap | R, W, lock monitorB
+    Missing guarantee: Mutual exclusion using the same lock for all accesses
+    Buggy interleaving:
+
+    t1 reads value while holding the MysticCAS instance lock in MysticCAS.get.
+    t2 updates value while holding monitorB in MysticCAS.compareAndSwap.
+    Why it fails: The two accesses are guarded by different locks, so they do not exclude each other.
+
+3. Suggested fix (description only, no code)
+Fix type: change_lock_order_or_granularity
+Where to apply: MysticCAS.get, MysticCAS.compareAndSwap
+Fix description: Use the same lock object for both methods.
+Confidence: high
+Case 25: 68-wrong_lock-1
+Root cause analysis
+1. Classification
+Bug type: data_race
+Family: Non-deadlock
+Deadlock type: n/a
+2. Root cause
+Shared state: value
+Accesses involved:
+
+    t1 | MysticCAS.get | R, lock monitorB
+    t2 | MysticCAS.compareAndSwap | R, W, lock this
+    Missing guarantee: Mutual exclusion using the same lock for all accesses
+    Buggy interleaving:
+
+    t1 reads value while holding monitorB in MysticCAS.get.
+    t2 updates value while holding the MysticCAS instance lock in MysticCAS.compareAndSwap.
+    Why it fails: The two accesses are guarded by different locks, so they do not exclude each other.
+
+3. Suggested fix (description only, no code)
+Fix type: change_lock_order_or_granularity
+Where to apply: MysticCAS.get, MysticCAS.compareAndSwap
+Fix description: Use the same lock object for both methods.
+Confidence: high
+Case 26: 73-lock_order_inversion_methods-0
+Root cause analysis
+1. Classification
+Bug type: resource_deadlock
+Family: Deadlock
+Deadlock type: Resource
+2. Root cause
+Shared state: IntHolder instance lock, monitorC
+Accesses involved:
+
+    t2 | IntHolder.get | lock this, lock monitorC
+    t1 | IntHolder.set | lock monitorC, lock this
+    Missing guarantee: Consistent lock acquisition order
+    Buggy interleaving:
+
+    t2 acquires the IntHolder instance lock in IntHolder.get.
+    t1 acquires monitorC in IntHolder.set.
+    Why it fails: t2 waits for monitorC held by t1, while t1 waits for the IntHolder instance lock held by t2, causing a circular wait.
+
+3. Suggested fix (description only, no code)
+Fix type: change_lock_order_or_granularity
+Where to apply: IntHolder.get, IntHolder.set
+Fix description: Acquire both locks in the same order in both methods, or use a single lock.
+Confidence: high
+Case 27: 73-rm_sync_one-0
+Root cause analysis
+1. Classification
+Bug type: data_race
+Family: Non-deadlock
+Deadlock type: n/a
+2. Root cause
+Shared state: value
+Accesses involved:
+
+    t1 | IntHolder.set | W, lock this
+    t2 | IntHolder.get | R
+    Missing guarantee: Visibility and mutual exclusion for value
+    Buggy interleaving:
+
+    t1 writes value inside synchronized IntHolder.set.
+    t2 reads value through unsynchronized IntHolder.get.
+    Why it fails: The unsynchronized read may not observe the write because there is no happens-before relationship.
+
+3. Suggested fix (description only, no code)
+Fix type: add_or_widen_synchronization
+Where to apply: IntHolder.get
+Fix description: Protect the read of value with the same lock used by set.
+Confidence: high
+Case 28: 73-rm_sync_one-1
+Root cause analysis
+1. Classification
+Bug type: data_race
+Family: Non-deadlock
+Deadlock type: n/a
+2. Root cause
+Shared state: value
+Accesses involved:
+
+    t1 | IntHolder.set | W
+    t2 | IntHolder.get | R, lock this
+    Missing guarantee: Visibility and mutual exclusion for value
+    Buggy interleaving:
+
+    t1 writes value through unsynchronized IntHolder.set.
+    t2 reads value inside synchronized IntHolder.get.
+    Why it fails: The write is not synchronized with the read, so the read may observe a stale value.
+
+3. Suggested fix (description only, no code)
+Fix type: add_or_widen_synchronization
+Where to apply: IntHolder.set
+Fix description: Protect the write to value with the same lock used by get.
+Confidence: high
+Case 29: 73-wrong_lock-0
+Root cause analysis
+1. Classification
+Bug type: data_race
+Family: Non-deadlock
+Deadlock type: n/a
+2. Root cause
+Shared state: value
+Accesses involved:
+
+    t2 | IntHolder.get | R, lock this
+    t1 | IntHolder.set | W, lock monitorB
+    Missing guarantee: Mutual exclusion using the same lock for both accesses
+    Buggy interleaving:
+
+    t2 reads value while holding the IntHolder instance lock in IntHolder.get.
+    t1 writes value while holding monitorB in IntHolder.set.
+    Why it fails: The read and write are protected by different locks, so they can proceed concurrently.
+
+3. Suggested fix (description only, no code)
+Fix type: change_lock_order_or_granularity
+Where to apply: IntHolder.get, IntHolder.set
+Fix description: Use the same lock object for both methods.
+Confidence: high
+Case 30: 73-wrong_lock-1
+Root cause analysis
+1. Classification
+Bug type: data_race
+Family: Non-deadlock
+Deadlock type: n/a
+2. Root cause
+Shared state: value
+Accesses involved:
+
+    t2 | IntHolder.get | R, lock monitorB
+    t1 | IntHolder.set | W, lock this
+    Missing guarantee: Mutual exclusion using the same lock for both accesses
+    Buggy interleaving:
+
+    t2 reads value while holding monitorB in IntHolder.get.
+    t1 writes value while holding the IntHolder instance lock in IntHolder.set.
+    Why it fails: The read and write are protected by different locks, so they can proceed concurrently.
+
+3. Suggested fix (description only, no code)
+Fix type: change_lock_order_or_granularity
+Where to apply: IntHolder.get, IntHolder.set
+Fix description: Use the same lock object for both methods.
+Confidence: high
+Case 31: 74-missing_notify-0
+Root cause analysis
+1. Classification
+Bug type: communication_deadlock
+Family: Deadlock
+Deadlock type: Communication
+2. Root cause
+Shared state: asleep, Sleeper monitor
+Accesses involved:
+
+    reader | Sleeper.tryToSleep | R, lock, wait
+    writer | Sleeper.setAsleep | W, lock
+    Missing guarantee: Notification after the awaited condition becomes true
+    Buggy interleaving:
+
+    reader enters Sleeper.tryToSleep, observes asleep is false, and waits.
+    writer enters Sleeper.setAsleep and sets asleep to true without notifying.
+    Why it fails: The waiting thread is never awakened even though the condition it is waiting for has become true.
+
+3. Suggested fix (description only, no code)
+Fix type: fix_wait_notify
+Where to apply: Sleeper.setAsleep
+Fix description: Signal waiting threads after changing asleep.
+Confidence: high
+Case 32: 74-monitor_misuse-0
+Root cause analysis
+1. Classification
+Bug type: monitor_misuse
+Family: Other
+Deadlock type: n/a
+2. Root cause
+Shared state: asleep, Sleeper monitor
+Accesses involved:
+
+    reader | Sleeper.tryToSleep | R, wait
+    writer | Sleeper.setAsleep | W, lock, notify
+    Missing guarantee: wait must be called while holding the monitor
+    Buggy interleaving:
+
+    reader executes Sleeper.tryToSleep without holding the monitor.
+    reader calls wait while not owning the Sleeper monitor.
+    Why it fails: Object.wait must be invoked while holding the object's monitor, so the wait operation is invalid.
+
+3. Suggested fix (description only, no code)
+Fix type: add_or_widen_synchronization
+Where to apply: Sleeper.tryToSleep
+Fix description: Ensure the wait is performed inside a synchronized context.
+Confidence: high
+Case 33: 74-monitor_misuse-1
+Root cause analysis
+1. Classification
+Bug type: monitor_misuse
+Family: Other
+Deadlock type: n/a
+2. Root cause
+Shared state: asleep, Sleeper monitor
+Accesses involved:
+
+    reader | Sleeper.tryToSleep | R, lock, wait
+    writer | Sleeper.setAsleep | W, notify
+    Missing guarantee: notify must be called while holding the monitor
+    Buggy interleaving:
+
+    reader waits correctly inside synchronized Sleeper.tryToSleep.
+    writer executes Sleeper.setAsleep and calls notifyAll without holding the monitor.
+    Why it fails: Object.notifyAll must be invoked while holding the object's monitor, so the notification is invalid.
+
+3. Suggested fix (description only, no code)
+Fix type: add_or_widen_synchronization
+Where to apply: Sleeper.setAsleep
+Fix description: Ensure the state change and notification occur while holding the monitor.
+Confidence: high
+Case 34: 74-unguarded_wait-0
+Root cause analysis
+1. Classification
+Bug type: communication_deadlock
+Family: Deadlock
+Deadlock type: Communication
+2. Root cause
+Shared state: asleep, Sleeper monitor
+Accesses involved:
+
+    reader | Sleeper.tryToSleep | lock, wait
+    writer | Sleeper.setAsleep | lock, W, notify
+    Missing guarantee: wait must be guarded by the awaited condition
+    Buggy interleaving:
+
+    writer sets asleep to true and calls notifyAll before reader calls wait.
+    reader later calls wait unconditionally and blocks forever.
+    Why it fails: Notifications are not retained, so a signal sent before the wait can be missed.
+
+3. Suggested fix (description only, no code)
+Fix type: fix_wait_notify
+Where to apply: Sleeper.tryToSleep
+Fix description: Wait only while the condition is false.
+Confidence: high
+Case 35: 87-lock_order_inversion_methods-2
+Root cause analysis
+1. Classification
+Bug type: resource_deadlock
+Family: Deadlock
+Deadlock type: Resource
+2. Root cause
+Shared state: ImproveList instance lock, monitorC
+Accesses involved:
+
+    t1 | ImproveList.add | lock this, lock monitorC
+    t2 | ImproveList.putIfAbsent | lock monitorC, lock this
+    Missing guarantee: Consistent lock acquisition order
+    Buggy interleaving:
+
+    t1 acquires the ImproveList instance lock in ImproveList.add.
+    t2 acquires monitorC in ImproveList.putIfAbsent.
+    Why it fails: t1 waits for monitorC held by t2, while t2 waits for the ImproveList instance lock held by t1, causing a circular wait.
+
+3. Suggested fix (description only, no code)
+Fix type: change_lock_order_or_granularity
+Where to apply: ImproveList.add, ImproveList.putIfAbsent
+Fix description: Acquire both locks in the same order in both methods, or use a single lock.
+Confidence: high
+Case 36: 97-missing_release-1
+Root cause analysis
+1. Classification
+Bug type: resource_deadlock
+Family: Deadlock
+Deadlock type: Resource
+2. Root cause
+Shared state: availableItems semaphore, buffer state
+Accesses involved:
+
+    t1 | BoundedBuffer.put | W, lock
+    t2 | BoundedBuffer.take | wait
+    Missing guarantee: A put operation must make an item available
+    Buggy interleaving:
+
+    t1 inserts an item in BoundedBuffer.put but does not release an item permit.
+    t2 blocks while trying to take an item because no item permit is available.
+    Why it fails: The consumer waits for an item permit that the producer never supplies, so it can block indefinitely.
+
+3. Suggested fix (description only, no code)
+Fix type: fix_wait_notify
+Where to apply: BoundedBuffer.put
+Fix description: Signal item availability after inserting an item.
+Confidence: high
+Case 37: 97-semaphore_starve-0
+Root cause analysis
+1. Classification
+Bug type: resource_deadlock
+Family: Deadlock
+Deadlock type: Resource
+2. Root cause
+Shared state: availableSpaces semaphore, availableItems semaphore
+Accesses involved:
+
+    t1 | BoundedBuffer.put | wait
+    t2 | BoundedBuffer.take | wait
+    Missing guarantee: Initial semaphore permits must match the buffer capacity and state
+    Buggy interleaving:
+
+    For capacity 1, availableSpaces is initialized with zero permits, so t1 blocks in BoundedBuffer.put.
+    availableItems is also zero, so t2 blocks in BoundedBuffer.take.
+    Why it fails: Neither thread can proceed because the initial permit counts prevent both putting and taking.
+
+3. Suggested fix (description only, no code)
+Fix type: other
+Where to apply: BoundedBuffer constructor
+Fix description: Initialize the space semaphore with the actual buffer capacity.
+Confidence: high

@@ -1,0 +1,11 @@
+{
+  "id": "115-rm_join-1",
+  "class": "SimulatedCAS",
+  "compiled": true,
+  "ran": true,
+  "returncode": 0,
+  "timed_out": false,
+  "violation": false,
+  "has_trace": false,
+  "seconds": 0.8
+}

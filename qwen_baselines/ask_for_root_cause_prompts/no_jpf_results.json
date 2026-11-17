@@ -1,0 +1,522 @@
+{
+  "results": [
+    {
+      "id": "1-lock_order_inversion_blocks-0",
+      "part": "dev",
+      "condition": "nojpf",
+      "fields": {
+        "bug_type": "resource_deadlock",
+        "family": "Deadlock",
+        "deadlock_type": "Resource",
+        "fix_type": "change_lock_order_or_granularity",
+        "where_to_apply": "CountingLanterns.tryToSleep, CountingLanterns.setAsleep",
+        "confidence": "high"
+      },
+      "output": "# Root cause analysis\n\n## 1. Classification\nBug type: resource_deadlock\nFamily: Deadlock\nDeadlock type: Resource\n\n## 2. Root cause\nShared state: the two locks CountingLanterns.asleepLock and CountingLanterns.monitorC (guarding field asleep)\nAccesses involved:\n- t1 | CountingLanterns.tryToSleep | lock asleepLock\n- t1 | CountingLanterns.tryToSleep | lock monitorC\n- t1 | CountingLanterns.tryToSleep | R asleep\n- t1 | CountingLanterns.tryToSleep | unlock monitorC, unlock asleepLock\n- t2 | CountingLanterns.setAsleep | lock monitorC\n- t2 | CountingLanterns.setAsleep | lock asleepLock\n- t2 | CountingLanterns.setAsleep | W asleep\n- t2 | CountingLanterns.setAsleep | unlock asleepLock, unlock monitorC\nMissing guarantee: Both methods must acquire the two locks in the same global order (or only one lock should guard asleep).\nBuggy interleaving:\n1. t1 is inside CountingLanterns.tryToSleep and acquires asleepLock.\n2. t2 (after its 500 ms sleep) enters CountingLanterns.setAsleep and acquires monitorC.\n3. t1 tries to acquire monitorC and blocks, because t2 holds it.\n4. t2 tries to acquire asleepLock and blocks, because t1 holds it. Neither thread can proceed and main blocks forever in join.\nWhy it fails: CountingLanterns.tryToSleep takes asleepLock then monitorC, while CountingLanterns.setAsleep takes monitorC then asleepLock. The inverted order creates a circular wait.\n\n## 3. Suggested fix (description only, no code)\nFix type: change_lock_order_or_granularity\nWhere to apply: CountingLanterns.tryToSleep, CountingLanterns.setAsleep\nFix description: Make both methods acquire the locks in one fixed order, or drop the redundant second lock so that a single lock guards asleep.\nConfidence: high"
+    },
+    {
+      "id": "1-rm_sync_block-0",
+      "part": "dev",
+      "condition": "nojpf",
+      "fields": {
+        "bug_type": "data_race",
+        "family": "Non-deadlock",
+        "deadlock_type": "n/a",
+        "fix_type": "add_or_widen_synchronization",
+        "where_to_apply": "CountingLanterns.tryToSleep",
+        "confidence": "high"
+      },
+      "output": "# Root cause analysis\n\n## 1. Classification\nBug type: data_race\nFamily: Non-deadlock\nDeadlock type: n/a\n\n## 2. Root cause\nShared state: field CountingLanterns.asleep (guarded by asleepLock on the write side only)\nAccesses involved:\n- t1 | CountingLanterns.tryToSleep | R asleep (no lock held)\n- t2 | CountingLanterns.setAsleep | lock asleepLock\n- t2 | CountingLanterns.setAsleep | W asleep\n- t2 | CountingLanterns.setAsleep | unlock asleepLock\nMissing guarantee: Reads of asleep must be protected by the same lock as the write (or asleep must be volatile) so that the write is atomic with respect to, and visible to, the reader.\nBuggy interleaving:\n1. t1 loops in CountingLanterns.tryToSleep and reads asleep (false) without holding asleepLock.\n2. t2 calls CountingLanterns.setAsleep and writes asleep = true under asleepLock.\n3. The read and the write are unordered (no common lock, no happens-before), so the accesses race and t1 may keep seeing a stale false.\nWhy it fails: The synchronized block around the read in CountingLanterns.tryToSleep is missing, so the read does not synchronize with the locked write in CountingLanterns.setAsleep. This is a data race with no visibility guarantee.\n\n## 3. Suggested fix (description only, no code)\nFix type: add_or_widen_synchronization\nWhere to apply: CountingLanterns.tryToSleep\nFix description: Guard the read of asleep in CountingLanterns.tryToSleep with asleepLock, the same lock used by CountingLanterns.setAsleep.\nConfidence: high"
+    },
+    {
+      "id": "1-rm_sync_block-1",
+      "part": "dev",
+      "condition": "nojpf",
+      "fields": {
+        "bug_type": "data_race",
+        "family": "Non-deadlock",
+        "deadlock_type": "n/a",
+        "fix_type": "add_or_widen_synchronization",
+        "where_to_apply": "CountingLanterns.setAsleep",
+        "confidence": "high"
+      },
+      "output": "# Root cause analysis\n\n## 1. Classification\nBug type: data_race\nFamily: Non-deadlock\nDeadlock type: n/a\n\n## 2. Root cause\nShared state: field CountingLanterns.asleep (guarded by asleepLock on the read side only)\nAccesses involved:\n- t1 | CountingLanterns.tryToSleep | lock asleepLock\n- t1 | CountingLanterns.tryToSleep | R asleep\n- t1 | CountingLanterns.tryToSleep | unlock asleepLock\n- t2 | CountingLanterns.setAsleep | W asleep (no lock held)\nMissing guarantee: The write to asleep must be protected by the same lock as the read (or asleep must be volatile) so that it is atomic with respect to, and visible to, the reader.\nBuggy interleaving:\n1. t1 repeatedly enters CountingLanterns.tryToSleep, takes asleepLock and reads asleep (false).\n2. t2 calls CountingLanterns.setAsleep and writes asleep = true without taking any lock.\n3. The unlocked write is not ordered with t1's locked read, so the accesses race and t1 may keep seeing a stale false.\nWhy it fails: The synchronized block around the write in CountingLanterns.setAsleep is missing, so the write does not synchronize with the locked read in CountingLanterns.tryToSleep. This is a data race with no visibility guarantee.\n\n## 3. Suggested fix (description only, no code)\nFix type: add_or_widen_synchronization\nWhere to apply: CountingLanterns.setAsleep\nFix description: Guard the write of asleep in CountingLanterns.setAsleep with asleepLock, the same lock used by CountingLanterns.tryToSleep.\nConfidence: high"
+    },
+    {
+      "id": "1-wrong_lock-0",
+      "part": "dev",
+      "condition": "nojpf",
+      "fields": {
+        "bug_type": "data_race",
+        "family": "Non-deadlock",
+        "deadlock_type": "n/a",
+        "fix_type": "add_or_widen_synchronization",
+        "where_to_apply": "CountingLanterns.tryToSleep",
+        "confidence": "high"
+      },
+      "output": "# Root cause analysis\n\n## 1. Classification\nBug type: data_race\nFamily: Non-deadlock\nDeadlock type: n/a\n\n## 2. Root cause\nShared state: field CountingLanterns.asleep, accessed under two different locks (monitorB for reads, asleepLock for writes)\nAccesses involved:\n- t1 | CountingLanterns.tryToSleep | lock monitorB\n- t1 | CountingLanterns.tryToSleep | R asleep\n- t1 | CountingLanterns.tryToSleep | unlock monitorB\n- t2 | CountingLanterns.setAsleep | lock asleepLock\n- t2 | CountingLanterns.setAsleep | W asleep\n- t2 | CountingLanterns.setAsleep | unlock asleepLock\nMissing guarantee: All accesses to asleep must be protected by one common lock so that they are mutually exclusive and ordered.\nBuggy interleaving:\n1. t1 in CountingLanterns.tryToSleep holds monitorB and reads asleep (false).\n2. t2 in CountingLanterns.setAsleep holds asleepLock, which does not exclude t1, and writes asleep = true at the same time.\n3. Because the two threads never share a lock, there is no mutual exclusion or happens-before between the read and the write, and t1 may keep seeing a stale false.\nWhy it fails: CountingLanterns.tryToSleep uses monitorB while CountingLanterns.setAsleep uses asleepLock. Each access looks synchronized, but the locks differ, so the accesses are not synchronized with each other.\n\n## 3. Suggested fix (description only, no code)\nFix type: add_or_widen_synchronization\nWhere to apply: CountingLanterns.tryToSleep\nFix description: Guard the read of asleep in CountingLanterns.tryToSleep with asleepLock instead of monitorB, so it uses the same lock as CountingLanterns.setAsleep.\nConfidence: high"
+    },
+    {
+      "id": "1-wrong_lock-1",
+      "part": "dev",
+      "condition": "nojpf",
+      "fields": {
+        "bug_type": "data_race",
+        "family": "Non-deadlock",
+        "deadlock_type": "n/a",
+        "fix_type": "add_or_widen_synchronization",
+        "where_to_apply": "CountingLanterns.setAsleep",
+        "confidence": "high"
+      },
+      "output": "# Root cause analysis\n\n## 1. Classification\nBug type: data_race\nFamily: Non-deadlock\nDeadlock type: n/a\n\n## 2. Root cause\nShared state: field CountingLanterns.asleep, accessed under two different locks (asleepLock for reads, monitorB for writes)\nAccesses involved:\n- t1 | CountingLanterns.tryToSleep | lock asleepLock\n- t1 | CountingLanterns.tryToSleep | R asleep\n- t1 | CountingLanterns.tryToSleep | unlock asleepLock\n- t2 | CountingLanterns.setAsleep | lock monitorB\n- t2 | CountingLanterns.setAsleep | W asleep\n- t2 | CountingLanterns.setAsleep | unlock monitorB\nMissing guarantee: All accesses to asleep must be protected by one common lock so that they are mutually exclusive and ordered.\nBuggy interleaving:\n1. t1 in CountingLanterns.tryToSleep holds asleepLock and reads asleep (false).\n2. t2 in CountingLanterns.setAsleep holds monitorB, which does not exclude t1, and writes asleep = true at the same time.\n3. Because the two threads never share a lock, there is no mutual exclusion or happens-before between the read and the write, and t1 may keep seeing a stale false.\nWhy it fails: CountingLanterns.tryToSleep uses asleepLock while CountingLanterns.setAsleep uses monitorB. Each access looks synchronized, but the locks differ, so the accesses are not synchronized with each other.\n\n## 3. Suggested fix (description only, no code)\nFix type: add_or_widen_synchronization\nWhere to apply: CountingLanterns.setAsleep\nFix description: Guard the write of asleep in CountingLanterns.setAsleep with asleepLock instead of monitorB, so it uses the same lock as CountingLanterns.tryToSleep.\nConfidence: high"
+    },
+    {
+      "id": "115-lock_order_inversion_methods-0",
+      "part": "dev",
+      "condition": "nojpf",
+      "fields": {
+        "bug_type": "resource_deadlock",
+        "family": "Deadlock",
+        "deadlock_type": "Resource",
+        "fix_type": "change_lock_order_or_granularity",
+        "where_to_apply": "SimulatedCAS.get, SimulatedCAS.compareAndSwap",
+        "confidence": "high"
+      },
+      "output": "# Root cause analysis\n\n## 1. Classification\nBug type: resource_deadlock\nFamily: Deadlock\nDeadlock type: Resource\n\n## 2. Root cause\nShared state: the two locks SimulatedCAS instance monitor (this) and SimulatedCAS.monitorC (guarding field value)\nAccesses involved:\n- t1/t2 | SimulatedCAS.get | lock this\n- t1/t2 | SimulatedCAS.get | lock monitorC\n- t1/t2 | SimulatedCAS.get | R value\n- t1/t2 | SimulatedCAS.get | unlock monitorC, unlock this\n- t1/t2 | SimulatedCAS.compareAndSwap | lock monitorC\n- t1/t2 | SimulatedCAS.compareAndSwap | lock this\n- t1/t2 | SimulatedCAS.compareAndSwap | R value, W value\n- t1/t2 | SimulatedCAS.compareAndSwap | unlock this, unlock monitorC\nMissing guarantee: Both methods must acquire the two locks in the same global order (or only one lock should guard value).\nBuggy interleaving:\n1. t1 calls CasCounter.increment, which calls SimulatedCAS.get; t1 acquires the SimulatedCAS monitor (this).\n2. t2 is in SimulatedCAS.compareAndSwap and acquires monitorC.\n3. t1 tries to acquire monitorC and blocks, because t2 holds it.\n4. t2 tries to acquire this and blocks, because t1 holds it. Neither thread can proceed and main blocks forever in join.\nWhy it fails: SimulatedCAS.get takes this then monitorC, while SimulatedCAS.compareAndSwap takes monitorC then this. The inverted order creates a circular wait.\n\n## 3. Suggested fix (description only, no code)\nFix type: change_lock_order_or_granularity\nWhere to apply: SimulatedCAS.get, SimulatedCAS.compareAndSwap\nFix description: Make both methods acquire the locks in one fixed order, or drop the redundant monitorC so that a single lock (this) guards value.\nConfidence: high"
+    },
+    {
+      "id": "115-rm_sync_one-0",
+      "part": "dev",
+      "condition": "nojpf",
+      "fields": {
+        "bug_type": "atomicity_violation",
+        "family": "Non-deadlock",
+        "deadlock_type": "n/a",
+        "fix_type": "add_or_widen_synchronization",
+        "where_to_apply": "SimulatedCAS.compareAndSwap",
+        "confidence": "high"
+      },
+      "output": "# Root cause analysis\n\n## 1. Classification\nBug type: atomicity_violation\nFamily: Non-deadlock\nDeadlock type: n/a\n\n## 2. Root cause\nShared state: field SimulatedCAS.value (the lock this guards it in get only)\nAccesses involved:\n- t1/t2 | CasCounter.increment | R value via SimulatedCAS.get, which locks this\n- t1/t2 | SimulatedCAS.compareAndSwap | R value (no lock held)\n- t1/t2 | SimulatedCAS.compareAndSwap | W value (no lock held)\nMissing guarantee: The read-compare-write sequence in SimulatedCAS.compareAndSwap must be atomic, and mutually exclusive with SimulatedCAS.get and with other compareAndSwap calls.\nBuggy interleaving:\n1. t1 and t2 both read value = 0 in CasCounter.increment via SimulatedCAS.get.\n2. t1 enters SimulatedCAS.compareAndSwap(0, 1), reads oldValue = 0 and sees it equals expectedValue.\n3. t2 enters SimulatedCAS.compareAndSwap(0, 1) before t1 writes, also reads oldValue = 0 and writes value = 1.\n4. t1 writes value = 1. Both calls return 0, so both CAS operations succeed and one increment is lost (value ends at 1, not 2).\nWhy it fails: SimulatedCAS.compareAndSwap is not synchronized, so its check-then-act sequence can interleave with another thread's, which breaks the compare-and-swap semantics. Its unlocked accesses to value also race with SimulatedCAS.get.\n\n## 3. Suggested fix (description only, no code)\nFix type: add_or_widen_synchronization\nWhere to apply: SimulatedCAS.compareAndSwap\nFix description: Make SimulatedCAS.compareAndSwap hold the same lock as SimulatedCAS.get (the instance monitor), so the whole read-compare-write is atomic.\nConfidence: high"
+    },
+    {
+      "id": "115-rm_sync_one-1",
+      "part": "dev",
+      "condition": "nojpf",
+      "fields": {
+        "bug_type": "data_race",
+        "family": "Non-deadlock",
+        "deadlock_type": "n/a",
+        "fix_type": "add_or_widen_synchronization",
+        "where_to_apply": "SimulatedCAS.get",
+        "confidence": "high"
+      },
+      "output": "# Root cause analysis\n\n## 1. Classification\nBug type: data_race\nFamily: Non-deadlock\nDeadlock type: n/a\n\n## 2. Root cause\nShared state: field SimulatedCAS.value (the lock this guards it in compareAndSwap only)\nAccesses involved:\n- t1/t2 | SimulatedCAS.get | R value (no lock held)\n- t1/t2 | SimulatedCAS.compareAndSwap | lock this\n- t1/t2 | SimulatedCAS.compareAndSwap | R value, W value\n- t1/t2 | SimulatedCAS.compareAndSwap | unlock this\nMissing guarantee: Reads of value in SimulatedCAS.get must be protected by the same lock as the writes in SimulatedCAS.compareAndSwap (or value must be volatile), so reads are ordered with, and see, completed writes.\nBuggy interleaving:\n1. t1 calls CasCounter.increment, which calls SimulatedCAS.get and reads value without holding any lock.\n2. t2 concurrently executes SimulatedCAS.compareAndSwap and writes value under this.\n3. The unlocked read and the locked write are unordered (no common lock, no happens-before), so t1 may read a stale or concurrently updated value.\nWhy it fails: SimulatedCAS.get is not synchronized, so its read does not synchronize with the locked write in SimulatedCAS.compareAndSwap. The compareAndSwap calls themselves exclude each other, so the defect is the unprotected read, not a lost update.\n\n## 3. Suggested fix (description only, no code)\nFix type: add_or_widen_synchronization\nWhere to apply: SimulatedCAS.get\nFix description: Make SimulatedCAS.get hold the same lock as SimulatedCAS.compareAndSwap (the instance monitor).\nConfidence: high"
+    },
+    {
+      "id": "115-wrong_lock-0",
+      "part": "dev",
+      "condition": "nojpf",
+      "fields": {
+        "bug_type": "data_race",
+        "family": "Non-deadlock",
+        "deadlock_type": "n/a",
+        "fix_type": "add_or_widen_synchronization",
+        "where_to_apply": "SimulatedCAS.get",
+        "confidence": "high"
+      },
+      "output": "# Root cause analysis\n\n## 1. Classification\nBug type: data_race\nFamily: Non-deadlock\nDeadlock type: n/a\n\n## 2. Root cause\nShared state: field SimulatedCAS.value, accessed under two different locks (monitorB for reads in get, this for reads and writes in compareAndSwap)\nAccesses involved:\n- t1/t2 | SimulatedCAS.get | lock monitorB\n- t1/t2 | SimulatedCAS.get | R value\n- t1/t2 | SimulatedCAS.get | unlock monitorB\n- t1/t2 | SimulatedCAS.compareAndSwap | lock this\n- t1/t2 | SimulatedCAS.compareAndSwap | R value, W value\n- t1/t2 | SimulatedCAS.compareAndSwap | unlock this\nMissing guarantee: All accesses to value must be protected by one common lock so that get and compareAndSwap are mutually exclusive and ordered.\nBuggy interleaving:\n1. t1 in SimulatedCAS.get holds monitorB and reads value.\n2. t2 in SimulatedCAS.compareAndSwap holds this, which does not exclude t1, and writes value at the same time.\n3. Because the threads share no lock, there is no mutual exclusion or happens-before between the read and the write, so t1 may read a stale or concurrently updated value.\nWhy it fails: SimulatedCAS.get uses monitorB while SimulatedCAS.compareAndSwap uses this. Each access looks synchronized, but the locks differ, so the accesses are not synchronized with each other. Concurrent compareAndSwap calls still exclude each other, so the race is between get and compareAndSwap.\n\n## 3. Suggested fix (description only, no code)\nFix type: add_or_widen_synchronization\nWhere to apply: SimulatedCAS.get\nFix description: Guard the read in SimulatedCAS.get with the instance monitor (this) instead of monitorB, so it uses the same lock as SimulatedCAS.compareAndSwap.\nConfidence: high"
+    },
+    {
+      "id": "115-wrong_lock-1",
+      "part": "dev",
+      "condition": "nojpf",
+      "fields": {
+        "bug_type": "data_race",
+        "family": "Non-deadlock",
+        "deadlock_type": "n/a",
+        "fix_type": "add_or_widen_synchronization",
+        "where_to_apply": "SimulatedCAS.compareAndSwap",
+        "confidence": "high"
+      },
+      "output": "# Root cause analysis\n\n## 1. Classification\nBug type: data_race\nFamily: Non-deadlock\nDeadlock type: n/a\n\n## 2. Root cause\nShared state: field SimulatedCAS.value, accessed under two different locks (this for reads in get, monitorB for reads and writes in compareAndSwap)\nAccesses involved:\n- t1/t2 | SimulatedCAS.get | lock this\n- t1/t2 | SimulatedCAS.get | R value\n- t1/t2 | SimulatedCAS.get | unlock this\n- t1/t2 | SimulatedCAS.compareAndSwap | lock monitorB\n- t1/t2 | SimulatedCAS.compareAndSwap | R value, W value\n- t1/t2 | SimulatedCAS.compareAndSwap | unlock monitorB\nMissing guarantee: All accesses to value must be protected by one common lock so that get and compareAndSwap are mutually exclusive and ordered.\nBuggy interleaving:\n1. t1 in SimulatedCAS.get holds this and reads value.\n2. t2 in SimulatedCAS.compareAndSwap holds monitorB, which does not exclude t1, and writes value at the same time.\n3. Because the threads share no lock, there is no mutual exclusion or happens-before between the read and the write, so t1 may read a stale or concurrently updated value.\nWhy it fails: SimulatedCAS.get uses this while SimulatedCAS.compareAndSwap uses monitorB. Each access looks synchronized, but the locks differ, so the accesses are not synchronized with each other. Concurrent compareAndSwap calls still exclude each other, so the race is between get and compareAndSwap.\n\n## 3. Suggested fix (description only, no code)\nFix type: add_or_widen_synchronization\nWhere to apply: SimulatedCAS.compareAndSwap\nFix description: Guard the read-compare-write in SimulatedCAS.compareAndSwap with the instance monitor (this) instead of monitorB, so it uses the same lock as SimulatedCAS.get.\nConfidence: high"
+    },
+    {
+      "id": "2-lock_order_inversion_blocks-0",
+      "part": "dev",
+      "condition": "nojpf",
+      "fields": {
+        "bug_type": "resource_deadlock",
+        "family": "Deadlock",
+        "deadlock_type": "Resource",
+        "fix_type": "change_lock_order_or_granularity",
+        "where_to_apply": "CountingComets.tryToSleep, CountingComets.setAsleep",
+        "confidence": "high"
+      },
+      "output": "# Root cause analysis\n\n## 1. Classification\nBug type: resource_deadlock\nFamily: Deadlock\nDeadlock type: Resource\n\n## 2. Root cause\nShared state: the two locks CountingComets.asleepLock and CountingComets.monitorC (guarding field asleep)\nAccesses involved:\n- t1 | CountingComets.tryToSleep | lock asleepLock\n- t1 | CountingComets.tryToSleep | lock monitorC\n- t1 | CountingComets.tryToSleep | R asleep\n- t1 | CountingComets.tryToSleep | unlock monitorC, unlock asleepLock\n- t2 | CountingComets.setAsleep | lock monitorC\n- t2 | CountingComets.setAsleep | lock asleepLock\n- t2 | CountingComets.setAsleep | W asleep\n- t2 | CountingComets.setAsleep | unlock asleepLock, unlock monitorC\nMissing guarantee: Both methods must acquire the two locks in the same global order (or only one lock should guard asleep).\nBuggy interleaving:\n1. t1 is inside CountingComets.tryToSleep and acquires asleepLock.\n2. t2 (after its 500 ms sleep) enters CountingComets.setAsleep and acquires monitorC.\n3. t1 tries to acquire monitorC and blocks, because t2 holds it.\n4. t2 tries to acquire asleepLock and blocks, because t1 holds it. Neither thread can proceed and main blocks forever in join.\nWhy it fails: CountingComets.tryToSleep takes asleepLock then monitorC, while CountingComets.setAsleep takes monitorC then asleepLock. The inverted order creates a circular wait.\n\n## 3. Suggested fix (description only, no code)\nFix type: change_lock_order_or_granularity\nWhere to apply: CountingComets.tryToSleep, CountingComets.setAsleep\nFix description: Make both methods acquire the locks in one fixed order, or drop the redundant second lock so that a single lock guards asleep.\nConfidence: high"
+    },
+    {
+      "id": "2-rm_sync_block-0",
+      "part": "dev",
+      "condition": "nojpf",
+      "fields": {
+        "bug_type": "data_race",
+        "family": "Non-deadlock",
+        "deadlock_type": "n/a",
+        "fix_type": "add_or_widen_synchronization",
+        "where_to_apply": "CountingComets.tryToSleep",
+        "confidence": "high"
+      },
+      "output": "# Root cause analysis\n\n## 1. Classification\nBug type: data_race\nFamily: Non-deadlock\nDeadlock type: n/a\n\n## 2. Root cause\nShared state: field CountingComets.asleep (guarded by asleepLock on the write side only)\nAccesses involved:\n- t1 | CountingComets.tryToSleep | R asleep (no lock held)\n- t2 | CountingComets.setAsleep | lock asleepLock\n- t2 | CountingComets.setAsleep | W asleep\n- t2 | CountingComets.setAsleep | unlock asleepLock\nMissing guarantee: Reads of asleep must be protected by the same lock as the write (or asleep must be volatile) so that the write is atomic with respect to, and visible to, the reader.\nBuggy interleaving:\n1. t1 loops in CountingComets.tryToSleep and reads asleep (false) without holding asleepLock.\n2. t2 calls CountingComets.setAsleep and writes asleep = true under asleepLock.\n3. The read and the write are unordered (no common lock, no happens-before), so the accesses race and t1 may keep seeing a stale false.\nWhy it fails: The synchronized block around the read in CountingComets.tryToSleep is missing, so the read does not synchronize with the locked write in CountingComets.setAsleep. This is a data race with no visibility guarantee.\n\n## 3. Suggested fix (description only, no code)\nFix type: add_or_widen_synchronization\nWhere to apply: CountingComets.tryToSleep\nFix description: Guard the read of asleep in CountingComets.tryToSleep with asleepLock, the same lock used by CountingComets.setAsleep.\nConfidence: high"
+    },
+    {
+      "id": "2-rm_sync_block-1",
+      "part": "dev",
+      "condition": "nojpf",
+      "fields": {
+        "bug_type": "data_race",
+        "family": "Non-deadlock",
+        "deadlock_type": "n/a",
+        "fix_type": "add_or_widen_synchronization",
+        "where_to_apply": "CountingComets.setAsleep",
+        "confidence": "high"
+      },
+      "output": "# Root cause analysis\n\n## 1. Classification\nBug type: data_race\nFamily: Non-deadlock\nDeadlock type: n/a\n\n## 2. Root cause\nShared state: field CountingComets.asleep (guarded by asleepLock on the read side only)\nAccesses involved:\n- t1 | CountingComets.tryToSleep | lock asleepLock\n- t1 | CountingComets.tryToSleep | R asleep\n- t1 | CountingComets.tryToSleep | unlock asleepLock\n- t2 | CountingComets.setAsleep | W asleep (no lock held)\nMissing guarantee: The write to asleep must be protected by the same lock as the read (or asleep must be volatile) so that it is atomic with respect to, and visible to, the reader.\nBuggy interleaving:\n1. t1 repeatedly enters CountingComets.tryToSleep, takes asleepLock and reads asleep (false).\n2. t2 calls CountingComets.setAsleep and writes asleep = true without taking any lock.\n3. The unlocked write is not ordered with t1's locked read, so the accesses race and t1 may keep seeing a stale false.\nWhy it fails: The synchronized block around the write in CountingComets.setAsleep is missing, so the write does not synchronize with the locked read in CountingComets.tryToSleep. This is a data race with no visibility guarantee.\n\n## 3. Suggested fix (description only, no code)\nFix type: add_or_widen_synchronization\nWhere to apply: CountingComets.setAsleep\nFix description: Guard the write of asleep in CountingComets.setAsleep with asleepLock, the same lock used by CountingComets.tryToSleep.\nConfidence: high"
+    },
+    {
+      "id": "2-wrong_lock-0",
+      "part": "dev",
+      "condition": "nojpf",
+      "fields": {
+        "bug_type": "data_race",
+        "family": "Non-deadlock",
+        "deadlock_type": "n/a",
+        "fix_type": "add_or_widen_synchronization",
+        "where_to_apply": "CountingComets.tryToSleep",
+        "confidence": "high"
+      },
+      "output": "# Root cause analysis\n\n## 1. Classification\nBug type: data_race\nFamily: Non-deadlock\nDeadlock type: n/a\n\n## 2. Root cause\nShared state: field CountingComets.asleep, accessed under two different locks (monitorB for reads, asleepLock for writes)\nAccesses involved:\n- t1 | CountingComets.tryToSleep | lock monitorB\n- t1 | CountingComets.tryToSleep | R asleep\n- t1 | CountingComets.tryToSleep | unlock monitorB\n- t2 | CountingComets.setAsleep | lock asleepLock\n- t2 | CountingComets.setAsleep | W asleep\n- t2 | CountingComets.setAsleep | unlock asleepLock\nMissing guarantee: All accesses to asleep must be protected by one common lock so that they are mutually exclusive and ordered.\nBuggy interleaving:\n1. t1 in CountingComets.tryToSleep holds monitorB and reads asleep (false).\n2. t2 in CountingComets.setAsleep holds asleepLock, which does not exclude t1, and writes asleep = true at the same time.\n3. Because the two threads never share a lock, there is no mutual exclusion or happens-before between the read and the write, and t1 may keep seeing a stale false.\nWhy it fails: CountingComets.tryToSleep uses monitorB while CountingComets.setAsleep uses asleepLock. Each access looks synchronized, but the locks differ, so the accesses are not synchronized with each other.\n\n## 3. Suggested fix (description only, no code)\nFix type: add_or_widen_synchronization\nWhere to apply: CountingComets.tryToSleep\nFix description: Guard the read of asleep in CountingComets.tryToSleep with asleepLock instead of monitorB, so it uses the same lock as CountingComets.setAsleep.\nConfidence: high"
+    },
+    {
+      "id": "2-wrong_lock-1",
+      "part": "dev",
+      "condition": "nojpf",
+      "fields": {
+        "bug_type": "data_race",
+        "family": "Non-deadlock",
+        "deadlock_type": "n/a",
+        "fix_type": "add_or_widen_synchronization",
+        "where_to_apply": "CountingComets.setAsleep",
+        "confidence": "high"
+      },
+      "output": "# Root cause analysis\n\n## 1. Classification\nBug type: data_race\nFamily: Non-deadlock\nDeadlock type: n/a\n\n## 2. Root cause\nShared state: field CountingComets.asleep, accessed under two different locks (asleepLock for reads, monitorB for writes)\nAccesses involved:\n- t1 | CountingComets.tryToSleep | lock asleepLock\n- t1 | CountingComets.tryToSleep | R asleep\n- t1 | CountingComets.tryToSleep | unlock asleepLock\n- t2 | CountingComets.setAsleep | lock monitorB\n- t2 | CountingComets.setAsleep | W asleep\n- t2 | CountingComets.setAsleep | unlock monitorB\nMissing guarantee: All accesses to asleep must be protected by one common lock so that they are mutually exclusive and ordered.\nBuggy interleaving:\n1. t1 in CountingComets.tryToSleep holds asleepLock and reads asleep (false).\n2. t2 in CountingComets.setAsleep holds monitorB, which does not exclude t1, and writes asleep = true at the same time.\n3. Because the two threads never share a lock, there is no mutual exclusion or happens-before between the read and the write, and t1 may keep seeing a stale false.\nWhy it fails: CountingComets.tryToSleep uses asleepLock while CountingComets.setAsleep uses monitorB. Each access looks synchronized, but the locks differ, so the accesses are not synchronized with each other.\n\n## 3. Suggested fix (description only, no code)\nFix type: add_or_widen_synchronization\nWhere to apply: CountingComets.setAsleep\nFix description: Guard the write of asleep in CountingComets.setAsleep with asleepLock instead of monitorB, so it uses the same lock as CountingComets.tryToSleep.\nConfidence: high"
+    },
+    {
+      "id": "3-lock_order_inversion_blocks-0",
+      "part": "dev",
+      "condition": "nojpf",
+      "fields": {
+        "bug_type": "resource_deadlock",
+        "family": "Deadlock",
+        "deadlock_type": "Resource",
+        "fix_type": "change_lock_order_or_granularity",
+        "where_to_apply": "CountingFireflies.tryToSleep, CountingFireflies.setAsleep",
+        "confidence": "high"
+      },
+      "output": "# Root cause analysis\n\n## 1. Classification\nBug type: resource_deadlock\nFamily: Deadlock\nDeadlock type: Resource\n\n## 2. Root cause\nShared state: the two locks CountingFireflies.asleepLock and CountingFireflies.monitorC (guarding field asleep)\nAccesses involved:\n- t1 | CountingFireflies.tryToSleep | lock asleepLock\n- t1 | CountingFireflies.tryToSleep | lock monitorC\n- t1 | CountingFireflies.tryToSleep | R asleep\n- t1 | CountingFireflies.tryToSleep | unlock monitorC, unlock asleepLock\n- t2 | CountingFireflies.setAsleep | lock monitorC\n- t2 | CountingFireflies.setAsleep | lock asleepLock\n- t2 | CountingFireflies.setAsleep | W asleep\n- t2 | CountingFireflies.setAsleep | unlock asleepLock, unlock monitorC\nMissing guarantee: Both methods must acquire the two locks in the same global order (or only one lock should guard asleep).\nBuggy interleaving:\n1. t1 is inside CountingFireflies.tryToSleep and acquires asleepLock.\n2. t2 (after its 500 ms sleep) enters CountingFireflies.setAsleep and acquires monitorC.\n3. t1 tries to acquire monitorC and blocks, because t2 holds it.\n4. t2 tries to acquire asleepLock and blocks, because t1 holds it. Neither thread can proceed and main blocks forever in join.\nWhy it fails: CountingFireflies.tryToSleep takes asleepLock then monitorC, while CountingFireflies.setAsleep takes monitorC then asleepLock. The inverted order creates a circular wait.\n\n## 3. Suggested fix (description only, no code)\nFix type: change_lock_order_or_granularity\nWhere to apply: CountingFireflies.tryToSleep, CountingFireflies.setAsleep\nFix description: Make both methods acquire the locks in one fixed order, or drop the redundant second lock so that a single lock guards asleep.\nConfidence: high"
+    },
+    {
+      "id": "3-rm_sync_block-0",
+      "part": "dev",
+      "condition": "nojpf",
+      "fields": {
+        "bug_type": "data_race",
+        "family": "Non-deadlock",
+        "deadlock_type": "n/a",
+        "fix_type": "add_or_widen_synchronization",
+        "where_to_apply": "CountingFireflies.tryToSleep",
+        "confidence": "high"
+      },
+      "output": "# Root cause analysis\n\n## 1. Classification\nBug type: data_race\nFamily: Non-deadlock\nDeadlock type: n/a\n\n## 2. Root cause\nShared state: field CountingFireflies.asleep (guarded by asleepLock on the write side only)\nAccesses involved:\n- t1 | CountingFireflies.tryToSleep | R asleep (no lock held)\n- t2 | CountingFireflies.setAsleep | lock asleepLock\n- t2 | CountingFireflies.setAsleep | W asleep\n- t2 | CountingFireflies.setAsleep | unlock asleepLock\nMissing guarantee: Reads of asleep must be protected by the same lock as the write (or asleep must be volatile) so that the write is atomic with respect to, and visible to, the reader.\nBuggy interleaving:\n1. t1 loops in CountingFireflies.tryToSleep and reads asleep (false) without holding asleepLock.\n2. t2 calls CountingFireflies.setAsleep and writes asleep = true under asleepLock.\n3. The read and the write are unordered (no common lock, no happens-before), so the accesses race and t1 may keep seeing a stale false.\nWhy it fails: The synchronized block around the read in CountingFireflies.tryToSleep is missing, so the read does not synchronize with the locked write in CountingFireflies.setAsleep. This is a data race with no visibility guarantee.\n\n## 3. Suggested fix (description only, no code)\nFix type: add_or_widen_synchronization\nWhere to apply: CountingFireflies.tryToSleep\nFix description: Guard the read of asleep in CountingFireflies.tryToSleep with asleepLock, the same lock used by CountingFireflies.setAsleep.\nConfidence: high"
+    },
+    {
+      "id": "3-rm_sync_block-1",
+      "part": "dev",
+      "condition": "nojpf",
+      "fields": {
+        "bug_type": "data_race",
+        "family": "Non-deadlock",
+        "deadlock_type": "n/a",
+        "fix_type": "add_or_widen_synchronization",
+        "where_to_apply": "CountingFireflies.setAsleep",
+        "confidence": "high"
+      },
+      "output": "# Root cause analysis\n\n## 1. Classification\nBug type: data_race\nFamily: Non-deadlock\nDeadlock type: n/a\n\n## 2. Root cause\nShared state: field CountingFireflies.asleep (guarded by asleepLock on the read side only)\nAccesses involved:\n- t1 | CountingFireflies.tryToSleep | lock asleepLock\n- t1 | CountingFireflies.tryToSleep | R asleep\n- t1 | CountingFireflies.tryToSleep | unlock asleepLock\n- t2 | CountingFireflies.setAsleep | W asleep (no lock held)\nMissing guarantee: The write to asleep must be protected by the same lock as the read (or asleep must be volatile) so that it is atomic with respect to, and visible to, the reader.\nBuggy interleaving:\n1. t1 repeatedly enters CountingFireflies.tryToSleep, takes asleepLock and reads asleep (false).\n2. t2 calls CountingFireflies.setAsleep and writes asleep = true without taking any lock.\n3. The unlocked write is not ordered with t1's locked read, so the accesses race and t1 may keep seeing a stale false.\nWhy it fails: The synchronized block around the write in CountingFireflies.setAsleep is missing, so the write does not synchronize with the locked read in CountingFireflies.tryToSleep. This is a data race with no visibility guarantee.\n\n## 3. Suggested fix (description only, no code)\nFix type: add_or_widen_synchronization\nWhere to apply: CountingFireflies.setAsleep\nFix description: Guard the write of asleep in CountingFireflies.setAsleep with asleepLock, the same lock used by CountingFireflies.tryToSleep.\nConfidence: high"
+    },
+    {
+      "id": "3-wrong_lock-0",
+      "part": "dev",
+      "condition": "nojpf",
+      "fields": {
+        "bug_type": "data_race",
+        "family": "Non-deadlock",
+        "deadlock_type": "n/a",
+        "fix_type": "add_or_widen_synchronization",
+        "where_to_apply": "CountingFireflies.tryToSleep",
+        "confidence": "high"
+      },
+      "output": "# Root cause analysis\n\n## 1. Classification\nBug type: data_race\nFamily: Non-deadlock\nDeadlock type: n/a\n\n## 2. Root cause\nShared state: field CountingFireflies.asleep, accessed under two different locks (monitorB for reads, asleepLock for writes)\nAccesses involved:\n- t1 | CountingFireflies.tryToSleep | lock monitorB\n- t1 | CountingFireflies.tryToSleep | R asleep\n- t1 | CountingFireflies.tryToSleep | unlock monitorB\n- t2 | CountingFireflies.setAsleep | lock asleepLock\n- t2 | CountingFireflies.setAsleep | W asleep\n- t2 | CountingFireflies.setAsleep | unlock asleepLock\nMissing guarantee: All accesses to asleep must be protected by one common lock so that they are mutually exclusive and ordered.\nBuggy interleaving:\n1. t1 in CountingFireflies.tryToSleep holds monitorB and reads asleep (false).\n2. t2 in CountingFireflies.setAsleep holds asleepLock, which does not exclude t1, and writes asleep = true at the same time.\n3. Because the two threads never share a lock, there is no mutual exclusion or happens-before between the read and the write, and t1 may keep seeing a stale false.\nWhy it fails: CountingFireflies.tryToSleep uses monitorB while CountingFireflies.setAsleep uses asleepLock. Each access looks synchronized, but the locks differ, so the accesses are not synchronized with each other.\n\n## 3. Suggested fix (description only, no code)\nFix type: add_or_widen_synchronization\nWhere to apply: CountingFireflies.tryToSleep\nFix description: Guard the read of asleep in CountingFireflies.tryToSleep with asleepLock instead of monitorB, so it uses the same lock as CountingFireflies.setAsleep.\nConfidence: high"
+    },
+    {
+      "id": "3-wrong_lock-1",
+      "part": "dev",
+      "condition": "nojpf",
+      "fields": {
+        "bug_type": "data_race",
+        "family": "Non-deadlock",
+        "deadlock_type": "n/a",
+        "fix_type": "add_or_widen_synchronization",
+        "where_to_apply": "CountingFireflies.setAsleep",
+        "confidence": "high"
+      },
+      "output": "# Root cause analysis\n\n## 1. Classification\nBug type: data_race\nFamily: Non-deadlock\nDeadlock type: n/a\n\n## 2. Root cause\nShared state: field CountingFireflies.asleep, accessed under two different locks (asleepLock for reads, monitorB for writes)\nAccesses involved:\n- t1 | CountingFireflies.tryToSleep | lock asleepLock\n- t1 | CountingFireflies.tryToSleep | R asleep\n- t1 | CountingFireflies.tryToSleep | unlock asleepLock\n- t2 | CountingFireflies.setAsleep | lock monitorB\n- t2 | CountingFireflies.setAsleep | W asleep\n- t2 | CountingFireflies.setAsleep | unlock monitorB\nMissing guarantee: All accesses to asleep must be protected by one common lock so that they are mutually exclusive and ordered.\nBuggy interleaving:\n1. t1 in CountingFireflies.tryToSleep holds asleepLock and reads asleep (false).\n2. t2 in CountingFireflies.setAsleep holds monitorB, which does not exclude t1, and writes asleep = true at the same time.\n3. Because the two threads never share a lock, there is no mutual exclusion or happens-before between the read and the write, and t1 may keep seeing a stale false.\nWhy it fails: CountingFireflies.tryToSleep uses asleepLock while CountingFireflies.setAsleep uses monitorB. Each access looks synchronized, but the locks differ, so the accesses are not synchronized with each other.\n\n## 3. Suggested fix (description only, no code)\nFix type: add_or_widen_synchronization\nWhere to apply: CountingFireflies.setAsleep\nFix description: Guard the write of asleep in CountingFireflies.setAsleep with asleepLock instead of monitorB, so it uses the same lock as CountingFireflies.tryToSleep.\nConfidence: high"
+    },
+    {
+      "id": "68-lock_order_inversion_methods-0",
+      "part": "dev",
+      "condition": "nojpf",
+      "fields": {
+        "bug_type": "resource_deadlock",
+        "family": "Deadlock",
+        "deadlock_type": "Resource",
+        "fix_type": "change_lock_order_or_granularity",
+        "where_to_apply": "MysticCAS.get, MysticCAS.compareAndSwap",
+        "confidence": "high"
+      },
+      "output": "# Root cause analysis\n\n## 1. Classification\nBug type: resource_deadlock\nFamily: Deadlock\nDeadlock type: Resource\n\n## 2. Root cause\nShared state: the two locks MysticCAS instance monitor (this) and MysticCAS.monitorC (guarding field value)\nAccesses involved:\n- t1/t2 | MysticCAS.get | lock this\n- t1/t2 | MysticCAS.get | lock monitorC\n- t1/t2 | MysticCAS.get | R value\n- t1/t2 | MysticCAS.get | unlock monitorC, unlock this\n- t1/t2 | MysticCAS.compareAndSwap | lock monitorC\n- t1/t2 | MysticCAS.compareAndSwap | lock this\n- t1/t2 | MysticCAS.compareAndSwap | R value, W value\n- t1/t2 | MysticCAS.compareAndSwap | unlock this, unlock monitorC\nMissing guarantee: Both methods must acquire the two locks in the same global order (or only one lock should guard value).\nBuggy interleaving:\n1. t1 calls DragonScaleCounter.growScale, which calls MysticCAS.get; t1 acquires the MysticCAS monitor (this).\n2. t2 is in MysticCAS.compareAndSwap and acquires monitorC.\n3. t1 tries to acquire monitorC and blocks, because t2 holds it.\n4. t2 tries to acquire this and blocks, because t1 holds it. Neither thread can proceed and main blocks forever in join.\nWhy it fails: MysticCAS.get takes this then monitorC, while MysticCAS.compareAndSwap takes monitorC then this. The inverted order creates a circular wait.\n\n## 3. Suggested fix (description only, no code)\nFix type: change_lock_order_or_granularity\nWhere to apply: MysticCAS.get, MysticCAS.compareAndSwap\nFix description: Make both methods acquire the locks in one fixed order, or drop the redundant monitorC so that a single lock (this) guards value.\nConfidence: high"
+    },
+    {
+      "id": "68-rm_sync_one-0",
+      "part": "dev",
+      "condition": "nojpf",
+      "fields": {
+        "bug_type": "data_race",
+        "family": "Non-deadlock",
+        "deadlock_type": "n/a",
+        "fix_type": "add_or_widen_synchronization",
+        "where_to_apply": "MysticCAS.get",
+        "confidence": "high"
+      },
+      "output": "# Root cause analysis\n\n## 1. Classification\nBug type: data_race\nFamily: Non-deadlock\nDeadlock type: n/a\n\n## 2. Root cause\nShared state: field MysticCAS.value (the lock this guards it in compareAndSwap only)\nAccesses involved:\n- t1/t2 | MysticCAS.get | R value (no lock held)\n- t1/t2 | MysticCAS.compareAndSwap | lock this\n- t1/t2 | MysticCAS.compareAndSwap | R value, W value\n- t1/t2 | MysticCAS.compareAndSwap | unlock this\nMissing guarantee: Reads of value in MysticCAS.get must be protected by the same lock as the writes in MysticCAS.compareAndSwap (or value must be volatile), so reads are ordered with, and see, completed writes.\nBuggy interleaving:\n1. t1 calls DragonScaleCounter.growScale, which calls MysticCAS.get and reads value without holding any lock.\n2. t2 concurrently executes MysticCAS.compareAndSwap and writes value under this.\n3. The unlocked read and the locked write are unordered (no common lock, no happens-before), so t1 may read a stale or concurrently updated value.\nWhy it fails: MysticCAS.get is not synchronized, so its read does not synchronize with the locked write in MysticCAS.compareAndSwap. The compareAndSwap calls themselves exclude each other, so the defect is the unprotected read, not a lost update.\n\n## 3. Suggested fix (description only, no code)\nFix type: add_or_widen_synchronization\nWhere to apply: MysticCAS.get\nFix description: Make MysticCAS.get hold the same lock as MysticCAS.compareAndSwap (the instance monitor).\nConfidence: high"
+    },
+    {
+      "id": "68-rm_sync_one-1",
+      "part": "dev",
+      "condition": "nojpf",
+      "fields": {
+        "bug_type": "atomicity_violation",
+        "family": "Non-deadlock",
+        "deadlock_type": "n/a",
+        "fix_type": "add_or_widen_synchronization",
+        "where_to_apply": "MysticCAS.compareAndSwap",
+        "confidence": "high"
+      },
+      "output": "# Root cause analysis\n\n## 1. Classification\nBug type: atomicity_violation\nFamily: Non-deadlock\nDeadlock type: n/a\n\n## 2. Root cause\nShared state: field MysticCAS.value (the lock this guards it in get only)\nAccesses involved:\n- t1/t2 | MysticCAS.get | lock this\n- t1/t2 | MysticCAS.get | R value\n- t1/t2 | MysticCAS.get | unlock this\n- t1/t2 | MysticCAS.compareAndSwap | R value (no lock held)\n- t1/t2 | MysticCAS.compareAndSwap | W value (no lock held)\nMissing guarantee: The read-compare-write sequence in MysticCAS.compareAndSwap must be atomic, and mutually exclusive with MysticCAS.get and with other compareAndSwap calls.\nBuggy interleaving:\n1. t1 and t2 both read value = 0 in DragonScaleCounter.growScale via MysticCAS.get.\n2. t1 enters MysticCAS.compareAndSwap(0, 1), reads old = 0 and sees value == expected.\n3. t2 enters MysticCAS.compareAndSwap(0, 1) before t1 writes, also reads old = 0 and writes value = 1.\n4. t1 writes value = 1. Both calls return 0, so both CAS operations succeed and one increment is lost (the final count is below 200).\nWhy it fails: MysticCAS.compareAndSwap is not synchronized, so its check-then-act sequence can interleave with another thread's, which breaks the compare-and-swap semantics. Its unlocked accesses to value also race with MysticCAS.get.\n\n## 3. Suggested fix (description only, no code)\nFix type: add_or_widen_synchronization\nWhere to apply: MysticCAS.compareAndSwap\nFix description: Make MysticCAS.compareAndSwap hold the same lock as MysticCAS.get (the instance monitor), so the whole read-compare-write is atomic.\nConfidence: high"
+    },
+    {
+      "id": "68-wrong_lock-0",
+      "part": "dev",
+      "condition": "nojpf",
+      "fields": {
+        "bug_type": "data_race",
+        "family": "Non-deadlock",
+        "deadlock_type": "n/a",
+        "fix_type": "add_or_widen_synchronization",
+        "where_to_apply": "MysticCAS.compareAndSwap",
+        "confidence": "high"
+      },
+      "output": "# Root cause analysis\n\n## 1. Classification\nBug type: data_race\nFamily: Non-deadlock\nDeadlock type: n/a\n\n## 2. Root cause\nShared state: field MysticCAS.value, accessed under two different locks (this for reads in get, monitorB for reads and writes in compareAndSwap)\nAccesses involved:\n- t1/t2 | MysticCAS.get | lock this\n- t1/t2 | MysticCAS.get | R value\n- t1/t2 | MysticCAS.get | unlock this\n- t1/t2 | MysticCAS.compareAndSwap | lock monitorB\n- t1/t2 | MysticCAS.compareAndSwap | R value, W value\n- t1/t2 | MysticCAS.compareAndSwap | unlock monitorB\nMissing guarantee: All accesses to value must be protected by one common lock so that get and compareAndSwap are mutually exclusive and ordered.\nBuggy interleaving:\n1. t1 in MysticCAS.get holds this and reads value.\n2. t2 in MysticCAS.compareAndSwap holds monitorB, which does not exclude t1, and writes value at the same time.\n3. Because the threads share no lock, there is no mutual exclusion or happens-before between the read and the write, so t1 may read a stale or concurrently updated value.\nWhy it fails: MysticCAS.get uses this while MysticCAS.compareAndSwap uses monitorB. Each access looks synchronized, but the locks differ, so the accesses are not synchronized with each other. Concurrent compareAndSwap calls still exclude each other, so the race is between get and compareAndSwap.\n\n## 3. Suggested fix (description only, no code)\nFix type: add_or_widen_synchronization\nWhere to apply: MysticCAS.compareAndSwap\nFix description: Guard the read-compare-write in MysticCAS.compareAndSwap with the instance monitor (this) instead of monitorB, so it uses the same lock as MysticCAS.get.\nConfidence: high"
+    },
+    {
+      "id": "68-wrong_lock-1",
+      "part": "dev",
+      "condition": "nojpf",
+      "fields": {
+        "bug_type": "data_race",
+        "family": "Non-deadlock",
+        "deadlock_type": "n/a",
+        "fix_type": "add_or_widen_synchronization",
+        "where_to_apply": "MysticCAS.get",
+        "confidence": "high"
+      },
+      "output": "# Root cause analysis\n\n## 1. Classification\nBug type: data_race\nFamily: Non-deadlock\nDeadlock type: n/a\n\n## 2. Root cause\nShared state: field MysticCAS.value, accessed under two different locks (monitorB for reads in get, this for reads and writes in compareAndSwap)\nAccesses involved:\n- t1/t2 | MysticCAS.get | lock monitorB\n- t1/t2 | MysticCAS.get | R value\n- t1/t2 | MysticCAS.get | unlock monitorB\n- t1/t2 | MysticCAS.compareAndSwap | lock this\n- t1/t2 | MysticCAS.compareAndSwap | R value, W value\n- t1/t2 | MysticCAS.compareAndSwap | unlock this\nMissing guarantee: All accesses to value must be protected by one common lock so that get and compareAndSwap are mutually exclusive and ordered.\nBuggy interleaving:\n1. t1 in MysticCAS.get holds monitorB and reads value.\n2. t2 in MysticCAS.compareAndSwap holds this, which does not exclude t1, and writes value at the same time.\n3. Because the threads share no lock, there is no mutual exclusion or happens-before between the read and the write, so t1 may read a stale or concurrently updated value.\nWhy it fails: MysticCAS.get uses monitorB while MysticCAS.compareAndSwap uses this. Each access looks synchronized, but the locks differ, so the accesses are not synchronized with each other. Concurrent compareAndSwap calls still exclude each other, so the race is between get and compareAndSwap.\n\n## 3. Suggested fix (description only, no code)\nFix type: add_or_widen_synchronization\nWhere to apply: MysticCAS.get\nFix description: Guard the read in MysticCAS.get with the instance monitor (this) instead of monitorB, so it uses the same lock as MysticCAS.compareAndSwap.\nConfidence: high"
+    },
+    {
+      "id": "73-lock_order_inversion_methods-0",
+      "part": "dev",
+      "condition": "nojpf",
+      "fields": {
+        "bug_type": "resource_deadlock",
+        "family": "Deadlock",
+        "deadlock_type": "Resource",
+        "fix_type": "change_lock_order_or_granularity",
+        "where_to_apply": "IntHolder.get, IntHolder.set",
+        "confidence": "high"
+      },
+      "output": "# Root cause analysis\n\n## 1. Classification\nBug type: resource_deadlock\nFamily: Deadlock\nDeadlock type: Resource\n\n## 2. Root cause\nShared state: the two locks IntHolder instance monitor (this) and IntHolder.monitorC (guarding field value)\nAccesses involved:\n- t2 | IntHolder.get | lock this\n- t2 | IntHolder.get | lock monitorC\n- t2 | IntHolder.get | R value\n- t2 | IntHolder.get | unlock monitorC, unlock this\n- t1 | IntHolder.set | lock monitorC\n- t1 | IntHolder.set | lock this\n- t1 | IntHolder.set | W value\n- t1 | IntHolder.set | unlock this, unlock monitorC\nMissing guarantee: Both methods must acquire the two locks in the same global order (or only one lock should guard value).\nBuggy interleaving:\n1. t2 enters IntHolder.get and acquires the IntHolder monitor (this).\n2. t1 enters IntHolder.set and acquires monitorC.\n3. t2 tries to acquire monitorC and blocks, because t1 holds it.\n4. t1 tries to acquire this and blocks, because t2 holds it. Neither thread can proceed and main blocks forever in join.\nWhy it fails: IntHolder.get takes this then monitorC, while IntHolder.set takes monitorC then this. The inverted order creates a circular wait.\n\n## 3. Suggested fix (description only, no code)\nFix type: change_lock_order_or_granularity\nWhere to apply: IntHolder.get, IntHolder.set\nFix description: Make both methods acquire the locks in one fixed order, or drop the redundant monitorC so that a single lock (this) guards value.\nConfidence: high"
+    },
+    {
+      "id": "73-rm_sync_one-0",
+      "part": "dev",
+      "condition": "nojpf",
+      "fields": {
+        "bug_type": "data_race",
+        "family": "Non-deadlock",
+        "deadlock_type": "n/a",
+        "fix_type": "add_or_widen_synchronization",
+        "where_to_apply": "IntHolder.get",
+        "confidence": "high"
+      },
+      "output": "# Root cause analysis\n\n## 1. Classification\nBug type: data_race\nFamily: Non-deadlock\nDeadlock type: n/a\n\n## 2. Root cause\nShared state: field IntHolder.value (the lock this guards it in set only)\nAccesses involved:\n- t2 | IntHolder.get | R value (no lock held)\n- t1 | IntHolder.set | lock this\n- t1 | IntHolder.set | W value\n- t1 | IntHolder.set | unlock this\nMissing guarantee: The read of value in IntHolder.get must be protected by the same lock as the write in IntHolder.set (or value must be volatile), so the read is ordered with, and sees, the write.\nBuggy interleaving:\n1. t2 calls IntHolder.get and reads value without holding any lock.\n2. t1 concurrently calls IntHolder.set and writes value = 1 under this.\n3. The unlocked read and the locked write are unordered (no common lock, no happens-before), so the accesses race and t2 may read a stale 0.\nWhy it fails: IntHolder.get is not synchronized, so its read does not synchronize with the locked write in IntHolder.set. This is a data race with no visibility or ordering guarantee.\n\n## 3. Suggested fix (description only, no code)\nFix type: add_or_widen_synchronization\nWhere to apply: IntHolder.get\nFix description: Make IntHolder.get hold the same lock as IntHolder.set (the instance monitor).\nConfidence: high"
+    },
+    {
+      "id": "73-rm_sync_one-1",
+      "part": "dev",
+      "condition": "nojpf",
+      "fields": {
+        "bug_type": "data_race",
+        "family": "Non-deadlock",
+        "deadlock_type": "n/a",
+        "fix_type": "add_or_widen_synchronization",
+        "where_to_apply": "IntHolder.set",
+        "confidence": "high"
+      },
+      "output": "# Root cause analysis\n\n## 1. Classification\nBug type: data_race\nFamily: Non-deadlock\nDeadlock type: n/a\n\n## 2. Root cause\nShared state: field IntHolder.value (the lock this guards it in get only)\nAccesses involved:\n- t2 | IntHolder.get | lock this\n- t2 | IntHolder.get | R value\n- t2 | IntHolder.get | unlock this\n- t1 | IntHolder.set | W value (no lock held)\nMissing guarantee: The write of value in IntHolder.set must be protected by the same lock as the read in IntHolder.get (or value must be volatile), so the write is ordered with, and visible to, the reader.\nBuggy interleaving:\n1. t2 calls IntHolder.get, acquires this and reads value.\n2. t1 concurrently calls IntHolder.set and writes value = 1 without taking any lock.\n3. The unlocked write is not ordered with t2's locked read, so the accesses race and t2 may read a stale 0.\nWhy it fails: IntHolder.set is not synchronized, so its write does not synchronize with the locked read in IntHolder.get. This is a data race with no visibility or ordering guarantee.\n\n## 3. Suggested fix (description only, no code)\nFix type: add_or_widen_synchronization\nWhere to apply: IntHolder.set\nFix description: Make IntHolder.set hold the same lock as IntHolder.get (the instance monitor).\nConfidence: high"
+    },
+    {
+      "id": "73-wrong_lock-0",
+      "part": "dev",
+      "condition": "nojpf",
+      "fields": {
+        "bug_type": "data_race",
+        "family": "Non-deadlock",
+        "deadlock_type": "n/a",
+        "fix_type": "add_or_widen_synchronization",
+        "where_to_apply": "IntHolder.set",
+        "confidence": "high"
+      },
+      "output": "# Root cause analysis\n\n## 1. Classification\nBug type: data_race\nFamily: Non-deadlock\nDeadlock type: n/a\n\n## 2. Root cause\nShared state: field IntHolder.value, accessed under two different locks (this for reads in get, monitorB for writes in set)\nAccesses involved:\n- t2 | IntHolder.get | lock this\n- t2 | IntHolder.get | R value\n- t2 | IntHolder.get | unlock this\n- t1 | IntHolder.set | lock monitorB\n- t1 | IntHolder.set | W value\n- t1 | IntHolder.set | unlock monitorB\nMissing guarantee: All accesses to value must be protected by one common lock so that get and set are mutually exclusive and ordered.\nBuggy interleaving:\n1. t2 in IntHolder.get holds this and reads value.\n2. t1 in IntHolder.set holds monitorB, which does not exclude t2, and writes value = 1 at the same time.\n3. Because the threads share no lock, there is no mutual exclusion or happens-before between the read and the write, so t2 may read a stale 0.\nWhy it fails: IntHolder.get uses this while IntHolder.set uses monitorB. Each access looks synchronized, but the locks differ, so the accesses are not synchronized with each other.\n\n## 3. Suggested fix (description only, no code)\nFix type: add_or_widen_synchronization\nWhere to apply: IntHolder.set\nFix description: Guard the write in IntHolder.set with the instance monitor (this) instead of monitorB, so it uses the same lock as IntHolder.get.\nConfidence: high"
+    },
+    {
+      "id": "73-wrong_lock-1",
+      "part": "dev",
+      "condition": "nojpf",
+      "fields": {
+        "bug_type": "data_race",
+        "family": "Non-deadlock",
+        "deadlock_type": "n/a",
+        "fix_type": "add_or_widen_synchronization",
+        "where_to_apply": "IntHolder.get",
+        "confidence": "high"
+      },
+      "output": "# Root cause analysis\n\n## 1. Classification\nBug type: data_race\nFamily: Non-deadlock\nDeadlock type: n/a\n\n## 2. Root cause\nShared state: field IntHolder.value, accessed under two different locks (monitorB for reads in get, this for writes in set)\nAccesses involved:\n- t2 | IntHolder.get | lock monitorB\n- t2 | IntHolder.get | R value\n- t2 | IntHolder.get | unlock monitorB\n- t1 | IntHolder.set | lock this\n- t1 | IntHolder.set | W value\n- t1 | IntHolder.set | unlock this\nMissing guarantee: All accesses to value must be protected by one common lock so that get and set are mutually exclusive and ordered.\nBuggy interleaving:\n1. t2 in IntHolder.get holds monitorB and reads value.\n2. t1 in IntHolder.set holds this, which does not exclude t2, and writes value = 1 at the same time.\n3. Because the threads share no lock, there is no mutual exclusion or happens-before between the read and the write, so t2 may read a stale 0.\nWhy it fails: IntHolder.get uses monitorB while IntHolder.set uses this. Each access looks synchronized, but the locks differ, so the accesses are not synchronized with each other.\n\n## 3. Suggested fix (description only, no code)\nFix type: add_or_widen_synchronization\nWhere to apply: IntHolder.get\nFix description: Guard the read in IntHolder.get with the instance monitor (this) instead of monitorB, so it uses the same lock as IntHolder.set.\nConfidence: high"
+    },
+    {
+      "id": "74-missing_notify-0",
+      "part": "dev",
+      "condition": "nojpf",
+      "fields": {
+        "bug_type": "communication_deadlock",
+        "family": "Deadlock",
+        "deadlock_type": "Communication",
+        "fix_type": "fix_wait_notify",
+        "where_to_apply": "Sleeper.setAsleep",
+        "confidence": "high"
+      },
+      "output": "# Root cause analysis\n\n## 1. Classification\nBug type: communication_deadlock\nFamily: Deadlock\nDeadlock type: Communication\n\n## 2. Root cause\nShared state: field Sleeper.asleep and the Sleeper instance monitor (wait set)\nAccesses involved:\n- reader | Sleeper.tryToSleep | lock this\n- reader | Sleeper.tryToSleep | R asleep\n- reader | Sleeper.tryToSleep | wait\n- writer | Sleeper.setAsleep | lock this\n- writer | Sleeper.setAsleep | W asleep\n- writer | Sleeper.setAsleep | unlock this (no notify)\nMissing guarantee: After the condition asleep changes to true, the waiting thread must be signalled (notify or notifyAll on the same monitor) so it can re-check the condition.\nBuggy interleaving:\n1. reader enters Sleeper.tryToSleep, sees asleep == false and calls wait(), releasing the monitor.\n2. writer enters Sleeper.setAsleep, sets asleep = true and returns without calling notify or notifyAll.\n3. reader is never woken, so it never re-evaluates the loop condition and stays blocked in wait() forever; main blocks forever in join.\nWhy it fails: Sleeper.setAsleep changes the state the waiter depends on but never signals the wait set, so the wakeup is lost and the reader waits indefinitely.\n\n## 3. Suggested fix (description only, no code)\nFix type: fix_wait_notify\nWhere to apply: Sleeper.setAsleep\nFix description: Call notifyAll on the Sleeper monitor in Sleeper.setAsleep, after setting asleep and while still holding the lock.\nConfidence: high"
+    },
+    {
+      "id": "74-monitor_misuse-0",
+      "part": "dev",
+      "condition": "nojpf",
+      "fields": {
+        "bug_type": "monitor_misuse",
+        "family": "Other",
+        "deadlock_type": "n/a",
+        "fix_type": "fix_wait_notify",
+        "where_to_apply": "Sleeper.tryToSleep",
+        "confidence": "high"
+      },
+      "output": "# Root cause analysis\n\n## 1. Classification\nBug type: monitor_misuse\nFamily: Other\nDeadlock type: n/a\n\n## 2. Root cause\nShared state: the Sleeper instance monitor (used for wait/notifyAll) and field Sleeper.asleep\nAccesses involved:\n- reader | Sleeper.tryToSleep | R asleep (no lock held)\n- reader | Sleeper.tryToSleep | wait (monitor not held)\n- writer | Sleeper.setAsleep | lock this\n- writer | Sleeper.setAsleep | W asleep\n- writer | Sleeper.setAsleep | notify (notifyAll)\n- writer | Sleeper.setAsleep | unlock this\nMissing guarantee: wait must be called while holding the monitor of the object it is called on, and the condition read must be protected by the same lock as the write.\nBuggy interleaving:\n1. reader runs Sleeper.tryToSleep without acquiring the Sleeper monitor and reads asleep (false).\n2. reader calls wait() without owning the monitor, so the JVM throws IllegalMonitorStateException.\n3. The exception is not caught (only InterruptedException is), so reader terminates abnormally and the intended wait for asleep never happens.\nWhy it fails: Sleeper.tryToSleep is not synchronized, so calling wait() violates the wait/notify monitor contract. The unlocked read of asleep also races with the locked write in Sleeper.setAsleep.\n\n## 3. Suggested fix (description only, no code)\nFix type: fix_wait_notify\nWhere to apply: Sleeper.tryToSleep\nFix description: Make Sleeper.tryToSleep hold the Sleeper monitor, as Sleeper.setAsleep does, so that the condition check and wait run under the lock.\nConfidence: high"
+    },
+    {
+      "id": "74-monitor_misuse-1",
+      "part": "dev",
+      "condition": "nojpf",
+      "fields": {
+        "bug_type": "monitor_misuse",
+        "family": "Other",
+        "deadlock_type": "n/a",
+        "fix_type": "fix_wait_notify",
+        "where_to_apply": "Sleeper.setAsleep",
+        "confidence": "high"
+      },
+      "output": "# Root cause analysis\n\n## 1. Classification\nBug type: monitor_misuse\nFamily: Other\nDeadlock type: n/a\n\n## 2. Root cause\nShared state: the Sleeper instance monitor (used for wait/notifyAll) and field Sleeper.asleep\nAccesses involved:\n- reader | Sleeper.tryToSleep | lock this\n- reader | Sleeper.tryToSleep | R asleep\n- reader | Sleeper.tryToSleep | wait\n- writer | Sleeper.setAsleep | W asleep (no lock held)\n- writer | Sleeper.setAsleep | notify (notifyAll, monitor not held)\nMissing guarantee: notifyAll must be called while holding the monitor of the object it is called on, and the write to asleep must be protected by the same lock as the reader's condition check.\nBuggy interleaving:\n1. reader enters Sleeper.tryToSleep, sees asleep == false and calls wait(), releasing the monitor.\n2. writer runs Sleeper.setAsleep without the monitor, writes asleep = true, then calls notifyAll().\n3. notifyAll() throws IllegalMonitorStateException because writer does not own the monitor, so no wakeup is delivered and writer dies with an uncaught exception.\n4. reader stays blocked in wait() forever, and main blocks in join.\nWhy it fails: Sleeper.setAsleep is not synchronized, so its notifyAll call violates the monitor contract and never signals the waiter. Its unlocked write of asleep is also unordered with the reader's locked read.\n\n## 3. Suggested fix (description only, no code)\nFix type: fix_wait_notify\nWhere to apply: Sleeper.setAsleep\nFix description: Make Sleeper.setAsleep hold the Sleeper monitor, as Sleeper.tryToSleep does, so the write to asleep and the notifyAll run under the lock.\nConfidence: high"
+    },
+    {
+      "id": "74-unguarded_wait-0",
+      "part": "dev",
+      "condition": "nojpf",
+      "fields": {
+        "bug_type": "communication_deadlock",
+        "family": "Deadlock",
+        "deadlock_type": "Communication",
+        "fix_type": "fix_wait_notify",
+        "where_to_apply": "Sleeper.tryToSleep",
+        "confidence": "high"
+      },
+      "output": "# Root cause analysis\n\n## 1. Classification\nBug type: communication_deadlock\nFamily: Deadlock\nDeadlock type: Communication\n\n## 2. Root cause\nShared state: field Sleeper.asleep and the Sleeper instance monitor (wait set)\nAccesses involved:\n- reader | Sleeper.tryToSleep | lock this\n- reader | Sleeper.tryToSleep | wait (no check of asleep)\n- writer | Sleeper.setAsleep | lock this\n- writer | Sleeper.setAsleep | W asleep\n- writer | Sleeper.setAsleep | notify (notifyAll)\n- writer | Sleeper.setAsleep | unlock this\nMissing guarantee: The waiter must test the condition asleep in a loop before and after waiting, so that a notification delivered before it starts waiting is not lost.\nBuggy interleaving:\n1. writer runs Sleeper.setAsleep first: it sets asleep = true and calls notifyAll() while nobody is waiting, so the signal is lost.\n2. reader then enters Sleeper.tryToSleep and calls wait() unconditionally, without checking asleep.\n3. No further notification ever arrives, so reader blocks forever in wait(); main blocks forever in join.\nWhy it fails: Sleeper.tryToSleep waits without any condition check, so it depends on the notification arriving after it starts waiting. If Sleeper.setAsleep runs first, the wakeup is lost and the reader hangs.\n\n## 3. Suggested fix (description only, no code)\nFix type: fix_wait_notify\nWhere to apply: Sleeper.tryToSleep\nFix description: Wrap the wait in Sleeper.tryToSleep in a loop that re-checks asleep, and wait only while asleep is false.\nConfidence: high"
+    },
+    {
+      "id": "87-lock_order_inversion_methods-2",
+      "part": "dev",
+      "condition": "nojpf",
+      "fields": {
+        "bug_type": "resource_deadlock",
+        "family": "Deadlock",
+        "deadlock_type": "Resource",
+        "fix_type": "change_lock_order_or_granularity",
+        "where_to_apply": "ImproveList.add(T), ImproveList.putIfAbsent",
+        "confidence": "high"
+      },
+      "output": "# Root cause analysis\n\n## 1. Classification\nBug type: resource_deadlock\nFamily: Deadlock\nDeadlock type: Resource\n\n## 2. Root cause\nShared state: the two locks ImproveList instance monitor (this) and ImproveList.monitorC (guarding the backing list)\nAccesses involved:\n- t1 | ImproveList.add(T) | lock this\n- t1 | ImproveList.add(T) | lock monitorC\n- t1 | ImproveList.add(T) | W list (backing list add)\n- t1 | ImproveList.add(T) | unlock monitorC, unlock this\n- t2 | ImproveList.putIfAbsent | lock monitorC\n- t2 | ImproveList.putIfAbsent | lock this\n- t2 | ImproveList.putIfAbsent | R list, W list\n- t2 | ImproveList.putIfAbsent | unlock this, unlock monitorC\nMissing guarantee: Both methods must acquire the two locks in the same global order (or only one lock should guard the backing list).\nBuggy interleaving:\n1. t1 calls ImproveList.add(T), which is synchronized, and acquires the ImproveList monitor (this).\n2. t2 calls ImproveList.putIfAbsent and acquires monitorC.\n3. t1 tries to acquire monitorC and blocks, because t2 holds it.\n4. t2 tries to acquire this and blocks, because t1 holds it. Neither thread can proceed and main blocks forever in join.\nWhy it fails: ImproveList.add(T) takes this then monitorC, while ImproveList.putIfAbsent takes monitorC then this. The inverted order creates a circular wait.\n\n## 3. Suggested fix (description only, no code)\nFix type: change_lock_order_or_granularity\nWhere to apply: ImproveList.add(T), ImproveList.putIfAbsent\nFix description: Make both methods acquire the locks in one fixed order, or drop the redundant monitorC so that a single lock (this) guards the backing list.\nConfidence: high"
+    },
+    {
+      "id": "97-missing_release-1",
+      "part": "dev",
+      "condition": "nojpf",
+      "fields": {
+        "bug_type": "communication_deadlock",
+        "family": "Deadlock",
+        "deadlock_type": "Communication",
+        "fix_type": "fix_wait_notify",
+        "where_to_apply": "BoundedBuffer.put",
+        "confidence": "high"
+      },
+      "output": "# Root cause analysis\n\n## 1. Classification\nBug type: communication_deadlock\nFamily: Deadlock\nDeadlock type: Communication\n\n## 2. Root cause\nShared state: Semaphore BoundedBuffer.availableItems (signals that an item is available), with BoundedBuffer.availableSpaces and the buffer state items, putPtr and count\nAccesses involved:\n- t1 | BoundedBuffer.put | wait (availableSpaces.acquire)\n- t1 | BoundedBuffer.put | lock this\n- t1 | BoundedBuffer.put | W items, putPtr, count\n- t1 | BoundedBuffer.put | unlock this (no availableItems.release follows)\n- t2 | BoundedBuffer.take | wait (availableItems.acquire)\nMissing guarantee: After an item is stored, BoundedBuffer.put must signal the consumer by releasing a permit on availableItems; otherwise BoundedBuffer.take can never proceed.\nBuggy interleaving:\n1. t2 calls BoundedBuffer.take and blocks in availableItems.acquire(), because availableItems starts with 0 permits.\n2. t1 calls BoundedBuffer.put, acquires an availableSpaces permit, stores the item and returns without calling availableItems.release().\n3. availableItems never receives a permit, so t2 stays blocked forever and main blocks in join. The same hang occurs if t1 runs first, so the failure does not depend on the interleaving.\nWhy it fails: BoundedBuffer.put never signals availableItems, so the only thread that could wake BoundedBuffer.take never does, and the consumer waits indefinitely for a signal that is never sent.\n\n## 3. Suggested fix (description only, no code)\nFix type: fix_wait_notify\nWhere to apply: BoundedBuffer.put\nFix description: Release a permit on availableItems in BoundedBuffer.put after the item is stored and the lock is released, so a waiting BoundedBuffer.take is signalled.\nConfidence: high"
+    },
+    {
+      "id": "97-semaphore_starve-0",
+      "part": "dev",
+      "condition": "nojpf",
+      "fields": {
+        "bug_type": "communication_deadlock",
+        "family": "Deadlock",
+        "deadlock_type": "Communication",
+        "fix_type": "other",
+        "where_to_apply": "BoundedBuffer.BoundedBuffer (constructor)",
+        "confidence": "high"
+      },
+      "output": "# Root cause analysis\n\n## 1. Classification\nBug type: communication_deadlock\nFamily: Deadlock\nDeadlock type: Communication\n\n## 2. Root cause\nShared state: Semaphores BoundedBuffer.availableSpaces and BoundedBuffer.availableItems (availableSpaces is initialised to capacity - 1, i.e. 0 permits for capacity 1)\nAccesses involved:\n- t1 | BoundedBuffer.put | wait (availableSpaces.acquire, blocks with 0 permits)\n- t1 | BoundedBuffer.put | notify (availableItems.release, never reached)\n- t2 | BoundedBuffer.take | wait (availableItems.acquire, blocks with 0 permits)\n- t2 | BoundedBuffer.take | notify (availableSpaces.release, never reached)\nMissing guarantee: availableSpaces must start with a permit count equal to the buffer capacity, so that the first put can proceed and signal the consumer.\nBuggy interleaving:\n1. t1 calls BoundedBuffer.put and blocks in availableSpaces.acquire(), because the semaphore was created with capacity - 1 = 0 permits.\n2. t2 calls BoundedBuffer.take and blocks in availableItems.acquire(), because no item was ever produced and only put releases that semaphore.\n3. Each thread waits for a permit that only the other can release, so neither proceeds and main blocks in join. The order in which the threads start does not change the outcome.\nWhy it fails: The BoundedBuffer constructor under-provisions availableSpaces by one permit. With capacity 1 the producer cannot make progress, so it never signals the consumer, which in turn never frees a space.\n\n## 3. Suggested fix (description only, no code)\nFix type: other\nWhere to apply: BoundedBuffer.BoundedBuffer (constructor)\nFix description: Initialise availableSpaces with the full buffer capacity as its permit count instead of capacity - 1.\nConfidence: high"
+    }
+  ]
+}

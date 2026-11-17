@@ -1,0 +1,67 @@
+import java.util.concurrent.Semaphore;
+class BoundedBuffer<E> {
+    private final Object[] items;
+    private int putPtr;
+    private int takePtr;
+    private int count;
+    private final Semaphore availableItems;
+    private final Semaphore availableSpaces;
+    BoundedBuffer(int capacity) {
+        items = new Object[capacity];
+        availableItems = new Semaphore(0);
+        availableSpaces = new Semaphore(capacity);
+    }
+    boolean isEmpty() {
+        synchronized (this) {
+            return count == 0;
+        }
+    }
+    boolean isFull() {
+        synchronized (this) {
+            return count == items.length;
+        }
+    }
+    void put(E item) throws InterruptedException {
+        availableSpaces.acquire();
+        synchronized (this) {
+            items[putPtr] = item;
+            if (++putPtr == items.length) putPtr = 0;
+            count++;
+        }
+        availableItems.release();
+    }
+    E take() throws InterruptedException {
+        availableItems.acquire();
+        E item;
+        synchronized (this) {
+            item = (E) items[takePtr];
+            items[takePtr] = null;
+            if (++takePtr == items.length) takePtr = 0;
+            count--;
+        }
+        availableSpaces.release();
+        return item;
+    }
+}
+public class Main {
+    public static void main(String[] args) throws Exception {
+        BoundedBuffer<Integer> buffer = new BoundedBuffer<>(1);
+        Thread t1 = new Thread(() -> {
+            try {
+                buffer.put(1);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        });
+        Thread t2 = new Thread(() -> {
+            try {
+                buffer.take();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        });
+        t1.start();
+        t2.start();
+        t1.join();
+    }
+}

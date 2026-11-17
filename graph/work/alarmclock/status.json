@@ -1,0 +1,11 @@
+{
+  "id": "alarmclock",
+  "class": "AlarmClock",
+  "compiled": true,
+  "ran": true,
+  "returncode": null,
+  "timed_out": true,
+  "violation": false,
+  "has_trace": false,
+  "seconds": 300.1
+}

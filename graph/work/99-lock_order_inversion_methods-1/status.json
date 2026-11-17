@@ -1,0 +1,11 @@
+{
+  "id": "99-lock_order_inversion_methods-1",
+  "class": "Main",
+  "compiled": true,
+  "ran": true,
+  "returncode": 0,
+  "timed_out": false,
+  "violation": true,
+  "has_trace": true,
+  "seconds": 3.4
+}

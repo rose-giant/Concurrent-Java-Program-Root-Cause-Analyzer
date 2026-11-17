@@ -1,0 +1,110 @@
+[
+  {
+    "prompt_id": 13,
+    "topic": "Avoiding lock-ordering deadlock using try Lock. M1",
+    "llm": "claude",
+    "max_depth": "27920",
+    "code_present": true,
+    "code_compiled": true,
+    "compile_error": "",
+    "jpf_result": "error #1: gov.nasa.jpf.listener.PreciseRaceDetector \"race for field LockerMover$ParcelCount@1fb.items  ...\"",
+    "jpf_details": "===== full exception (untruncated) =====\ngov.nasa.jpf.listener.PreciseRaceDetector\nrace for field LockerMover$ParcelCount@1fb.items\n  pool-1-thread-1 at LockerMover$ParcelCount.getItems(LockerMover.java:23)\n\t\t\"return items;\"  READ:  getfield LockerMover$ParcelCount.items\n  pool-1-thread-2 at LockerMover$ParcelCount.setItems(LockerMover.java:27)\n\t\t\"this.items = items;\"  WRITE: putfield LockerMover$ParcelCount.items\n\nUnique logical threads created during execution: 3\n[JPF-STARVATION] search end, start concluding starvation...\n[JPF-STARVATION] Thread ID: 0 OK (waiting proportion: 0.01%)\n[JPF-STARVATION] Thread ID: 1 OK (waiting proportion: 30.42%)\n[JPF-STARVATION] Thread ID: 2 OK (waiting proportion: 30.43%)\n\n====================================================== results\nerror #1: gov.nasa.jpf.listener.PreciseRaceDetector \"race for field LockerMover$ParcelCount@1fb.items  ...\"\n\n====================================================== statistics\nstates:             new=50776,visited=2824,backtracked=25680,end=127\nsearch:             maxDepth=27920,constraints=14931\nchoice generators:  thread=37279 (signal=0,lock=4,sharedRef=5758,threadApi=1082,reschedule=416), data=0\nheap:               new=19364,released=26339,maxLive=715,gcCycles=53600\ninstructions:       4545401\nmax memory:         500MB\nloaded code:        classes=134,methods=2404\n\n====================================================== search finished",
+    "classification": "Race Condition"
+  },
+  {
+    "prompt_id": 14,
+    "topic": "Avoiding lock-ordering deadlock using try Lock. M2",
+    "llm": "claude",
+    "max_depth": "27920",
+    "code_present": true,
+    "code_compiled": true,
+    "compile_error": "",
+    "jpf_result": "JavaPathfinder core system v8.0 (rev 2345caaa002e15c6147d001d1ccd71e4b538f8e9) - (C) 2005-2014 United States Government. All rights reserved.\n====================================================== system under test\nContainerSwapper.main()\n====================================================== search started: 9/20/26 4:31 PM\n====================================================== search constraint\n...\n\tat sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)\n\tat sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\n\tat java.lang.reflect.Method.invoke(Method.java:498)\n\tat gov.nasa.jpf.tool.Run.call(Run.java:80)\n\tat gov.nasa.jpf.tool.RunJPF.main(RunJPF.java:116)",
+    "jpf_details": "at gov.nasa.jpf.search.DFSearch.search(DFSearch.java:79)\n\tat gov.nasa.jpf.JPF.run(JPF.java:613)\n\tat gov.nasa.jpf.JPF.start(JPF.java:189)\n\tat sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)\n\tat sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)\n\tat sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\n\tat java.lang.reflect.Method.invoke(Method.java:498)\n\tat gov.nasa.jpf.tool.Run.call(Run.java:80)\n\tat gov.nasa.jpf.tool.RunJPF.main(RunJPF.java:116)",
+    "classification": "Termination Error"
+  },
+  {
+    "prompt_id": 15,
+    "topic": "Avoiding lock-ordering deadlock using try Lock. M3",
+    "llm": "claude",
+    "max_depth": "27920",
+    "code_present": true,
+    "code_compiled": true,
+    "compile_error": "",
+    "jpf_result": "JavaPathfinder core system v8.0 (rev 2345caaa002e15c6147d001d1ccd71e4b538f8e9) - (C) 2005-2014 United States Government. All rights reserved.\n====================================================== system under test\nBinMover.main()\n====================================================== search started: 9/20/26 4:32 PM\n====================================================== search constraint\n...\n\tat sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)\n\tat sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\n\tat java.lang.reflect.Method.invoke(Method.java:498)\n\tat gov.nasa.jpf.tool.Run.call(Run.java:80)\n\tat gov.nasa.jpf.tool.RunJPF.main(RunJPF.java:116)",
+    "jpf_details": "at gov.nasa.jpf.search.DFSearch.search(DFSearch.java:79)\n\tat gov.nasa.jpf.JPF.run(JPF.java:613)\n\tat gov.nasa.jpf.JPF.start(JPF.java:189)\n\tat sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)\n\tat sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)\n\tat sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\n\tat java.lang.reflect.Method.invoke(Method.java:498)\n\tat gov.nasa.jpf.tool.Run.call(Run.java:80)\n\tat gov.nasa.jpf.tool.RunJPF.main(RunJPF.java:116)",
+    "classification": "Termination Error"
+  },
+  {
+    "prompt_id": 60,
+    "topic": "Monitor-based vehicle tracker implementation. M3",
+    "llm": "claude",
+    "max_depth": "510",
+    "code_present": true,
+    "code_compiled": true,
+    "compile_error": "",
+    "jpf_result": "error #1: gov.nasa.jpf.vm.NoUncaughtExceptionsProperty \"java.lang.UnsupportedOperationException  at Celest...\"",
+    "jpf_details": "===== full exception (untruncated) =====\ngov.nasa.jpf.vm.NoUncaughtExceptionsProperty\njava.lang.UnsupportedOperationException\n\tat CelestialGriffinTracker$1.put(CelestialGriffinTracker.java:63)\n\tat CelestialGriffinTracker$1.put(CelestialGriffinTracker.java:60)\n\tat CelestialGriffinTracker.unmodifiableStarlightMap(CelestialGriffinTracker.java:83)\n\tat CelestialGriffinTracker.getStarlights(CelestialGriffinTracker.java:89)\n\tat CelestialGriffinTracker.main(CelestialGriffinTracker.java:129)\n\nUnique logical threads created during execution: 3\n[JPF-STARVATION] search end, start concluding starvation...\n[JPF-STARVATION] Thread ID: 0 OK (waiting proportion: 28.57%)\n[JPF-STARVATION] Thread ID: 1 OK (waiting proportion: 0.00%)\n[JPF-STARVATION] Thread ID: 2 OK (waiting proportion: 0.00%)\n\n====================================================== results\nerror #1: gov.nasa.jpf.vm.NoUncaughtExceptionsProperty \"java.lang.UnsupportedOperationException  at Celest...\"\n\n====================================================== statistics\nstates:             new=7,visited=0,backtracked=0,end=0\nsearch:             maxDepth=7,constraints=0\nchoice generators:  thread=7 (signal=0,lock=1,sharedRef=0,threadApi=4,reschedule=2), data=0\nheap:               new=576,released=23,maxLive=506,gcCycles=6\ninstructions:       8827\nmax memory:         117MB\nloaded code:        classes=95,methods=1901\n\n====================================================== search finished",
+    "classification": "Uncaught Exception"
+  },
+  {
+    "prompt_id": 84,
+    "topic": "84_DelegatingVehicleTracker.java",
+    "llm": "claude",
+    "max_depth": "3000",
+    "code_present": true,
+    "code_compiled": true,
+    "compile_error": "",
+    "jpf_result": "no errors detected",
+    "jpf_details": "Unique logical threads created during execution: 3\n[JPF-STARVATION] search end, start concluding starvation...\n[JPF-STARVATION] Thread ID: 0 OK (waiting proportion: 0.06%)\n[JPF-STARVATION] Thread ID: 1 OK (waiting proportion: 62.01%)\n[JPF-STARVATION] Thread ID: 2 OK (waiting proportion: 62.04%)\n\n====================================================== results\nno errors detected\n\n====================================================== statistics\nstates:             new=35790,visited=10028,backtracked=42835,end=11\nsearch:             maxDepth=3000,constraints=21374\nchoice generators:  thread=17317 (signal=0,lock=4,sharedRef=9957,threadApi=2,reschedule=127), data=0\nheap:               new=274248,released=224755,maxLive=825,gcCycles=45476\ninstructions:       14091189\nmax memory:         401MB\nloaded code:        classes=156,methods=2670\n\n====================================================== search finished",
+    "classification": "Pass"
+  },
+  {
+    "prompt_id": 85,
+    "topic": "85_DelegatingVehicleTrackerLiveVsStatic.java",
+    "llm": "claude",
+    "max_depth": "3000",
+    "code_present": true,
+    "code_compiled": true,
+    "compile_error": "",
+    "jpf_result": "no errors detected",
+    "jpf_details": "Unique logical threads created during execution: 2\n[JPF-STARVATION] search end, start concluding starvation...\n[JPF-STARVATION] Thread ID: 0 OK (waiting proportion: 26.02%)\n[JPF-STARVATION] Thread ID: 1 OK (waiting proportion: 26.02%)\n\n====================================================== results\nno errors detected\n\n====================================================== statistics\nstates:             new=15661,visited=8582,backtracked=23608,end=6262\nsearch:             maxDepth=3000,constraints=136\nchoice generators:  thread=15569 (signal=0,lock=3,sharedRef=2368,threadApi=1,reschedule=6262), data=0\nheap:               new=550191,released=834766,maxLive=823,gcCycles=24243\ninstructions:       24299342\nmax memory:         399MB\nloaded code:        classes=156,methods=2668\n\n====================================================== search finished",
+    "classification": "Pass"
+  },
+  {
+    "prompt_id": 90,
+    "topic": "90_PrimeGenerator.java",
+    "llm": "claude",
+    "max_depth": "3000",
+    "code_present": true,
+    "code_compiled": true,
+    "compile_error": "",
+    "jpf_result": "error #1: gov.nasa.jpf.listener.PreciseRaceDetector \"race for field PrimeGenerator@1bd.cancelled   main...\"",
+    "jpf_details": "===== full exception (untruncated) =====\ngov.nasa.jpf.listener.PreciseRaceDetector\nrace for field PrimeGenerator@1bd.cancelled\n  main at PrimeGenerator.cancel(PrimeGenerator.java:28)\n\t\t\"cancelled = true;\"  WRITE: putfield PrimeGenerator.cancelled\n  pool-1-thread-1 at PrimeGenerator.run(PrimeGenerator.java:21)\n\t\t\"while (!cancelled) {\"  READ:  getfield PrimeGenerator.cancelled\n\nUnique logical threads created during execution: 2\n[JPF-STARVATION] search end, start concluding starvation...\n[JPF-STARVATION] Thread ID: 0 OK (waiting proportion: 43.05%)\n[JPF-STARVATION] Thread ID: 1 OK (waiting proportion: 42.38%)\n\n====================================================== results\nerror #1: gov.nasa.jpf.listener.PreciseRaceDetector \"race for field PrimeGenerator@1bd.cancelled   main...\"\n\n====================================================== statistics\nstates:             new=173,visited=129,backtracked=273,end=38\nsearch:             maxDepth=40,constraints=0\nchoice generators:  thread=172 (signal=0,lock=8,sharedRef=124,threadApi=2,reschedule=38), data=0\nheap:               new=8904,released=2541,maxLive=1088,gcCycles=301\ninstructions:       211854\nmax memory:         147MB\nloaded code:        classes=142,methods=2811\n\n====================================================== search finished",
+    "classification": "Race Condition"
+  },
+  {
+    "prompt_id": 91,
+    "topic": "91_PrimeGenerator10.java",
+    "llm": "claude",
+    "max_depth": "3000",
+    "code_present": true,
+    "code_compiled": true,
+    "compile_error": "",
+    "jpf_result": "no errors detected",
+    "jpf_details": "Unique logical threads created during execution: 2\n[JPF-STARVATION] search end, start concluding starvation...\n[JPF-STARVATION] Thread ID: 0 OK (waiting proportion: 1.50%)\n[JPF-STARVATION] Thread ID: 1 OK (waiting proportion: 44.80%)\n\n====================================================== results\nno errors detected\n\n====================================================== statistics\nstates:             new=32077,visited=8425,backtracked=38103,end=603\nsearch:             maxDepth=3000,constraints=10332\nchoice generators:  thread=21747 (signal=0,lock=620,sharedRef=12378,threadApi=2,reschedule=603), data=0\nheap:               new=553389,released=54373,maxLive=1095,gcCycles=40502\ninstructions:       16119686\nmax memory:         401MB\nloaded code:        classes=144,methods=2830\n\n====================================================== search finished",
+    "classification": "Pass"
+  },
+  {
+    "prompt_id": 107,
+    "topic": "107_BoundedHashSet.java",
+    "llm": "claude",
+    "max_depth": "3000",
+    "code_present": true,
+    "code_compiled": true,
+    "compile_error": "",
+    "jpf_result": "JavaPathfinder core system v8.0 (rev 2345caaa002e15c6147d001d1ccd71e4b538f8e9) - (C) 2005-2014 United States Government. All rights reserved.\n====================================================== system under test\nBoundedHashSet.main()\n====================================================== search started: 9/20/26 4:32 PM\n====================================================== search constraint\n...\n\tat sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)\n\tat sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\n\tat java.lang.reflect.Method.invoke(Method.java:498)\n\tat gov.nasa.jpf.tool.Run.call(Run.java:80)\n\tat gov.nasa.jpf.tool.RunJPF.main(RunJPF.java:116)",
+    "jpf_details": "at gov.nasa.jpf.search.DFSearch.search(DFSearch.java:79)\n\tat gov.nasa.jpf.JPF.run(JPF.java:613)\n\tat gov.nasa.jpf.JPF.start(JPF.java:189)\n\tat sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)\n\tat sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)\n\tat sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\n\tat java.lang.reflect.Method.invoke(Method.java:498)\n\tat gov.nasa.jpf.tool.Run.call(Run.java:80)\n\tat gov.nasa.jpf.tool.RunJPF.main(RunJPF.java:116)",
+    "classification": "Termination Error"
+  }
+]

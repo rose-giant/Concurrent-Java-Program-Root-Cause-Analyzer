@@ -1,0 +1,6 @@
+{
+  "id": "2-rm_sync_block-0",
+  "safe_id": "2-rm_sync_block-0",
+  "class": "CountingComets",
+  "classification": "Race Condition"
+}

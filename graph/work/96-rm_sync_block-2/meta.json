@@ -1,0 +1,6 @@
+{
+  "id": "96-rm_sync_block-2",
+  "safe_id": "96-rm_sync_block-2",
+  "class": "Main",
+  "classification": "Race Condition"
+}

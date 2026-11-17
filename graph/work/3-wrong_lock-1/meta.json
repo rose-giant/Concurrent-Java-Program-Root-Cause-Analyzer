@@ -1,0 +1,6 @@
+{
+  "id": "3-wrong_lock-1",
+  "safe_id": "3-wrong_lock-1",
+  "class": "CountingFireflies",
+  "classification": "Race Condition"
+}

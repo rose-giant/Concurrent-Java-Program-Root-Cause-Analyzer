@@ -1,0 +1,6 @@
+{
+  "id": "105-lock_order_inversion_methods-0",
+  "safe_id": "105-lock_order_inversion_methods-0",
+  "class": "Main",
+  "classification": "Deadlock"
+}

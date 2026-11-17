@@ -1,0 +1,6 @@
+{
+  "id": "74-unguarded_wait-0",
+  "safe_id": "74-unguarded_wait-0",
+  "class": "Main",
+  "classification": "Deadlock"
+}

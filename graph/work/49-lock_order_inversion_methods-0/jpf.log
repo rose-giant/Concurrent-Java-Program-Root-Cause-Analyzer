@@ -1,0 +1,111 @@
+JavaPathfinder core system v8.0 (rev 2345caaa002e15c6147d001d1ccd71e4b538f8e9) - (C) 2005-2014 United States Government. All rights reserved.
+
+
+====================================================== system under test
+Main.main()
+
+====================================================== search started: 11/1/26 3:37 PM
+Put R2
+Get R1: Sword
+Get R1: Sword
+Get R1: Sword
+Get R1: Sword
+Get R1: Sword
+Get R1: Sword
+Get R1: Sword
+Get R1: Sword
+Put R2
+Put R2
+Put R2
+Get R1: Sword
+Put R2
+Get R1: Sword
+Put R2
+Put R2
+Get R1: Sword
+Put R2
+Get R1: Sword
+Put R2
+
+====================================================== error 1
+gov.nasa.jpf.vm.NotDeadlockedProperty
+deadlock encountered:
+  thread java.lang.Thread:{id:0,name:main,status:WAITING,priority:5,isDaemon:false,lockCount:0,suspendCount:0}
+  thread java.lang.Thread:{id:1,name:Thread-1,status:BLOCKED,priority:5,isDaemon:false,lockCount:0,suspendCount:0}
+  thread java.lang.Thread:{id:2,name:Thread-2,status:BLOCKED,priority:5,isDaemon:false,lockCount:0,suspendCount:0}
+
+
+====================================================== trace #1
+------------------------------------------------------ transition #0 thread: 0
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"ROOT" ,1/1,isCascaded:false}
+      [7189 insn w/o sources]
+------------------------------------------------------ transition #1 thread: 0
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"START" ,1/2,isCascaded:false}
+      [5 insn w/o sources]
+------------------------------------------------------ transition #2 thread: 0
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"START" ,1/3,isCascaded:false}
+      [5 insn w/o sources]
+------------------------------------------------------ transition #3 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"JOIN" ,1/2,isCascaded:false}
+      [4 insn w/o sources]
+------------------------------------------------------ transition #4 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_OBJECT" ,1/2,isCascaded:false}
+      [6 insn w/o sources]
+------------------------------------------------------ transition #5 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"LOCK" ,1/2,isCascaded:false}
+      [2 insn w/o sources]
+------------------------------------------------------ transition #6 thread: 1
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_CLASS" ,1/2,isCascaded:false}
+      [4 insn w/o sources]
+------------------------------------------------------ transition #7 thread: 2
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"LOCK" ,2/2,isCascaded:false}
+      [4 insn w/o sources]
+------------------------------------------------------ transition #8 thread: 2
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_OBJECT" ,2/2,isCascaded:false}
+      [6 insn w/o sources]
+------------------------------------------------------ transition #9 thread: 2
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"SHARED_CLASS" ,2/2,isCascaded:false}
+      [4 insn w/o sources]
+------------------------------------------------------ transition #10 thread: 2
+gov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:"LOCK" ,2/2,isCascaded:false}
+      [5 insn w/o sources]
+
+====================================================== snapshot #1
+thread java.lang.Thread:{id:0,name:main,status:WAITING,priority:5,isDaemon:false,lockCount:0,suspendCount:0}
+  waiting on: java.lang.Thread@1e0
+  call stack:
+	at java.lang.Thread.join(Thread.java)
+	at Main.main(Main.java:19)
+
+thread java.lang.Thread:{id:1,name:Thread-1,status:BLOCKED,priority:5,isDaemon:false,lockCount:0,suspendCount:0}
+  owned locks:CrystalCache@1d1
+  blocked on: java.lang.Object@1d0
+  call stack:
+	at CrystalCache.put(Main.java:33)
+	at Main.lambda$main$0(Main.java:9)
+	at Main$$Lambda$0.run(pc 5)
+
+thread java.lang.Thread:{id:2,name:Thread-2,status:BLOCKED,priority:5,isDaemon:false,lockCount:0,suspendCount:0}
+  owned locks:java.lang.Object@1d0
+  blocked on: CrystalCache@1d1
+  call stack:
+	at CrystalCache.get(Main.java:48)
+	at Main.lambda$main$1(Main.java:13)
+	at Main$$Lambda$1.run(pc 5)
+
+
+====================================================== results
+error #1: gov.nasa.jpf.vm.NotDeadlockedProperty "deadlock encountered:   thread java.lang.Thread:{i..."
+
+====================================================== statistics
+elapsed time:       00:00:01
+states:             new=113,visited=72,backtracked=174,end=3
+search:             maxDepth=35,constraints=0
+choice generators:  thread=112 (signal=0,lock=26,sharedRef=58,threadApi=13,reschedule=15), data=0
+heap:               new=624,released=137,maxLive=507,gcCycles=160
+instructions:       11709
+max memory:         117MB
+loaded code:        classes=88,methods=1851
+
+====================================================== search finished: 11/1/26 3:37 PM
+

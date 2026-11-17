@@ -1,0 +1,2845 @@
+[
+  {
+    "id": 1,
+    "case_id": "1-rm_join-1",
+    "operator": "rm_join",
+    "failure_type": "hard_root_cause",
+    "root_cause_score": 0.0333,
+    "fix_score": 1.0,
+    "subscores": {
+      "family": 0.0,
+      "bug_class": 0.0,
+      "missing_guarantee": 0.0,
+      "conflict_type": 0.0,
+      "shared_objects": 0.0,
+      "accesses": 0.1667,
+      "conflict": 0.0,
+      "fix_type": 1.0,
+      "fix_action": 1.0,
+      "fix_exact": 1.0,
+      "fix_where": 1.0
+    },
+    "code": "public class CountingLanterns { private boolean asleep = false; private final Object asleepLock = new Object(); public void tryToSleep() { while (true) { boolean isAsleep; synchronized (asleepLock) { isAsleep = asleep; } if (isAsleep) { break; } countSomeSheep(); } } private void countSomeSheep() { System.out.println(\"Tallying a lantern...\"); try { Thread.sleep(100); } catch (InterruptedException e) { Thread.currentThread().interrupt(); } } public void setAsleep(boolean value) { synchronized (asleepLock) { this.asleep = value; } } public static void main(String[] args) { CountingLanterns traveler = new CountingLanterns(); Thread t1 = new Thread(() -> traveler.tryToSleep()); Thread t2 = new Thread(() -> { try { Thread.sleep(500); } catch (InterruptedException e) { Thread.currentThread().interrupt(); } traveler.setAsleep(true); }); t1.start(); t2.start(); try {  t2.join(); } catch (InterruptedException e) { Thread.currentThread().interrupt(); } } }",
+    "ground_truth": {
+      "case_id": "1-rm_join-1",
+      "reasoning": "The mutation removes t1.join() from main, but main does nothing afterwards that depends on t1, so the program has no concurrency defect; the failure is on the JPF side and its mechanism is not established.",
+      "family": "other",
+      "bug_class": "no_defect",
+      "shared_objects": [],
+      "accesses": [
+        {
+          "method": "CountingLanterns.main",
+          "op": "join",
+          "target": "t1"
+        }
+      ],
+      "missing_guarantee": "none",
+      "conflict": {
+        "type": "none",
+        "edges": [],
+        "field": null,
+        "methods": []
+      },
+      "fix_type": "other",
+      "fix_action": "restore_join",
+      "fix_where": [
+        "CountingLanterns.main"
+      ],
+      "acceptable_alternatives": [],
+      "meta": {
+        "bug_status": "jpf-no-finish (mutation is program-level benign; failure is JPF-side)",
+        "confidence": "high that the removed t1.join() is the trigger, low for the mechanism",
+        "name_conflicts": []
+      }
+    },
+    "model_output": null
+  },
+  {
+    "id": 2,
+    "case_id": "100-rm_join-0",
+    "operator": "rm_join",
+    "failure_type": "hard_root_cause",
+    "root_cause_score": 0.0,
+    "fix_score": 1.0,
+    "subscores": {
+      "family": 0.0,
+      "bug_class": 0.0,
+      "missing_guarantee": 0.0,
+      "conflict_type": 0.0,
+      "shared_objects": 0.0,
+      "accesses": 0.0,
+      "conflict": 0.0,
+      "fix_type": 1.0,
+      "fix_action": 1.0,
+      "fix_exact": 1.0,
+      "fix_where": 1.0
+    },
+    "code": "import java.util.concurrent.*; class SimulatedCAS { private int value; public synchronized int get() { return value; } public synchronized int compareAndSwap(int expectedValue, int newValue) { int oldValue = value; if (oldValue == expectedValue) value = newValue; return oldValue; } public synchronized boolean compareAndSet(int expectedValue, int newValue) { return compareAndSwap(expectedValue, newValue) == expectedValue; } } public class Main { public static void main(String[] args) throws Exception { SimulatedCAS cas = new SimulatedCAS(); Thread t = new Thread(() -> { cas.compareAndSet(0, 1); }); t.start();  } }",
+    "ground_truth": {
+      "case_id": "100-rm_join-0",
+      "reasoning": "The mutation removes t.join() from main, but main does nothing afterwards that depends on t, so the program has no concurrency defect; the failure is on the JPF side and its mechanism is not established.",
+      "family": "other",
+      "bug_class": "no_defect",
+      "shared_objects": [],
+      "accesses": [
+        {
+          "method": "Main.main",
+          "op": "join",
+          "target": "t"
+        }
+      ],
+      "missing_guarantee": "none",
+      "conflict": {
+        "type": "none",
+        "edges": [],
+        "field": null,
+        "methods": []
+      },
+      "fix_type": "other",
+      "fix_action": "restore_join",
+      "fix_where": [
+        "Main.main"
+      ],
+      "acceptable_alternatives": [],
+      "meta": {
+        "bug_status": "jpf-no-finish (mutation is program-level benign; failure is JPF-side)",
+        "confidence": "high that the removed t.join() is the trigger, low for the mechanism",
+        "name_conflicts": []
+      }
+    },
+    "model_output": null
+  },
+  {
+    "id": 3,
+    "case_id": "101-rm_join-0",
+    "operator": "rm_join",
+    "failure_type": "hard_root_cause",
+    "root_cause_score": 0.0333,
+    "fix_score": 1.0,
+    "subscores": {
+      "family": 0.0,
+      "bug_class": 0.0,
+      "missing_guarantee": 0.0,
+      "conflict_type": 0.0,
+      "shared_objects": 0.0,
+      "accesses": 0.1667,
+      "conflict": 0.0,
+      "fix_type": 1.0,
+      "fix_action": 1.0,
+      "fix_exact": 1.0,
+      "fix_where": 1.0
+    },
+    "code": "import java.util.concurrent.atomic.AtomicReference;\n\nclass ConcurrentStack<E> {\n    static class Node<E> {\n        E item;\n        Node<E> next;\n        Node(E item) {\n            this.item = item;\n        }\n    }\n    private final AtomicReference<Node<E>> top = new AtomicReference<>();\n    void push(E item) {\n        Node<E> newHead = new Node<>(item);\n        Node<E> oldHead;\n        do {\n            oldHead = top.get();\n            newHead.next = oldHead;\n        } while (!top.compareAndSet(oldHead, newHead));\n    }\n    E pop() {\n        Node<E> oldHead;\n        Node<E> newHead;\n        do {\n            oldHead = top.get();\n            if (oldHead == null) return null;\n            newHead = oldHead.next;\n        } while (!top.compareAndSet(oldHead, newHead));\n        return oldHead.item;\n    }\n}\n\npublic class Main {\n    public static void main(String[] args) throws Exception {\n        ConcurrentStack<Integer> stack = new ConcurrentStack<>();\n        Runnable task = () -> {\n            for (int j = 0; j < 2; j++) {\n                stack.push(j);\n                System.out.print('P');\n            }\n            for (int j = 0; j < 2; j++) {\n                stack.pop();\n                System.out.print('O');\n            }\n        };\n        Thread t1 = new Thread(task);\n        Thread t2 = new Thread(task);\n        t1.start(); t2.start();\n        t1.join(); \n        System.out.print('C');\n    }\n}",
+    "ground_truth": {
+      "case_id": "101-rm_join-0",
+      "reasoning": "The mutation removes t2.join() from main, but main does nothing afterwards that depends on t2, so the program has no concurrency defect; the failure is on the JPF side and its mechanism is not established.",
+      "family": "other",
+      "bug_class": "no_defect",
+      "shared_objects": [],
+      "accesses": [
+        {
+          "method": "Main.main",
+          "op": "join",
+          "target": "t2"
+        }
+      ],
+      "missing_guarantee": "none",
+      "conflict": {
+        "type": "none",
+        "edges": [],
+        "field": null,
+        "methods": []
+      },
+      "fix_type": "other",
+      "fix_action": "restore_join",
+      "fix_where": [
+        "Main.main"
+      ],
+      "acceptable_alternatives": [],
+      "meta": {
+        "bug_status": "jpf-no-finish (mutation is program-level benign; failure is JPF-side)",
+        "confidence": "high that the removed t2.join() is the trigger, low for the mechanism",
+        "name_conflicts": []
+      }
+    },
+    "model_output": null
+  },
+  {
+    "id": 4,
+    "case_id": "101-rm_join-1",
+    "operator": "rm_join",
+    "failure_type": "hard_root_cause",
+    "root_cause_score": 0.0333,
+    "fix_score": 1.0,
+    "subscores": {
+      "family": 0.0,
+      "bug_class": 0.0,
+      "missing_guarantee": 0.0,
+      "conflict_type": 0.0,
+      "shared_objects": 0.0,
+      "accesses": 0.1667,
+      "conflict": 0.0,
+      "fix_type": 1.0,
+      "fix_action": 1.0,
+      "fix_exact": 1.0,
+      "fix_where": 1.0
+    },
+    "code": "import java.util.concurrent.atomic.AtomicReference;\n\nclass ConcurrentStack<E> {\n    static class Node<E> {\n        E item;\n        Node<E> next;\n        Node(E item) {\n            this.item = item;\n        }\n    }\n    private final AtomicReference<Node<E>> top = new AtomicReference<>();\n    void push(E item) {\n        Node<E> newHead = new Node<>(item);\n        Node<E> oldHead;\n        do {\n            oldHead = top.get();\n            newHead.next = oldHead;\n        } while (!top.compareAndSet(oldHead, newHead));\n    }\n    E pop() {\n        Node<E> oldHead;\n        Node<E> newHead;\n        do {\n            oldHead = top.get();\n            if (oldHead == null) return null;\n            newHead = oldHead.next;\n        } while (!top.compareAndSet(oldHead, newHead));\n        return oldHead.item;\n    }\n}\n\npublic class Main {\n    public static void main(String[] args) throws Exception {\n        ConcurrentStack<Integer> stack = new ConcurrentStack<>();\n        Runnable task = () -> {\n            for (int j = 0; j < 2; j++) {\n                stack.push(j);\n                System.out.print('P');\n            }\n            for (int j = 0; j < 2; j++) {\n                stack.pop();\n                System.out.print('O');\n            }\n        };\n        Thread t1 = new Thread(task);\n        Thread t2 = new Thread(task);\n        t1.start(); t2.start();\n         t2.join();\n        System.out.print('C');\n    }\n}",
+    "ground_truth": {
+      "case_id": "101-rm_join-1",
+      "reasoning": "The mutation removes t1.join() from main, but main does nothing afterwards that depends on t1, so the program has no concurrency defect; the failure is on the JPF side and its mechanism is not established.",
+      "family": "other",
+      "bug_class": "no_defect",
+      "shared_objects": [],
+      "accesses": [
+        {
+          "method": "Main.main",
+          "op": "join",
+          "target": "t1"
+        }
+      ],
+      "missing_guarantee": "none",
+      "conflict": {
+        "type": "none",
+        "edges": [],
+        "field": null,
+        "methods": []
+      },
+      "fix_type": "other",
+      "fix_action": "restore_join",
+      "fix_where": [
+        "Main.main"
+      ],
+      "acceptable_alternatives": [],
+      "meta": {
+        "bug_status": "jpf-no-finish (mutation is program-level benign; failure is JPF-side)",
+        "confidence": "high that the removed t1.join() is the trigger, low for the mechanism",
+        "name_conflicts": []
+      }
+    },
+    "model_output": null
+  },
+  {
+    "id": 5,
+    "case_id": "105-lock_order_inversion_methods-0",
+    "operator": "lock_order_inversion_methods",
+    "failure_type": "soft_root_cause",
+    "root_cause_score": 0.8999,
+    "fix_score": 1.0,
+    "subscores": {
+      "family": 1.0,
+      "bug_class": 1.0,
+      "missing_guarantee": 1.0,
+      "conflict_type": 1.0,
+      "shared_objects": 0.8,
+      "accesses": 0.6494,
+      "conflict": 1.0,
+      "fix_type": 1.0,
+      "fix_action": 1.0,
+      "fix_exact": 0.0,
+      "fix_where": 1.0
+    },
+    "code": "class Counter { private static final Object monitorC = new Object();  private long value; public synchronized long getValue() { synchronized (monitorC) {  return value;  } } public long increment() { synchronized (monitorC) { synchronized (this) {  if (value == Long.MAX_VALUE) throw new IllegalStateException(new String(new char[] { 'c', 'o', 'u', 'n', 't', 'e', 'r', ' ', 'o', 'v', 'e', 'r', 'f', 'l', 'o', 'w' })); return ++value;  } } } } public class Main { public static void main(String[] args) throws Exception { Counter counter = new Counter(); Thread t1 = new Thread(() -> { counter.increment(); }); Thread t2 = new Thread(() -> { counter.getValue(); }); t1.start(); t2.start(); t1.join(); t2.join(); } }",
+    "ground_truth": {
+      "case_id": "105-lock_order_inversion_methods-0",
+      "reasoning": "getValue acquires this then monitorC while increment acquires monitorC then this; if each thread takes its outer lock first, each waits forever for the lock the other holds.",
+      "family": "deadlock",
+      "bug_class": "resource_deadlock",
+      "shared_objects": [
+        "this",
+        "monitorC"
+      ],
+      "accesses": [
+        {
+          "method": "Counter.getValue",
+          "op": "lock",
+          "target": "this"
+        },
+        {
+          "method": "Counter.getValue",
+          "op": "lock",
+          "target": "monitorC"
+        },
+        {
+          "method": "Counter.increment",
+          "op": "lock",
+          "target": "monitorC"
+        },
+        {
+          "method": "Counter.increment",
+          "op": "lock",
+          "target": "this"
+        }
+      ],
+      "missing_guarantee": "consistent_lock_order",
+      "conflict": {
+        "type": "lock_cycle",
+        "edges": [
+          [
+            "this",
+            "monitorC"
+          ],
+          [
+            "monitorC",
+            "this"
+          ]
+        ],
+        "field": null,
+        "methods": [
+          "Counter.getValue",
+          "Counter.increment"
+        ]
+      },
+      "fix_type": "change_lock_order_or_granularity",
+      "fix_action": "remove_nested_lock",
+      "fix_where": [
+        "Counter.getValue",
+        "Counter.increment"
+      ],
+      "acceptable_alternatives": [
+        {
+          "fix_type": "change_lock_order_or_granularity",
+          "fix_action": "reorder_locks"
+        },
+        {
+          "fix_type": "change_lock_order_or_granularity",
+          "fix_action": "single_lock"
+        }
+      ],
+      "meta": {
+        "bug_status": "injected-deadlock-confirmed-by-JPF",
+        "confidence": "high; derived from the single known mutation (JPF prints only thread states, so the lock cycle is derived)",
+        "name_conflicts": []
+      }
+    },
+    "model_output": null
+  },
+  {
+    "id": 6,
+    "case_id": "105-rm_join-0",
+    "operator": "rm_join",
+    "failure_type": "hard_root_cause",
+    "root_cause_score": 0.0333,
+    "fix_score": 1.0,
+    "subscores": {
+      "family": 0.0,
+      "bug_class": 0.0,
+      "missing_guarantee": 0.0,
+      "conflict_type": 0.0,
+      "shared_objects": 0.0,
+      "accesses": 0.1667,
+      "conflict": 0.0,
+      "fix_type": 1.0,
+      "fix_action": 1.0,
+      "fix_exact": 1.0,
+      "fix_where": 1.0
+    },
+    "code": "class Counter { private long value; public synchronized long getValue() { return value; } public synchronized long increment() { if (value == Long.MAX_VALUE) throw new IllegalStateException(new String(new char[] { 'c', 'o', 'u', 'n', 't', 'e', 'r', ' ', 'o', 'v', 'e', 'r', 'f', 'l', 'o', 'w' })); return ++value; } } public class Main { public static void main(String[] args) throws Exception { Counter counter = new Counter(); Thread t1 = new Thread(() -> { counter.increment(); }); Thread t2 = new Thread(() -> { counter.getValue(); }); t1.start(); t2.start();  t2.join(); } }",
+    "ground_truth": {
+      "case_id": "105-rm_join-0",
+      "reasoning": "The mutation removes t1.join() from main, but main does nothing afterwards that depends on t1, so the program has no concurrency defect; the failure is on the JPF side and its mechanism is not established.",
+      "family": "other",
+      "bug_class": "no_defect",
+      "shared_objects": [],
+      "accesses": [
+        {
+          "method": "Main.main",
+          "op": "join",
+          "target": "t1"
+        }
+      ],
+      "missing_guarantee": "none",
+      "conflict": {
+        "type": "none",
+        "edges": [],
+        "field": null,
+        "methods": []
+      },
+      "fix_type": "other",
+      "fix_action": "restore_join",
+      "fix_where": [
+        "Main.main"
+      ],
+      "acceptable_alternatives": [],
+      "meta": {
+        "bug_status": "jpf-no-finish (mutation is program-level benign; failure is JPF-side)",
+        "confidence": "high that the removed t1.join() is the trigger, low for the mechanism",
+        "name_conflicts": []
+      }
+    },
+    "model_output": null
+  },
+  {
+    "id": 7,
+    "case_id": "105-rm_join-1",
+    "operator": "rm_join",
+    "failure_type": "hard_root_cause",
+    "root_cause_score": 0.0333,
+    "fix_score": 1.0,
+    "subscores": {
+      "family": 0.0,
+      "bug_class": 0.0,
+      "missing_guarantee": 0.0,
+      "conflict_type": 0.0,
+      "shared_objects": 0.0,
+      "accesses": 0.1667,
+      "conflict": 0.0,
+      "fix_type": 1.0,
+      "fix_action": 1.0,
+      "fix_exact": 1.0,
+      "fix_where": 1.0
+    },
+    "code": "class Counter { private long value; public synchronized long getValue() { return value; } public synchronized long increment() { if (value == Long.MAX_VALUE) throw new IllegalStateException(new String(new char[] { 'c', 'o', 'u', 'n', 't', 'e', 'r', ' ', 'o', 'v', 'e', 'r', 'f', 'l', 'o', 'w' })); return ++value; } } public class Main { public static void main(String[] args) throws Exception { Counter counter = new Counter(); Thread t1 = new Thread(() -> { counter.increment(); }); Thread t2 = new Thread(() -> { counter.getValue(); }); t1.start(); t2.start(); t1.join();  } }",
+    "ground_truth": {
+      "case_id": "105-rm_join-1",
+      "reasoning": "The mutation removes t2.join() from main, but main does nothing afterwards that depends on t2, so the program has no concurrency defect; the failure is on the JPF side and its mechanism is not established.",
+      "family": "other",
+      "bug_class": "no_defect",
+      "shared_objects": [],
+      "accesses": [
+        {
+          "method": "Main.main",
+          "op": "join",
+          "target": "t2"
+        }
+      ],
+      "missing_guarantee": "none",
+      "conflict": {
+        "type": "none",
+        "edges": [],
+        "field": null,
+        "methods": []
+      },
+      "fix_type": "other",
+      "fix_action": "restore_join",
+      "fix_where": [
+        "Main.main"
+      ],
+      "acceptable_alternatives": [],
+      "meta": {
+        "bug_status": "jpf-no-finish (mutation is program-level benign; failure is JPF-side)",
+        "confidence": "high that the removed t2.join() is the trigger, low for the mechanism",
+        "name_conflicts": []
+      }
+    },
+    "model_output": null
+  },
+  {
+    "id": 8,
+    "case_id": "112-lock_order_inversion_methods-0",
+    "operator": "lock_order_inversion_methods",
+    "failure_type": "soft_root_cause",
+    "root_cause_score": 0.8967,
+    "fix_score": 1.0,
+    "subscores": {
+      "family": 1.0,
+      "bug_class": 1.0,
+      "missing_guarantee": 1.0,
+      "conflict_type": 1.0,
+      "shared_objects": 0.6667,
+      "accesses": 0.7333,
+      "conflict": 1.0,
+      "fix_type": 1.0,
+      "fix_action": 1.0,
+      "fix_exact": 0.0,
+      "fix_where": 1.0
+    },
+    "code": "import java.util.*; public class ServerStatusBeforeSplit { private static final Object monitorC = new Object();  private final Set<String> users = new HashSet<>(); private final Set<String> queries = new HashSet<>(); public synchronized void addUser(String u) { synchronized (monitorC) {  users.add(u);  } } public void addQuery(String q) { synchronized (monitorC) { synchronized (this) {  queries.add(q);  } } } public synchronized void removeUser(String u) { users.remove(u); } public synchronized void removeQuery(String q) { queries.remove(q); } public static void main(String[] args) throws Exception { ServerStatusBeforeSplit status = new ServerStatusBeforeSplit(); Thread t1 = new Thread(() -> { status.addUser(String.valueOf(1)); }); Thread t2 = new Thread(() -> { status.addQuery(String.valueOf(2)); }); t1.start(); t2.start(); t1.join(); t2.join(); } }",
+    "ground_truth": {
+      "case_id": "112-lock_order_inversion_methods-0",
+      "reasoning": "addUser acquires this then monitorC while addQuery acquires monitorC then this; if each thread takes its outer lock first, each waits forever for the lock the other holds.",
+      "family": "deadlock",
+      "bug_class": "resource_deadlock",
+      "shared_objects": [
+        "this",
+        "monitorC"
+      ],
+      "accesses": [
+        {
+          "method": "ServerStatusBeforeSplit.addUser",
+          "op": "lock",
+          "target": "this"
+        },
+        {
+          "method": "ServerStatusBeforeSplit.addUser",
+          "op": "lock",
+          "target": "monitorC"
+        },
+        {
+          "method": "ServerStatusBeforeSplit.addQuery",
+          "op": "lock",
+          "target": "monitorC"
+        },
+        {
+          "method": "ServerStatusBeforeSplit.addQuery",
+          "op": "lock",
+          "target": "this"
+        }
+      ],
+      "missing_guarantee": "consistent_lock_order",
+      "conflict": {
+        "type": "lock_cycle",
+        "edges": [
+          [
+            "this",
+            "monitorC"
+          ],
+          [
+            "monitorC",
+            "this"
+          ]
+        ],
+        "field": null,
+        "methods": [
+          "ServerStatusBeforeSplit.addUser",
+          "ServerStatusBeforeSplit.addQuery"
+        ]
+      },
+      "fix_type": "change_lock_order_or_granularity",
+      "fix_action": "remove_nested_lock",
+      "fix_where": [
+        "ServerStatusBeforeSplit.addUser",
+        "ServerStatusBeforeSplit.addQuery"
+      ],
+      "acceptable_alternatives": [
+        {
+          "fix_type": "change_lock_order_or_granularity",
+          "fix_action": "reorder_locks"
+        },
+        {
+          "fix_type": "change_lock_order_or_granularity",
+          "fix_action": "single_lock"
+        }
+      ],
+      "meta": {
+        "bug_status": "injected-deadlock-confirmed-by-JPF",
+        "confidence": "high; derived from the single known mutation (JPF prints only thread states, so the lock cycle is derived)",
+        "name_conflicts": []
+      }
+    },
+    "model_output": null
+  },
+  {
+    "id": 9,
+    "case_id": "112-rm_join-0",
+    "operator": "rm_join",
+    "failure_type": "hard_root_cause",
+    "root_cause_score": 0.0333,
+    "fix_score": 1.0,
+    "subscores": {
+      "family": 0.0,
+      "bug_class": 0.0,
+      "missing_guarantee": 0.0,
+      "conflict_type": 0.0,
+      "shared_objects": 0.0,
+      "accesses": 0.1667,
+      "conflict": 0.0,
+      "fix_type": 1.0,
+      "fix_action": 1.0,
+      "fix_exact": 1.0,
+      "fix_where": 1.0
+    },
+    "code": "import java.util.*; public class ServerStatusBeforeSplit { private final Set<String> users = new HashSet<>(); private final Set<String> queries = new HashSet<>(); public synchronized void addUser(String u) { users.add(u); } public synchronized void addQuery(String q) { queries.add(q); } public synchronized void removeUser(String u) { users.remove(u); } public synchronized void removeQuery(String q) { queries.remove(q); } public static void main(String[] args) throws Exception { ServerStatusBeforeSplit status = new ServerStatusBeforeSplit(); Thread t1 = new Thread(() -> { status.addUser(String.valueOf(1)); }); Thread t2 = new Thread(() -> { status.addQuery(String.valueOf(2)); }); t1.start(); t2.start(); t1.join();  } }",
+    "ground_truth": {
+      "case_id": "112-rm_join-0",
+      "reasoning": "The mutation removes t2.join() from main, but main does nothing afterwards that depends on t2, so the program has no concurrency defect; the failure is on the JPF side and its mechanism is not established.",
+      "family": "other",
+      "bug_class": "no_defect",
+      "shared_objects": [],
+      "accesses": [
+        {
+          "method": "ServerStatusBeforeSplit.main",
+          "op": "join",
+          "target": "t2"
+        }
+      ],
+      "missing_guarantee": "none",
+      "conflict": {
+        "type": "none",
+        "edges": [],
+        "field": null,
+        "methods": []
+      },
+      "fix_type": "other",
+      "fix_action": "restore_join",
+      "fix_where": [
+        "ServerStatusBeforeSplit.main"
+      ],
+      "acceptable_alternatives": [],
+      "meta": {
+        "bug_status": "jpf-no-finish (mutation is program-level benign; failure is JPF-side)",
+        "confidence": "high that the removed t2.join() is the trigger, low for the mechanism",
+        "name_conflicts": []
+      }
+    },
+    "model_output": null
+  },
+  {
+    "id": 10,
+    "case_id": "112-rm_join-1",
+    "operator": "rm_join",
+    "failure_type": "hard_root_cause",
+    "root_cause_score": 0.0333,
+    "fix_score": 1.0,
+    "subscores": {
+      "family": 0.0,
+      "bug_class": 0.0,
+      "missing_guarantee": 0.0,
+      "conflict_type": 0.0,
+      "shared_objects": 0.0,
+      "accesses": 0.1667,
+      "conflict": 0.0,
+      "fix_type": 1.0,
+      "fix_action": 1.0,
+      "fix_exact": 1.0,
+      "fix_where": 1.0
+    },
+    "code": "import java.util.*; public class ServerStatusBeforeSplit { private final Set<String> users = new HashSet<>(); private final Set<String> queries = new HashSet<>(); public synchronized void addUser(String u) { users.add(u); } public synchronized void addQuery(String q) { queries.add(q); } public synchronized void removeUser(String u) { users.remove(u); } public synchronized void removeQuery(String q) { queries.remove(q); } public static void main(String[] args) throws Exception { ServerStatusBeforeSplit status = new ServerStatusBeforeSplit(); Thread t1 = new Thread(() -> { status.addUser(String.valueOf(1)); }); Thread t2 = new Thread(() -> { status.addQuery(String.valueOf(2)); }); t1.start(); t2.start();  t2.join(); } }",
+    "ground_truth": {
+      "case_id": "112-rm_join-1",
+      "reasoning": "The mutation removes t1.join() from main, but main does nothing afterwards that depends on t1, so the program has no concurrency defect; the failure is on the JPF side and its mechanism is not established.",
+      "family": "other",
+      "bug_class": "no_defect",
+      "shared_objects": [],
+      "accesses": [
+        {
+          "method": "ServerStatusBeforeSplit.main",
+          "op": "join",
+          "target": "t1"
+        }
+      ],
+      "missing_guarantee": "none",
+      "conflict": {
+        "type": "none",
+        "edges": [],
+        "field": null,
+        "methods": []
+      },
+      "fix_type": "other",
+      "fix_action": "restore_join",
+      "fix_where": [
+        "ServerStatusBeforeSplit.main"
+      ],
+      "acceptable_alternatives": [],
+      "meta": {
+        "bug_status": "jpf-no-finish (mutation is program-level benign; failure is JPF-side)",
+        "confidence": "high that the removed t1.join() is the trigger, low for the mechanism",
+        "name_conflicts": []
+      }
+    },
+    "model_output": null
+  },
+  {
+    "id": 11,
+    "case_id": "113-rm_join-0",
+    "operator": "rm_join",
+    "failure_type": "hard_root_cause",
+    "root_cause_score": 0.0333,
+    "fix_score": 1.0,
+    "subscores": {
+      "family": 0.0,
+      "bug_class": 0.0,
+      "missing_guarantee": 0.0,
+      "conflict_type": 0.0,
+      "shared_objects": 0.0,
+      "accesses": 0.1667,
+      "conflict": 0.0,
+      "fix_type": 1.0,
+      "fix_action": 1.0,
+      "fix_exact": 1.0,
+      "fix_where": 1.0
+    },
+    "code": "import java.util.*; public class ServerStatusAfterSplit { private final Set<String> users = new HashSet<>(); private final Set<String> queries = new HashSet<>(); public void addUser(String u) { synchronized (users) { users.add(u); } } public void addQuery(String q) { synchronized (queries) { queries.add(q); } } public void removeUser(String u) { synchronized (users) { users.remove(u); } } public void removeQuery(String q) { synchronized (queries) { queries.remove(q); } } public static void main(String[] args) throws Exception { ServerStatusAfterSplit status = new ServerStatusAfterSplit(); Thread t1 = new Thread(() -> { status.addUser(String.valueOf(1)); }); Thread t2 = new Thread(() -> { status.addQuery(String.valueOf(2)); }); t1.start(); t2.start(); t1.join();  } }",
+    "ground_truth": {
+      "case_id": "113-rm_join-0",
+      "reasoning": "The mutation removes t2.join() from main, but main does nothing afterwards that depends on t2, so the program has no concurrency defect; the failure is on the JPF side and its mechanism is not established.",
+      "family": "other",
+      "bug_class": "no_defect",
+      "shared_objects": [],
+      "accesses": [
+        {
+          "method": "ServerStatusAfterSplit.main",
+          "op": "join",
+          "target": "t2"
+        }
+      ],
+      "missing_guarantee": "none",
+      "conflict": {
+        "type": "none",
+        "edges": [],
+        "field": null,
+        "methods": []
+      },
+      "fix_type": "other",
+      "fix_action": "restore_join",
+      "fix_where": [
+        "ServerStatusAfterSplit.main"
+      ],
+      "acceptable_alternatives": [],
+      "meta": {
+        "bug_status": "jpf-no-finish (mutation is program-level benign; failure is JPF-side)",
+        "confidence": "high that the removed t2.join() is the trigger, low for the mechanism",
+        "name_conflicts": []
+      }
+    },
+    "model_output": null
+  },
+  {
+    "id": 12,
+    "case_id": "113-rm_join-1",
+    "operator": "rm_join",
+    "failure_type": "hard_root_cause",
+    "root_cause_score": 0.0333,
+    "fix_score": 1.0,
+    "subscores": {
+      "family": 0.0,
+      "bug_class": 0.0,
+      "missing_guarantee": 0.0,
+      "conflict_type": 0.0,
+      "shared_objects": 0.0,
+      "accesses": 0.1667,
+      "conflict": 0.0,
+      "fix_type": 1.0,
+      "fix_action": 1.0,
+      "fix_exact": 1.0,
+      "fix_where": 1.0
+    },
+    "code": "import java.util.*; public class ServerStatusAfterSplit { private final Set<String> users = new HashSet<>(); private final Set<String> queries = new HashSet<>(); public void addUser(String u) { synchronized (users) { users.add(u); } } public void addQuery(String q) { synchronized (queries) { queries.add(q); } } public void removeUser(String u) { synchronized (users) { users.remove(u); } } public void removeQuery(String q) { synchronized (queries) { queries.remove(q); } } public static void main(String[] args) throws Exception { ServerStatusAfterSplit status = new ServerStatusAfterSplit(); Thread t1 = new Thread(() -> { status.addUser(String.valueOf(1)); }); Thread t2 = new Thread(() -> { status.addQuery(String.valueOf(2)); }); t1.start(); t2.start();  t2.join(); } }",
+    "ground_truth": {
+      "case_id": "113-rm_join-1",
+      "reasoning": "The mutation removes t1.join() from main, but main does nothing afterwards that depends on t1, so the program has no concurrency defect; the failure is on the JPF side and its mechanism is not established.",
+      "family": "other",
+      "bug_class": "no_defect",
+      "shared_objects": [],
+      "accesses": [
+        {
+          "method": "ServerStatusAfterSplit.main",
+          "op": "join",
+          "target": "t1"
+        }
+      ],
+      "missing_guarantee": "none",
+      "conflict": {
+        "type": "none",
+        "edges": [],
+        "field": null,
+        "methods": []
+      },
+      "fix_type": "other",
+      "fix_action": "restore_join",
+      "fix_where": [
+        "ServerStatusAfterSplit.main"
+      ],
+      "acceptable_alternatives": [],
+      "meta": {
+        "bug_status": "jpf-no-finish (mutation is program-level benign; failure is JPF-side)",
+        "confidence": "high that the removed t1.join() is the trigger, low for the mechanism",
+        "name_conflicts": []
+      }
+    },
+    "model_output": null
+  },
+  {
+    "id": 13,
+    "case_id": "114-rm_join-0",
+    "operator": "rm_join",
+    "failure_type": "hard_root_cause",
+    "root_cause_score": 0.0333,
+    "fix_score": 1.0,
+    "subscores": {
+      "family": 0.0,
+      "bug_class": 0.0,
+      "missing_guarantee": 0.0,
+      "conflict_type": 0.0,
+      "shared_objects": 0.0,
+      "accesses": 0.1667,
+      "conflict": 0.0,
+      "fix_type": 1.0,
+      "fix_action": 1.0,
+      "fix_exact": 1.0,
+      "fix_where": 1.0
+    },
+    "code": "public class BarrierTimer implements Runnable { private boolean started; private long startTime; private long endTime; public synchronized void run() { long now = System.nanoTime(); if (!started) { started = true; startTime = now; } else { endTime = now; } } public synchronized void clear() { started = false; } public synchronized long getTime() { return endTime - startTime; } public static void main(String[] args) throws Exception { BarrierTimer timer = new BarrierTimer(); Thread t1 = new Thread(() -> { timer.run(); }); Thread t2 = new Thread(() -> { timer.run(); }); t1.start(); t2.start();  t2.join(); timer.getTime(); timer.clear(); } }",
+    "ground_truth": {
+      "case_id": "114-rm_join-0",
+      "reasoning": "The mutation removes t1.join() from main, but main does nothing afterwards that depends on t1, so the program has no concurrency defect; the failure is on the JPF side and its mechanism is not established.",
+      "family": "other",
+      "bug_class": "no_defect",
+      "shared_objects": [],
+      "accesses": [
+        {
+          "method": "BarrierTimer.main",
+          "op": "join",
+          "target": "t1"
+        }
+      ],
+      "missing_guarantee": "none",
+      "conflict": {
+        "type": "none",
+        "edges": [],
+        "field": null,
+        "methods": []
+      },
+      "fix_type": "other",
+      "fix_action": "restore_join",
+      "fix_where": [
+        "BarrierTimer.main"
+      ],
+      "acceptable_alternatives": [],
+      "meta": {
+        "bug_status": "jpf-no-finish (mutation is program-level benign; failure is JPF-side)",
+        "confidence": "high that the removed t1.join() is the trigger, low for the mechanism",
+        "name_conflicts": []
+      }
+    },
+    "model_output": null
+  },
+  {
+    "id": 14,
+    "case_id": "114-rm_join-1",
+    "operator": "rm_join",
+    "failure_type": "hard_root_cause",
+    "root_cause_score": 0.0333,
+    "fix_score": 1.0,
+    "subscores": {
+      "family": 0.0,
+      "bug_class": 0.0,
+      "missing_guarantee": 0.0,
+      "conflict_type": 0.0,
+      "shared_objects": 0.0,
+      "accesses": 0.1667,
+      "conflict": 0.0,
+      "fix_type": 1.0,
+      "fix_action": 1.0,
+      "fix_exact": 1.0,
+      "fix_where": 1.0
+    },
+    "code": "public class BarrierTimer implements Runnable { private boolean started; private long startTime; private long endTime; public synchronized void run() { long now = System.nanoTime(); if (!started) { started = true; startTime = now; } else { endTime = now; } } public synchronized void clear() { started = false; } public synchronized long getTime() { return endTime - startTime; } public static void main(String[] args) throws Exception { BarrierTimer timer = new BarrierTimer(); Thread t1 = new Thread(() -> { timer.run(); }); Thread t2 = new Thread(() -> { timer.run(); }); t1.start(); t2.start(); t1.join();  timer.getTime(); timer.clear(); } }",
+    "ground_truth": {
+      "case_id": "114-rm_join-1",
+      "reasoning": "The mutation removes t2.join() from main, but main does nothing afterwards that depends on t2, so the program has no concurrency defect; the failure is on the JPF side and its mechanism is not established.",
+      "family": "other",
+      "bug_class": "no_defect",
+      "shared_objects": [],
+      "accesses": [
+        {
+          "method": "BarrierTimer.main",
+          "op": "join",
+          "target": "t2"
+        }
+      ],
+      "missing_guarantee": "none",
+      "conflict": {
+        "type": "none",
+        "edges": [],
+        "field": null,
+        "methods": []
+      },
+      "fix_type": "other",
+      "fix_action": "restore_join",
+      "fix_where": [
+        "BarrierTimer.main"
+      ],
+      "acceptable_alternatives": [],
+      "meta": {
+        "bug_status": "jpf-no-finish (mutation is program-level benign; failure is JPF-side)",
+        "confidence": "high that the removed t2.join() is the trigger, low for the mechanism",
+        "name_conflicts": []
+      }
+    },
+    "model_output": null
+  },
+  {
+    "id": 15,
+    "case_id": "114-rm_sync_one-1",
+    "operator": "rm_sync_one",
+    "failure_type": "soft_root_cause",
+    "root_cause_score": 0.7878,
+    "fix_score": 1.0,
+    "subscores": {
+      "family": 1.0,
+      "bug_class": 1.0,
+      "missing_guarantee": 1.0,
+      "conflict_type": 1.0,
+      "shared_objects": 0.4,
+      "accesses": 0.5556,
+      "conflict": 0.8333,
+      "fix_type": 1.0,
+      "fix_action": 1.0,
+      "fix_exact": 1.0,
+      "fix_where": 1.0
+    },
+    "code": "public class BarrierTimer implements Runnable { private boolean started; private long startTime; private long endTime; public void run() { long now = System.nanoTime(); if (!started) { started = true; startTime = now; } else { endTime = now; } } public synchronized void clear() { started = false; } public synchronized long getTime() { return endTime - startTime; } public static void main(String[] args) throws Exception { BarrierTimer timer = new BarrierTimer(); Thread t1 = new Thread(() -> { timer.run(); }); Thread t2 = new Thread(() -> { timer.run(); }); t1.start(); t2.start(); t1.join(); t2.join(); timer.getTime(); timer.clear(); } }",
+    "ground_truth": {
+      "case_id": "114-rm_sync_one-1",
+      "reasoning": "BarrierTimer.run lost its synchronized modifier, so two threads running it read and write BarrierTimer.started without holding any lock and the accesses race.",
+      "family": "non_deadlock",
+      "bug_class": "data_race",
+      "shared_objects": [
+        "BarrierTimer.started"
+      ],
+      "accesses": [
+        {
+          "method": "BarrierTimer.run",
+          "op": "write",
+          "target": "BarrierTimer.started"
+        },
+        {
+          "method": "BarrierTimer.run",
+          "op": "read",
+          "target": "BarrierTimer.started"
+        }
+      ],
+      "missing_guarantee": "mutual_exclusion",
+      "conflict": {
+        "type": "read_write_race",
+        "edges": [],
+        "field": "BarrierTimer.started",
+        "methods": [
+          "BarrierTimer.run",
+          "BarrierTimer.run"
+        ]
+      },
+      "fix_type": "add_or_widen_synchronization",
+      "fix_action": "restore_sync_block",
+      "fix_where": [
+        "BarrierTimer.run"
+      ],
+      "acceptable_alternatives": [
+        {
+          "fix_type": "add_volatile",
+          "fix_action": "add_volatile_or_atomic"
+        }
+      ],
+      "meta": {
+        "bug_status": "injected-race-confirmed-by-JPF",
+        "confidence": "high; single edit and JPF race report involves the mutated method",
+        "name_conflicts": []
+      }
+    },
+    "model_output": null
+  },
+  {
+    "id": 16,
+    "case_id": "115-lock_order_inversion_methods-0",
+    "operator": "lock_order_inversion_methods",
+    "failure_type": "soft_root_cause",
+    "root_cause_score": 0.8999,
+    "fix_score": 1.0,
+    "subscores": {
+      "family": 1.0,
+      "bug_class": 1.0,
+      "missing_guarantee": 1.0,
+      "conflict_type": 1.0,
+      "shared_objects": 0.8,
+      "accesses": 0.6494,
+      "conflict": 1.0,
+      "fix_type": 1.0,
+      "fix_action": 1.0,
+      "fix_exact": 0.0,
+      "fix_where": 1.0
+    },
+    "code": "class CasCounter { private final SimulatedCAS cas = new SimulatedCAS(); public int getValue() { return cas.get(); } public int increment() { int oldValue; do { oldValue = cas.get(); } while (cas.compareAndSwap(oldValue, oldValue + 1) != oldValue); return oldValue + 1; } static class SimulatedCAS { private static final Object monitorC = new Object();  private int value; public synchronized int get() { synchronized (monitorC) {  return value;  } } public int compareAndSwap(int expectedValue, int newValue) { synchronized (monitorC) { synchronized (this) {  int oldValue = value; if (oldValue == expectedValue) value = newValue; return oldValue;  } } } } public static void main(String[] args) throws Exception { CasCounter counter = new CasCounter(); Thread t1 = new Thread(() -> { counter.increment(); }); Thread t2 = new Thread(() -> { counter.increment(); }); t1.start(); t2.start(); t1.join(); t2.join(); } }",
+    "ground_truth": {
+      "case_id": "115-lock_order_inversion_methods-0",
+      "reasoning": "get acquires this then monitorC while compareAndSwap acquires monitorC then this; if each thread takes its outer lock first, each waits forever for the lock the other holds.",
+      "family": "deadlock",
+      "bug_class": "resource_deadlock",
+      "shared_objects": [
+        "this",
+        "monitorC"
+      ],
+      "accesses": [
+        {
+          "method": "SimulatedCAS.get",
+          "op": "lock",
+          "target": "this"
+        },
+        {
+          "method": "SimulatedCAS.get",
+          "op": "lock",
+          "target": "monitorC"
+        },
+        {
+          "method": "SimulatedCAS.compareAndSwap",
+          "op": "lock",
+          "target": "monitorC"
+        },
+        {
+          "method": "SimulatedCAS.compareAndSwap",
+          "op": "lock",
+          "target": "this"
+        }
+      ],
+      "missing_guarantee": "consistent_lock_order",
+      "conflict": {
+        "type": "lock_cycle",
+        "edges": [
+          [
+            "this",
+            "monitorC"
+          ],
+          [
+            "monitorC",
+            "this"
+          ]
+        ],
+        "field": null,
+        "methods": [
+          "SimulatedCAS.get",
+          "SimulatedCAS.compareAndSwap"
+        ]
+      },
+      "fix_type": "change_lock_order_or_granularity",
+      "fix_action": "remove_nested_lock",
+      "fix_where": [
+        "SimulatedCAS.get",
+        "SimulatedCAS.compareAndSwap"
+      ],
+      "acceptable_alternatives": [
+        {
+          "fix_type": "change_lock_order_or_granularity",
+          "fix_action": "reorder_locks"
+        },
+        {
+          "fix_type": "change_lock_order_or_granularity",
+          "fix_action": "single_lock"
+        }
+      ],
+      "meta": {
+        "bug_status": "injected-deadlock-confirmed-by-JPF",
+        "confidence": "high; derived from the single known mutation (JPF prints only thread states, so the lock cycle is derived)",
+        "name_conflicts": []
+      }
+    },
+    "model_output": null
+  },
+  {
+    "id": 17,
+    "case_id": "115-rm_join-0",
+    "operator": "rm_join",
+    "failure_type": "hard_root_cause",
+    "root_cause_score": 0.04,
+    "fix_score": 1.0,
+    "subscores": {
+      "family": 0.0,
+      "bug_class": 0.0,
+      "missing_guarantee": 0.0,
+      "conflict_type": 0.0,
+      "shared_objects": 0.0,
+      "accesses": 0.2,
+      "conflict": 0.0,
+      "fix_type": 1.0,
+      "fix_action": 1.0,
+      "fix_exact": 1.0,
+      "fix_where": 1.0
+    },
+    "code": "class CasCounter { private final SimulatedCAS cas = new SimulatedCAS(); public int getValue() { return cas.get(); } public int increment() { int oldValue; do { oldValue = cas.get(); } while (cas.compareAndSwap(oldValue, oldValue + 1) != oldValue); return oldValue + 1; } static class SimulatedCAS { private int value; public synchronized int get() { return value; } public synchronized int compareAndSwap(int expectedValue, int newValue) { int oldValue = value; if (oldValue == expectedValue) value = newValue; return oldValue; } } public static void main(String[] args) throws Exception { CasCounter counter = new CasCounter(); Thread t1 = new Thread(() -> { counter.increment(); }); Thread t2 = new Thread(() -> { counter.increment(); }); t1.start(); t2.start(); t1.join();  } }",
+    "ground_truth": {
+      "case_id": "115-rm_join-0",
+      "reasoning": "The mutation removes t2.join() from main, but main does nothing afterwards that depends on t2, so the program has no concurrency defect; the failure is on the JPF side and its mechanism is not established.",
+      "family": "other",
+      "bug_class": "no_defect",
+      "shared_objects": [],
+      "accesses": [
+        {
+          "method": "CasCounter.main",
+          "op": "join",
+          "target": "t2"
+        }
+      ],
+      "missing_guarantee": "none",
+      "conflict": {
+        "type": "none",
+        "edges": [],
+        "field": null,
+        "methods": []
+      },
+      "fix_type": "other",
+      "fix_action": "restore_join",
+      "fix_where": [
+        "CasCounter.main"
+      ],
+      "acceptable_alternatives": [],
+      "meta": {
+        "bug_status": "jpf-no-finish (mutation is program-level benign; failure is JPF-side)",
+        "confidence": "high that the removed t2.join() is the trigger, low for the mechanism",
+        "name_conflicts": []
+      }
+    },
+    "model_output": null
+  },
+  {
+    "id": 18,
+    "case_id": "115-rm_join-1",
+    "operator": "rm_join",
+    "failure_type": "hard_root_cause",
+    "root_cause_score": 0.04,
+    "fix_score": 1.0,
+    "subscores": {
+      "family": 0.0,
+      "bug_class": 0.0,
+      "missing_guarantee": 0.0,
+      "conflict_type": 0.0,
+      "shared_objects": 0.0,
+      "accesses": 0.2,
+      "conflict": 0.0,
+      "fix_type": 1.0,
+      "fix_action": 1.0,
+      "fix_exact": 1.0,
+      "fix_where": 1.0
+    },
+    "code": "class CasCounter { private final SimulatedCAS cas = new SimulatedCAS(); public int getValue() { return cas.get(); } public int increment() { int oldValue; do { oldValue = cas.get(); } while (cas.compareAndSwap(oldValue, oldValue + 1) != oldValue); return oldValue + 1; } static class SimulatedCAS { private int value; public synchronized int get() { return value; } public synchronized int compareAndSwap(int expectedValue, int newValue) { int oldValue = value; if (oldValue == expectedValue) value = newValue; return oldValue; } } public static void main(String[] args) throws Exception { CasCounter counter = new CasCounter(); Thread t1 = new Thread(() -> { counter.increment(); }); Thread t2 = new Thread(() -> { counter.increment(); }); t1.start(); t2.start();  t2.join(); } }",
+    "ground_truth": {
+      "case_id": "115-rm_join-1",
+      "reasoning": "The mutation removes t1.join() from main, but main does nothing afterwards that depends on t1, so the program has no concurrency defect; the failure is on the JPF side and its mechanism is not established.",
+      "family": "other",
+      "bug_class": "no_defect",
+      "shared_objects": [],
+      "accesses": [
+        {
+          "method": "CasCounter.main",
+          "op": "join",
+          "target": "t1"
+        }
+      ],
+      "missing_guarantee": "none",
+      "conflict": {
+        "type": "none",
+        "edges": [],
+        "field": null,
+        "methods": []
+      },
+      "fix_type": "other",
+      "fix_action": "restore_join",
+      "fix_where": [
+        "CasCounter.main"
+      ],
+      "acceptable_alternatives": [],
+      "meta": {
+        "bug_status": "jpf-no-finish (mutation is program-level benign; failure is JPF-side)",
+        "confidence": "high that the removed t1.join() is the trigger, low for the mechanism",
+        "name_conflicts": []
+      }
+    },
+    "model_output": null
+  },
+  {
+    "id": 19,
+    "case_id": "2-rm_join-0",
+    "operator": "rm_join",
+    "failure_type": "hard_root_cause",
+    "root_cause_score": 0.0333,
+    "fix_score": 1.0,
+    "subscores": {
+      "family": 0.0,
+      "bug_class": 0.0,
+      "missing_guarantee": 0.0,
+      "conflict_type": 0.0,
+      "shared_objects": 0.0,
+      "accesses": 0.1667,
+      "conflict": 0.0,
+      "fix_type": 1.0,
+      "fix_action": 1.0,
+      "fix_exact": 1.0,
+      "fix_where": 1.0
+    },
+    "code": "public class CountingComets { private boolean asleep = false; private final Object asleepLock = new Object(); public void tryToSleep() { while (true) { boolean isAsleep; synchronized (asleepLock) { isAsleep = asleep; } if (isAsleep) { break; } countSomeSheep(); } } private void countSomeSheep() { System.out.println(\"Surveying a comet...\"); try { Thread.sleep(100); } catch (InterruptedException e) { Thread.currentThread().interrupt(); } } public void setAsleep(boolean value) { synchronized (asleepLock) { this.asleep = value; } } public static void main(String[] args) { CountingComets wanderer = new CountingComets(); Thread t1 = new Thread(() -> wanderer.tryToSleep()); Thread t2 = new Thread(() -> { try { Thread.sleep(500); } catch (InterruptedException e) { Thread.currentThread().interrupt(); } wanderer.setAsleep(true); }); t1.start(); t2.start(); try {  t2.join(); } catch (InterruptedException e) { Thread.currentThread().interrupt(); } } }",
+    "ground_truth": {
+      "case_id": "2-rm_join-0",
+      "reasoning": "The mutation removes t1.join() from main, but main does nothing afterwards that depends on t1, so the program has no concurrency defect; the failure is on the JPF side and its mechanism is not established.",
+      "family": "other",
+      "bug_class": "no_defect",
+      "shared_objects": [],
+      "accesses": [
+        {
+          "method": "CountingComets.main",
+          "op": "join",
+          "target": "t1"
+        }
+      ],
+      "missing_guarantee": "none",
+      "conflict": {
+        "type": "none",
+        "edges": [],
+        "field": null,
+        "methods": []
+      },
+      "fix_type": "other",
+      "fix_action": "restore_join",
+      "fix_where": [
+        "CountingComets.main"
+      ],
+      "acceptable_alternatives": [],
+      "meta": {
+        "bug_status": "jpf-no-finish (mutation is program-level benign; failure is JPF-side)",
+        "confidence": "high that the removed t1.join() is the trigger, low for the mechanism",
+        "name_conflicts": []
+      }
+    },
+    "model_output": null
+  },
+  {
+    "id": 20,
+    "case_id": "3-rm_join-0",
+    "operator": "rm_join",
+    "failure_type": "hard_root_cause",
+    "root_cause_score": 0.0333,
+    "fix_score": 1.0,
+    "subscores": {
+      "family": 0.0,
+      "bug_class": 0.0,
+      "missing_guarantee": 0.0,
+      "conflict_type": 0.0,
+      "shared_objects": 0.0,
+      "accesses": 0.1667,
+      "conflict": 0.0,
+      "fix_type": 1.0,
+      "fix_action": 1.0,
+      "fix_exact": 1.0,
+      "fix_where": 1.0
+    },
+    "code": "public class CountingFireflies { private boolean asleep = false; private final Object asleepLock = new Object(); public void tryToSleep() { while (true) { boolean isAsleep; synchronized (asleepLock) { isAsleep = asleep; } if (isAsleep) { break; } countSomeSheep(); } } private void countSomeSheep() { System.out.println(\"Observing a firefly...\"); try { Thread.sleep(100); } catch (InterruptedException e) { Thread.currentThread().interrupt(); } } public void setAsleep(boolean value) { synchronized (asleepLock) { this.asleep = value; } } public static void main(String[] args) { CountingFireflies scout = new CountingFireflies(); Thread t1 = new Thread(() -> scout.tryToSleep()); Thread t2 = new Thread(() -> { try { Thread.sleep(500); } catch (InterruptedException e) { Thread.currentThread().interrupt(); } scout.setAsleep(true); }); t1.start(); t2.start(); try {  t2.join(); } catch (InterruptedException e) { Thread.currentThread().interrupt(); } } }",
+    "ground_truth": {
+      "case_id": "3-rm_join-0",
+      "reasoning": "The mutation removes t1.join() from main, but main does nothing afterwards that depends on t1, so the program has no concurrency defect; the failure is on the JPF side and its mechanism is not established.",
+      "family": "other",
+      "bug_class": "no_defect",
+      "shared_objects": [],
+      "accesses": [
+        {
+          "method": "CountingFireflies.main",
+          "op": "join",
+          "target": "t1"
+        }
+      ],
+      "missing_guarantee": "none",
+      "conflict": {
+        "type": "none",
+        "edges": [],
+        "field": null,
+        "methods": []
+      },
+      "fix_type": "other",
+      "fix_action": "restore_join",
+      "fix_where": [
+        "CountingFireflies.main"
+      ],
+      "acceptable_alternatives": [],
+      "meta": {
+        "bug_status": "jpf-no-finish (mutation is program-level benign; failure is JPF-side)",
+        "confidence": "high that the removed t1.join() is the trigger, low for the mechanism",
+        "name_conflicts": []
+      }
+    },
+    "model_output": null
+  },
+  {
+    "id": 21,
+    "case_id": "49-rm_join-0",
+    "operator": "rm_join",
+    "failure_type": "hard_root_cause",
+    "root_cause_score": 0.0333,
+    "fix_score": 1.0,
+    "subscores": {
+      "family": 0.0,
+      "bug_class": 0.0,
+      "missing_guarantee": 0.0,
+      "conflict_type": 0.0,
+      "shared_objects": 0.0,
+      "accesses": 0.1667,
+      "conflict": 0.0,
+      "fix_type": 1.0,
+      "fix_action": 1.0,
+      "fix_exact": 1.0,
+      "fix_where": 1.0
+    },
+    "code": "import java.util.HashMap; import java.util.Map; public class Main { public static void main(String[] args) { Map<String, String> base = new HashMap<>(); base.put(\"R1\", \"Sword\"); CrystalCache cache = new CrystalCache(base); Thread t1 = new Thread(() -> { cache.put(\"R2\", \"Shield\"); System.out.println(\"Put R2\"); }); Thread t2 = new Thread(() -> { String val = cache.get(\"R1\"); System.out.println(\"Get R1: \" + val); }); t1.start(); t2.start(); try { t1.join();  } catch (InterruptedException e) { Thread.currentThread().interrupt(); } } } class CrystalCache { private final Map<String, String> map; public CrystalCache(Map<String, String> map) { this.map = new HashMap<>(map); } public synchronized String put(String key, String value) { return map.put(key, value); } public synchronized String remove(Object key) { return map.remove(key); } public synchronized void putAll(Map<String, String> m) { map.putAll(m); } public synchronized void clear() { map.clear(); } public synchronized String get(Object key) { return map.get(key); } public synchronized int size() { return map.size(); } public synchronized boolean isEmpty() { return map.isEmpty(); } public synchronized boolean containsKey(Object key) { return map.containsKey(key); } public synchronized boolean containsValue(Object value) { return map.containsValue(value); } }",
+    "ground_truth": {
+      "case_id": "49-rm_join-0",
+      "reasoning": "The mutation removes t2.join() from main, but main does nothing afterwards that depends on t2, so the program has no concurrency defect; the failure is on the JPF side and its mechanism is not established.",
+      "family": "other",
+      "bug_class": "no_defect",
+      "shared_objects": [],
+      "accesses": [
+        {
+          "method": "Main.main",
+          "op": "join",
+          "target": "t2"
+        }
+      ],
+      "missing_guarantee": "none",
+      "conflict": {
+        "type": "none",
+        "edges": [],
+        "field": null,
+        "methods": []
+      },
+      "fix_type": "other",
+      "fix_action": "restore_join",
+      "fix_where": [
+        "Main.main"
+      ],
+      "acceptable_alternatives": [],
+      "meta": {
+        "bug_status": "jpf-no-finish (mutation is program-level benign; failure is JPF-side)",
+        "confidence": "high that the removed t2.join() is the trigger, low for the mechanism",
+        "name_conflicts": []
+      }
+    },
+    "model_output": null
+  },
+  {
+    "id": 22,
+    "case_id": "49-rm_join-1",
+    "operator": "rm_join",
+    "failure_type": "hard_root_cause",
+    "root_cause_score": 0.0333,
+    "fix_score": 1.0,
+    "subscores": {
+      "family": 0.0,
+      "bug_class": 0.0,
+      "missing_guarantee": 0.0,
+      "conflict_type": 0.0,
+      "shared_objects": 0.0,
+      "accesses": 0.1667,
+      "conflict": 0.0,
+      "fix_type": 1.0,
+      "fix_action": 1.0,
+      "fix_exact": 1.0,
+      "fix_where": 1.0
+    },
+    "code": "import java.util.HashMap; import java.util.Map; public class Main { public static void main(String[] args) { Map<String, String> base = new HashMap<>(); base.put(\"R1\", \"Sword\"); CrystalCache cache = new CrystalCache(base); Thread t1 = new Thread(() -> { cache.put(\"R2\", \"Shield\"); System.out.println(\"Put R2\"); }); Thread t2 = new Thread(() -> { String val = cache.get(\"R1\"); System.out.println(\"Get R1: \" + val); }); t1.start(); t2.start(); try {  t2.join(); } catch (InterruptedException e) { Thread.currentThread().interrupt(); } } } class CrystalCache { private final Map<String, String> map; public CrystalCache(Map<String, String> map) { this.map = new HashMap<>(map); } public synchronized String put(String key, String value) { return map.put(key, value); } public synchronized String remove(Object key) { return map.remove(key); } public synchronized void putAll(Map<String, String> m) { map.putAll(m); } public synchronized void clear() { map.clear(); } public synchronized String get(Object key) { return map.get(key); } public synchronized int size() { return map.size(); } public synchronized boolean isEmpty() { return map.isEmpty(); } public synchronized boolean containsKey(Object key) { return map.containsKey(key); } public synchronized boolean containsValue(Object value) { return map.containsValue(value); } }",
+    "ground_truth": {
+      "case_id": "49-rm_join-1",
+      "reasoning": "The mutation removes t1.join() from main, but main does nothing afterwards that depends on t1, so the program has no concurrency defect; the failure is on the JPF side and its mechanism is not established.",
+      "family": "other",
+      "bug_class": "no_defect",
+      "shared_objects": [],
+      "accesses": [
+        {
+          "method": "Main.main",
+          "op": "join",
+          "target": "t1"
+        }
+      ],
+      "missing_guarantee": "none",
+      "conflict": {
+        "type": "none",
+        "edges": [],
+        "field": null,
+        "methods": []
+      },
+      "fix_type": "other",
+      "fix_action": "restore_join",
+      "fix_where": [
+        "Main.main"
+      ],
+      "acceptable_alternatives": [],
+      "meta": {
+        "bug_status": "jpf-no-finish (mutation is program-level benign; failure is JPF-side)",
+        "confidence": "high that the removed t1.join() is the trigger, low for the mechanism",
+        "name_conflicts": []
+      }
+    },
+    "model_output": null
+  },
+  {
+    "id": 23,
+    "case_id": "68-lock_order_inversion_methods-0",
+    "operator": "lock_order_inversion_methods",
+    "failure_type": "soft_root_cause",
+    "root_cause_score": 0.8999,
+    "fix_score": 1.0,
+    "subscores": {
+      "family": 1.0,
+      "bug_class": 1.0,
+      "missing_guarantee": 1.0,
+      "conflict_type": 1.0,
+      "shared_objects": 0.8,
+      "accesses": 0.6494,
+      "conflict": 1.0,
+      "fix_type": 1.0,
+      "fix_action": 1.0,
+      "fix_exact": 0.0,
+      "fix_where": 1.0
+    },
+    "code": "public class Main {\n    public static void main(String[] args) {\n        final DragonScaleCounter counter = new DragonScaleCounter();\n\n        Thread t1 = new Thread(new Runnable() {\n            @Override\n            public void run() {\n                for (int i = 0; i < 100; i++) {\n                    counter.growScale();\n                }\n                System.out.println(\"Thread 1 done\");\n            }\n        });\n\n        Thread t2 = new Thread(new Runnable() {\n            @Override\n            public void run() {\n                for (int i = 0; i < 100; i++) {\n                    counter.growScale();\n                }\n                System.out.println(\"Thread 2 done\");\n            }\n        });\n\n        t1.start();\n        t2.start();\n\n        try {\n            t1.join();\n            t2.join();\n        } catch (InterruptedException e) {\n            Thread.currentThread().interrupt();\n        }\n\n        System.out.println(\"Scale count: \" + counter.getScaleCount());\n    }\n}\n\nclass MysticCAS { private static final Object monitorC = new Object(); \n    private int value;\n\n    public synchronized int get() { synchronized (monitorC) { \n        return value;\n     } }\n\n    public int compareAndSwap(int expected, int newValue) { synchronized (monitorC) { synchronized (this) { \n        int old = value;\n        if (value == expected) {\n            value = newValue;\n        }\n        return old;\n     } } }\n}\n\nclass DragonScaleCounter {\n    private final MysticCAS cas = new MysticCAS();\n\n    public int getScaleCount() {\n        return cas.get();\n    }\n\n    public void growScale() {\n        int old;\n        int newValue;\n\n        do {\n            old = cas.get();\n            newValue = old + 1;\n        } while (cas.compareAndSwap(old, newValue) != old);\n    }\n}",
+    "ground_truth": {
+      "case_id": "68-lock_order_inversion_methods-0",
+      "reasoning": "get acquires this then monitorC while compareAndSwap acquires monitorC then this; if each thread takes its outer lock first, each waits forever for the lock the other holds.",
+      "family": "deadlock",
+      "bug_class": "resource_deadlock",
+      "shared_objects": [
+        "this",
+        "monitorC"
+      ],
+      "accesses": [
+        {
+          "method": "MysticCAS.get",
+          "op": "lock",
+          "target": "this"
+        },
+        {
+          "method": "MysticCAS.get",
+          "op": "lock",
+          "target": "monitorC"
+        },
+        {
+          "method": "MysticCAS.compareAndSwap",
+          "op": "lock",
+          "target": "monitorC"
+        },
+        {
+          "method": "MysticCAS.compareAndSwap",
+          "op": "lock",
+          "target": "this"
+        }
+      ],
+      "missing_guarantee": "consistent_lock_order",
+      "conflict": {
+        "type": "lock_cycle",
+        "edges": [
+          [
+            "this",
+            "monitorC"
+          ],
+          [
+            "monitorC",
+            "this"
+          ]
+        ],
+        "field": null,
+        "methods": [
+          "MysticCAS.get",
+          "MysticCAS.compareAndSwap"
+        ]
+      },
+      "fix_type": "change_lock_order_or_granularity",
+      "fix_action": "remove_nested_lock",
+      "fix_where": [
+        "MysticCAS.get",
+        "MysticCAS.compareAndSwap"
+      ],
+      "acceptable_alternatives": [
+        {
+          "fix_type": "change_lock_order_or_granularity",
+          "fix_action": "reorder_locks"
+        },
+        {
+          "fix_type": "change_lock_order_or_granularity",
+          "fix_action": "single_lock"
+        }
+      ],
+      "meta": {
+        "bug_status": "injected-deadlock-confirmed-by-JPF",
+        "confidence": "high; derived from the single known mutation (JPF prints only thread states, so the lock cycle is derived)",
+        "name_conflicts": []
+      }
+    },
+    "model_output": null
+  },
+  {
+    "id": 24,
+    "case_id": "74-monitor_misuse-0",
+    "operator": "monitor_misuse",
+    "failure_type": "soft_root_cause",
+    "root_cause_score": 0.8167,
+    "fix_score": 0.75,
+    "subscores": {
+      "family": 1.0,
+      "bug_class": 1.0,
+      "missing_guarantee": 1.0,
+      "conflict_type": 1.0,
+      "shared_objects": 0.6667,
+      "accesses": 0.3333,
+      "conflict": 1.0,
+      "fix_type": 0.0,
+      "fix_action": 1.0,
+      "fix_exact": 0.0,
+      "fix_where": 1.0
+    },
+    "code": "class Sleeper {\n    private boolean asleep;\n\n    void tryToSleep() throws InterruptedException {\n        while (!asleep) {\n            wait();\n        }\n    }\n\n    synchronized void setAsleep() {\n        asleep = true;\n        notifyAll();\n    }\n}\n\npublic class Main {\n    public static void main(String[] args) throws Exception {\n        Sleeper sleeper = new Sleeper();\n\n        Thread reader = new Thread(() -> {\n            try {\n                sleeper.tryToSleep();\n            } catch (InterruptedException e) {\n                Thread.currentThread().interrupt();\n            }\n        });\n\n        Thread writer = new Thread(sleeper::setAsleep);\n\n        reader.start();\n        writer.start();\n\n        reader.join();\n        writer.join();\n    }\n}",
+    "ground_truth": {
+      "case_id": "74-monitor_misuse-0",
+      "reasoning": "tryToSleep lost its synchronized modifier but still calls wait() on the Sleeper monitor, so the caller does not own the monitor and the call throws IllegalMonitorStateException as soon as it runs.",
+      "family": "non_deadlock",
+      "bug_class": "monitor_misuse",
+      "shared_objects": [
+        "this"
+      ],
+      "accesses": [
+        {
+          "method": "Sleeper.tryToSleep",
+          "op": "wait",
+          "target": "this"
+        }
+      ],
+      "missing_guarantee": "monitor_ownership",
+      "conflict": {
+        "type": "monitor_not_held",
+        "edges": [],
+        "field": null,
+        "methods": [
+          "Sleeper.tryToSleep"
+        ]
+      },
+      "fix_type": "add_or_widen_synchronization",
+      "fix_action": "restore_sync_block",
+      "fix_where": [
+        "Sleeper.tryToSleep"
+      ],
+      "acceptable_alternatives": [],
+      "meta": {
+        "bug_status": "injected-monitor-misuse-confirmed-by-JPF",
+        "confidence": "high; single edit and JPF reports IllegalMonitorStateException in the mutated method",
+        "name_conflicts": []
+      }
+    },
+    "model_output": null
+  },
+  {
+    "id": 25,
+    "case_id": "74-monitor_misuse-1",
+    "operator": "monitor_misuse",
+    "failure_type": "soft_root_cause",
+    "root_cause_score": 0.8167,
+    "fix_score": 0.75,
+    "subscores": {
+      "family": 1.0,
+      "bug_class": 1.0,
+      "missing_guarantee": 1.0,
+      "conflict_type": 1.0,
+      "shared_objects": 0.6667,
+      "accesses": 0.3333,
+      "conflict": 1.0,
+      "fix_type": 0.0,
+      "fix_action": 1.0,
+      "fix_exact": 0.0,
+      "fix_where": 1.0
+    },
+    "code": "class Sleeper {\n    private boolean asleep;\n\n    synchronized void tryToSleep() throws InterruptedException {\n        while (!asleep) {\n            wait();\n        }\n    }\n\n    void setAsleep() {\n        asleep = true;\n        notifyAll();\n    }\n}\n\npublic class Main {\n    public static void main(String[] args) throws Exception {\n        Sleeper sleeper = new Sleeper();\n\n        Thread reader = new Thread(() -> {\n            try {\n                sleeper.tryToSleep();\n            } catch (InterruptedException e) {\n                Thread.currentThread().interrupt();\n            }\n        });\n\n        Thread writer = new Thread(sleeper::setAsleep);\n\n        reader.start();\n        writer.start();\n\n        reader.join();\n        writer.join();\n    }\n}",
+    "ground_truth": {
+      "case_id": "74-monitor_misuse-1",
+      "reasoning": "setAsleep lost its synchronized modifier but still calls notifyAll() on the Sleeper monitor, so the caller does not own the monitor and the call throws IllegalMonitorStateException as soon as it runs.",
+      "family": "non_deadlock",
+      "bug_class": "monitor_misuse",
+      "shared_objects": [
+        "this"
+      ],
+      "accesses": [
+        {
+          "method": "Sleeper.setAsleep",
+          "op": "notify",
+          "target": "this"
+        }
+      ],
+      "missing_guarantee": "monitor_ownership",
+      "conflict": {
+        "type": "monitor_not_held",
+        "edges": [],
+        "field": null,
+        "methods": [
+          "Sleeper.setAsleep"
+        ]
+      },
+      "fix_type": "add_or_widen_synchronization",
+      "fix_action": "restore_sync_block",
+      "fix_where": [
+        "Sleeper.setAsleep"
+      ],
+      "acceptable_alternatives": [],
+      "meta": {
+        "bug_status": "injected-monitor-misuse-confirmed-by-JPF",
+        "confidence": "high; single edit and JPF reports IllegalMonitorStateException in the mutated method",
+        "name_conflicts": []
+      }
+    },
+    "model_output": null
+  },
+  {
+    "id": 26,
+    "case_id": "74-rm_join-0",
+    "operator": "rm_join",
+    "failure_type": "hard_root_cause",
+    "root_cause_score": 0.0333,
+    "fix_score": 1.0,
+    "subscores": {
+      "family": 0.0,
+      "bug_class": 0.0,
+      "missing_guarantee": 0.0,
+      "conflict_type": 0.0,
+      "shared_objects": 0.0,
+      "accesses": 0.1667,
+      "conflict": 0.0,
+      "fix_type": 1.0,
+      "fix_action": 1.0,
+      "fix_exact": 1.0,
+      "fix_where": 1.0
+    },
+    "code": "class Sleeper {\n    private boolean asleep;\n\n    synchronized void tryToSleep() throws InterruptedException {\n        while (!asleep) {\n            wait();\n        }\n    }\n\n    synchronized void setAsleep() {\n        asleep = true;\n        notifyAll();\n    }\n}\n\npublic class Main {\n    public static void main(String[] args) throws Exception {\n        Sleeper sleeper = new Sleeper();\n\n        Thread reader = new Thread(() -> {\n            try {\n                sleeper.tryToSleep();\n            } catch (InterruptedException e) {\n                Thread.currentThread().interrupt();\n            }\n        });\n\n        Thread writer = new Thread(sleeper::setAsleep);\n\n        reader.start();\n        writer.start();\n\n        reader.join();\n        \n    }\n}",
+    "ground_truth": {
+      "case_id": "74-rm_join-0",
+      "reasoning": "The mutation removes writer.join() from main, but main does nothing afterwards that depends on writer, so the program has no concurrency defect; the failure is on the JPF side and its mechanism is not established.",
+      "family": "other",
+      "bug_class": "no_defect",
+      "shared_objects": [],
+      "accesses": [
+        {
+          "method": "Main.main",
+          "op": "join",
+          "target": "writer"
+        }
+      ],
+      "missing_guarantee": "none",
+      "conflict": {
+        "type": "none",
+        "edges": [],
+        "field": null,
+        "methods": []
+      },
+      "fix_type": "other",
+      "fix_action": "restore_join",
+      "fix_where": [
+        "Main.main"
+      ],
+      "acceptable_alternatives": [],
+      "meta": {
+        "bug_status": "jpf-no-finish (mutation is program-level benign; failure is JPF-side)",
+        "confidence": "high that the removed writer.join() is the trigger, low for the mechanism",
+        "name_conflicts": []
+      }
+    },
+    "model_output": null
+  },
+  {
+    "id": 27,
+    "case_id": "74-rm_join-1",
+    "operator": "rm_join",
+    "failure_type": "hard_root_cause",
+    "root_cause_score": 0.0333,
+    "fix_score": 1.0,
+    "subscores": {
+      "family": 0.0,
+      "bug_class": 0.0,
+      "missing_guarantee": 0.0,
+      "conflict_type": 0.0,
+      "shared_objects": 0.0,
+      "accesses": 0.1667,
+      "conflict": 0.0,
+      "fix_type": 1.0,
+      "fix_action": 1.0,
+      "fix_exact": 1.0,
+      "fix_where": 1.0
+    },
+    "code": "class Sleeper {\n    private boolean asleep;\n\n    synchronized void tryToSleep() throws InterruptedException {\n        while (!asleep) {\n            wait();\n        }\n    }\n\n    synchronized void setAsleep() {\n        asleep = true;\n        notifyAll();\n    }\n}\n\npublic class Main {\n    public static void main(String[] args) throws Exception {\n        Sleeper sleeper = new Sleeper();\n\n        Thread reader = new Thread(() -> {\n            try {\n                sleeper.tryToSleep();\n            } catch (InterruptedException e) {\n                Thread.currentThread().interrupt();\n            }\n        });\n\n        Thread writer = new Thread(sleeper::setAsleep);\n\n        reader.start();\n        writer.start();\n\n        \n        writer.join();\n    }\n}",
+    "ground_truth": {
+      "case_id": "74-rm_join-1",
+      "reasoning": "The mutation removes reader.join() from main, but main does nothing afterwards that depends on reader, so the program has no concurrency defect; the failure is on the JPF side and its mechanism is not established.",
+      "family": "other",
+      "bug_class": "no_defect",
+      "shared_objects": [],
+      "accesses": [
+        {
+          "method": "Main.main",
+          "op": "join",
+          "target": "reader"
+        }
+      ],
+      "missing_guarantee": "none",
+      "conflict": {
+        "type": "none",
+        "edges": [],
+        "field": null,
+        "methods": []
+      },
+      "fix_type": "other",
+      "fix_action": "restore_join",
+      "fix_where": [
+        "Main.main"
+      ],
+      "acceptable_alternatives": [],
+      "meta": {
+        "bug_status": "jpf-no-finish (mutation is program-level benign; failure is JPF-side)",
+        "confidence": "high that the removed reader.join() is the trigger, low for the mechanism",
+        "name_conflicts": []
+      }
+    },
+    "model_output": null
+  },
+  {
+    "id": 28,
+    "case_id": "80-rm_join-0",
+    "operator": "rm_join",
+    "failure_type": "hard_root_cause",
+    "root_cause_score": 0.04,
+    "fix_score": 1.0,
+    "subscores": {
+      "family": 0.0,
+      "bug_class": 0.0,
+      "missing_guarantee": 0.0,
+      "conflict_type": 0.0,
+      "shared_objects": 0.0,
+      "accesses": 0.2,
+      "conflict": 0.0,
+      "fix_type": 1.0,
+      "fix_action": 1.0,
+      "fix_exact": 1.0,
+      "fix_where": 1.0
+    },
+    "code": "import java.math.BigInteger; import java.util.*; class OneValueCache { private final BigInteger lastNumber; private final BigInteger[] lastFactors; OneValueCache(BigInteger number, BigInteger[] factors) { lastNumber = number; lastFactors = Arrays.copyOf(factors, factors.length); } BigInteger[] getFactors(BigInteger number) { if (!lastNumber.equals(number)) return null; return Arrays.copyOf(lastFactors, lastFactors.length); } } class Factorizer { private volatile OneValueCache cache = new OneValueCache(BigInteger.ONE, new BigInteger[] { BigInteger.ONE }); synchronized BigInteger[] service(BigInteger input) { BigInteger[] factors = cache.getFactors(input); if (factors == null) { factors = new BigInteger[] { input }; cache = new OneValueCache(input, factors); } return factors; } } public class Main { public static void main(String[] args) throws Exception { Factorizer factorizer = new Factorizer(); Thread t1 = new Thread(() -> { factorizer.service(BigInteger.ONE); }); Thread t2 = new Thread(() -> { factorizer.service(BigInteger.valueOf(2)); }); t1.start(); t2.start();  t2.join(); } }",
+    "ground_truth": {
+      "case_id": "80-rm_join-0",
+      "reasoning": "The mutation removes t1.join() from main, but main does nothing afterwards that depends on t1, so the program has no concurrency defect; the failure is on the JPF side and its mechanism is not established.",
+      "family": "other",
+      "bug_class": "no_defect",
+      "shared_objects": [],
+      "accesses": [
+        {
+          "method": "Main.main",
+          "op": "join",
+          "target": "t1"
+        }
+      ],
+      "missing_guarantee": "none",
+      "conflict": {
+        "type": "none",
+        "edges": [],
+        "field": null,
+        "methods": []
+      },
+      "fix_type": "other",
+      "fix_action": "restore_join",
+      "fix_where": [
+        "Main.main"
+      ],
+      "acceptable_alternatives": [],
+      "meta": {
+        "bug_status": "jpf-no-finish (mutation is program-level benign; failure is JPF-side)",
+        "confidence": "high that the removed t1.join() is the trigger, low for the mechanism",
+        "name_conflicts": []
+      }
+    },
+    "model_output": null
+  },
+  {
+    "id": 29,
+    "case_id": "80-rm_join-1",
+    "operator": "rm_join",
+    "failure_type": "hard_root_cause",
+    "root_cause_score": 0.04,
+    "fix_score": 1.0,
+    "subscores": {
+      "family": 0.0,
+      "bug_class": 0.0,
+      "missing_guarantee": 0.0,
+      "conflict_type": 0.0,
+      "shared_objects": 0.0,
+      "accesses": 0.2,
+      "conflict": 0.0,
+      "fix_type": 1.0,
+      "fix_action": 1.0,
+      "fix_exact": 1.0,
+      "fix_where": 1.0
+    },
+    "code": "import java.math.BigInteger; import java.util.*; class OneValueCache { private final BigInteger lastNumber; private final BigInteger[] lastFactors; OneValueCache(BigInteger number, BigInteger[] factors) { lastNumber = number; lastFactors = Arrays.copyOf(factors, factors.length); } BigInteger[] getFactors(BigInteger number) { if (!lastNumber.equals(number)) return null; return Arrays.copyOf(lastFactors, lastFactors.length); } } class Factorizer { private volatile OneValueCache cache = new OneValueCache(BigInteger.ONE, new BigInteger[] { BigInteger.ONE }); synchronized BigInteger[] service(BigInteger input) { BigInteger[] factors = cache.getFactors(input); if (factors == null) { factors = new BigInteger[] { input }; cache = new OneValueCache(input, factors); } return factors; } } public class Main { public static void main(String[] args) throws Exception { Factorizer factorizer = new Factorizer(); Thread t1 = new Thread(() -> { factorizer.service(BigInteger.ONE); }); Thread t2 = new Thread(() -> { factorizer.service(BigInteger.valueOf(2)); }); t1.start(); t2.start(); t1.join();  } }",
+    "ground_truth": {
+      "case_id": "80-rm_join-1",
+      "reasoning": "The mutation removes t2.join() from main, but main does nothing afterwards that depends on t2, so the program has no concurrency defect; the failure is on the JPF side and its mechanism is not established.",
+      "family": "other",
+      "bug_class": "no_defect",
+      "shared_objects": [],
+      "accesses": [
+        {
+          "method": "Main.main",
+          "op": "join",
+          "target": "t2"
+        }
+      ],
+      "missing_guarantee": "none",
+      "conflict": {
+        "type": "none",
+        "edges": [],
+        "field": null,
+        "methods": []
+      },
+      "fix_type": "other",
+      "fix_action": "restore_join",
+      "fix_where": [
+        "Main.main"
+      ],
+      "acceptable_alternatives": [],
+      "meta": {
+        "bug_status": "jpf-no-finish (mutation is program-level benign; failure is JPF-side)",
+        "confidence": "high that the removed t2.join() is the trigger, low for the mechanism",
+        "name_conflicts": []
+      }
+    },
+    "model_output": null
+  },
+  {
+    "id": 30,
+    "case_id": "80-rm_sync_one-0",
+    "operator": "rm_sync_one",
+    "failure_type": "soft_root_cause",
+    "root_cause_score": 0.7,
+    "fix_score": 1.0,
+    "subscores": {
+      "family": 1.0,
+      "bug_class": 0.0,
+      "missing_guarantee": 0.0,
+      "conflict_type": 1.0,
+      "shared_objects": 1.0,
+      "accesses": 1.0,
+      "conflict": 1.0,
+      "fix_type": 1.0,
+      "fix_action": 1.0,
+      "fix_exact": 1.0,
+      "fix_where": 1.0
+    },
+    "code": "import java.math.BigInteger; import java.util.*; class OneValueCache { private final BigInteger lastNumber; private final BigInteger[] lastFactors; OneValueCache(BigInteger number, BigInteger[] factors) { lastNumber = number; lastFactors = Arrays.copyOf(factors, factors.length); } BigInteger[] getFactors(BigInteger number) { if (!lastNumber.equals(number)) return null; return Arrays.copyOf(lastFactors, lastFactors.length); } } class Factorizer { private volatile OneValueCache cache = new OneValueCache(BigInteger.ONE, new BigInteger[] { BigInteger.ONE }); BigInteger[] service(BigInteger input) { BigInteger[] factors = cache.getFactors(input); if (factors == null) { factors = new BigInteger[] { input }; cache = new OneValueCache(input, factors); } return factors; } } public class Main { public static void main(String[] args) throws Exception { Factorizer factorizer = new Factorizer(); Thread t1 = new Thread(() -> { factorizer.service(BigInteger.ONE); }); Thread t2 = new Thread(() -> { factorizer.service(BigInteger.valueOf(2)); }); t1.start(); t2.start(); t1.join(); t2.join(); } }",
+    "ground_truth": {
+      "case_id": "80-rm_sync_one-0",
+      "reasoning": "Factorizer.service lost its synchronized modifier, so two threads running it read and write Factorizer.cache without holding any lock and the accesses race.",
+      "family": "non_deadlock",
+      "bug_class": "data_race",
+      "shared_objects": [
+        "Factorizer.cache"
+      ],
+      "accesses": [
+        {
+          "method": "Factorizer.service",
+          "op": "read",
+          "target": "Factorizer.cache"
+        },
+        {
+          "method": "Factorizer.service",
+          "op": "write",
+          "target": "Factorizer.cache"
+        }
+      ],
+      "missing_guarantee": "mutual_exclusion",
+      "conflict": {
+        "type": "read_write_race",
+        "edges": [],
+        "field": "Factorizer.cache",
+        "methods": [
+          "Factorizer.service",
+          "Factorizer.service"
+        ]
+      },
+      "fix_type": "add_or_widen_synchronization",
+      "fix_action": "restore_sync_block",
+      "fix_where": [
+        "Factorizer.service"
+      ],
+      "acceptable_alternatives": [
+        {
+          "fix_type": "add_volatile",
+          "fix_action": "add_volatile_or_atomic"
+        }
+      ],
+      "meta": {
+        "bug_status": "injected-race-confirmed-by-JPF",
+        "confidence": "high; single edit and JPF race report involves the mutated method",
+        "name_conflicts": []
+      }
+    },
+    "model_output": null
+  },
+  {
+    "id": 31,
+    "case_id": "86-lock_order_inversion_methods-0",
+    "operator": "lock_order_inversion_methods",
+    "failure_type": "soft_root_cause",
+    "root_cause_score": 0.8595,
+    "fix_score": 1.0,
+    "subscores": {
+      "family": 1.0,
+      "bug_class": 1.0,
+      "missing_guarantee": 1.0,
+      "conflict_type": 1.0,
+      "shared_objects": 0.5714,
+      "accesses": 0.619,
+      "conflict": 1.0,
+      "fix_type": 1.0,
+      "fix_action": 1.0,
+      "fix_exact": 0.0,
+      "fix_where": 1.0
+    },
+    "code": "import java.util.*; import java.util.concurrent.*; class SafePoint { public volatile int x; public volatile int y; SafePoint(int x, int y) { this.x = x; this.y = y; } } class PublishingVehicleTracker { private static final Object monitorC = new Object();  private final ConcurrentHashMap<String, SafePoint> locations; PublishingVehicleTracker(Map<String, SafePoint> initial) { locations = new ConcurrentHashMap<>(initial); } Map<String, SafePoint> getLocations() { return Collections.unmodifiableMap(locations); } synchronized SafePoint getLocation(String id) { synchronized (monitorC) {  SafePoint p = locations.get(id); return p == null ? null : new SafePoint(p.x, p.y);  } } void setLocation(String id, int x, int y) { synchronized (monitorC) { synchronized (this) {  SafePoint p = locations.get(id); if (p == null) throw new IllegalArgumentException(); p.x = x; p.y = y;  } } } } public class Main { public static void main(String[] args) throws Exception { Map<String, SafePoint> initial = new HashMap<>(); initial.put(String.valueOf(1), new SafePoint(0, 0)); PublishingVehicleTracker tracker = new PublishingVehicleTracker(initial); ExecutorService es = Executors.newFixedThreadPool(2); es.execute(() -> { tracker.setLocation(String.valueOf(1), 2, 2); }); es.execute(() -> { tracker.getLocation(String.valueOf(1)); }); es.shutdown(); es.awaitTermination(1, TimeUnit.SECONDS); } }",
+    "ground_truth": {
+      "case_id": "86-lock_order_inversion_methods-0",
+      "reasoning": "getLocation acquires this then monitorC while setLocation acquires monitorC then this; if each thread takes its outer lock first, each waits forever for the lock the other holds.",
+      "family": "deadlock",
+      "bug_class": "resource_deadlock",
+      "shared_objects": [
+        "this",
+        "monitorC"
+      ],
+      "accesses": [
+        {
+          "method": "PublishingVehicleTracker.getLocation",
+          "op": "lock",
+          "target": "this"
+        },
+        {
+          "method": "PublishingVehicleTracker.getLocation",
+          "op": "lock",
+          "target": "monitorC"
+        },
+        {
+          "method": "PublishingVehicleTracker.setLocation",
+          "op": "lock",
+          "target": "monitorC"
+        },
+        {
+          "method": "PublishingVehicleTracker.setLocation",
+          "op": "lock",
+          "target": "this"
+        }
+      ],
+      "missing_guarantee": "consistent_lock_order",
+      "conflict": {
+        "type": "lock_cycle",
+        "edges": [
+          [
+            "this",
+            "monitorC"
+          ],
+          [
+            "monitorC",
+            "this"
+          ]
+        ],
+        "field": null,
+        "methods": [
+          "PublishingVehicleTracker.getLocation",
+          "PublishingVehicleTracker.setLocation"
+        ]
+      },
+      "fix_type": "change_lock_order_or_granularity",
+      "fix_action": "remove_nested_lock",
+      "fix_where": [
+        "PublishingVehicleTracker.getLocation",
+        "PublishingVehicleTracker.setLocation"
+      ],
+      "acceptable_alternatives": [
+        {
+          "fix_type": "change_lock_order_or_granularity",
+          "fix_action": "reorder_locks"
+        },
+        {
+          "fix_type": "change_lock_order_or_granularity",
+          "fix_action": "single_lock"
+        }
+      ],
+      "meta": {
+        "bug_status": "injected-deadlock-confirmed-by-JPF",
+        "confidence": "high; derived from the single known mutation (JPF prints only thread states, so the lock cycle is derived)",
+        "name_conflicts": []
+      }
+    },
+    "model_output": null
+  },
+  {
+    "id": 32,
+    "case_id": "87-lock_order_inversion_methods-2",
+    "operator": "lock_order_inversion_methods",
+    "failure_type": "soft_root_cause",
+    "root_cause_score": 0.8999,
+    "fix_score": 1.0,
+    "subscores": {
+      "family": 1.0,
+      "bug_class": 1.0,
+      "missing_guarantee": 1.0,
+      "conflict_type": 1.0,
+      "shared_objects": 0.8,
+      "accesses": 0.6494,
+      "conflict": 1.0,
+      "fix_type": 1.0,
+      "fix_action": 1.0,
+      "fix_exact": 0.0,
+      "fix_where": 1.0
+    },
+    "code": "import java.util.*; class ImproveList<T> extends AbstractList<T> implements List<T> { private static final Object monitorC = new Object();  private final List<T> list; ImproveList(List<T> backing) { list = backing; } public int size() { return list.size(); } public T get(int index) { return list.get(index); } public synchronized T set(int index, T element) { return list.set(index, element); } public synchronized void add(int index, T element) { list.add(index, element); } public synchronized boolean add(T element) { synchronized (monitorC) {  return list.add(element);  } } public synchronized T remove(int index) { return list.remove(index); } public synchronized boolean remove(Object o) { return list.remove(o); } public synchronized boolean addAll(Collection<? extends T> c) { return list.addAll(c); } public synchronized boolean addAll(int index, Collection<? extends T> c) { return list.addAll(index, c); } public synchronized void clear() { list.clear(); } public boolean putIfAbsent(T element) { synchronized (monitorC) { synchronized (this) {  boolean present = list.contains(element); if (!present) list.add(element); return !present;  } } } } public class Main { public static void main(String[] args) throws Exception { ImproveList<Integer> list = new ImproveList<>(new ArrayList<>()); Thread t1 = new Thread(() -> { list.add(1); }); Thread t2 = new Thread(() -> { list.putIfAbsent(1); }); t1.start(); t2.start(); t1.join(); t2.join(); } }",
+    "ground_truth": {
+      "case_id": "87-lock_order_inversion_methods-2",
+      "reasoning": "add acquires this then monitorC while putIfAbsent acquires monitorC then this; if each thread takes its outer lock first, each waits forever for the lock the other holds.",
+      "family": "deadlock",
+      "bug_class": "resource_deadlock",
+      "shared_objects": [
+        "this",
+        "monitorC"
+      ],
+      "accesses": [
+        {
+          "method": "ImproveList.add",
+          "op": "lock",
+          "target": "this"
+        },
+        {
+          "method": "ImproveList.add",
+          "op": "lock",
+          "target": "monitorC"
+        },
+        {
+          "method": "ImproveList.putIfAbsent",
+          "op": "lock",
+          "target": "monitorC"
+        },
+        {
+          "method": "ImproveList.putIfAbsent",
+          "op": "lock",
+          "target": "this"
+        }
+      ],
+      "missing_guarantee": "consistent_lock_order",
+      "conflict": {
+        "type": "lock_cycle",
+        "edges": [
+          [
+            "this",
+            "monitorC"
+          ],
+          [
+            "monitorC",
+            "this"
+          ]
+        ],
+        "field": null,
+        "methods": [
+          "ImproveList.add",
+          "ImproveList.putIfAbsent"
+        ]
+      },
+      "fix_type": "change_lock_order_or_granularity",
+      "fix_action": "remove_nested_lock",
+      "fix_where": [
+        "ImproveList.add",
+        "ImproveList.putIfAbsent"
+      ],
+      "acceptable_alternatives": [
+        {
+          "fix_type": "change_lock_order_or_granularity",
+          "fix_action": "reorder_locks"
+        },
+        {
+          "fix_type": "change_lock_order_or_granularity",
+          "fix_action": "single_lock"
+        }
+      ],
+      "meta": {
+        "bug_status": "injected-deadlock-confirmed-by-JPF",
+        "confidence": "high; derived from the single known mutation (JPF prints only thread states, so the lock cycle is derived)",
+        "name_conflicts": []
+      }
+    },
+    "model_output": null
+  },
+  {
+    "id": 33,
+    "case_id": "87-rm_join-0",
+    "operator": "rm_join",
+    "failure_type": "hard_root_cause",
+    "root_cause_score": 0.0333,
+    "fix_score": 1.0,
+    "subscores": {
+      "family": 0.0,
+      "bug_class": 0.0,
+      "missing_guarantee": 0.0,
+      "conflict_type": 0.0,
+      "shared_objects": 0.0,
+      "accesses": 0.1667,
+      "conflict": 0.0,
+      "fix_type": 1.0,
+      "fix_action": 1.0,
+      "fix_exact": 1.0,
+      "fix_where": 1.0
+    },
+    "code": "import java.util.*; class ImproveList<T> extends AbstractList<T> implements List<T> { private final List<T> list; ImproveList(List<T> backing) { list = backing; } public int size() { return list.size(); } public T get(int index) { return list.get(index); } public synchronized T set(int index, T element) { return list.set(index, element); } public synchronized void add(int index, T element) { list.add(index, element); } public synchronized boolean add(T element) { return list.add(element); } public synchronized T remove(int index) { return list.remove(index); } public synchronized boolean remove(Object o) { return list.remove(o); } public synchronized boolean addAll(Collection<? extends T> c) { return list.addAll(c); } public synchronized boolean addAll(int index, Collection<? extends T> c) { return list.addAll(index, c); } public synchronized void clear() { list.clear(); } public synchronized boolean putIfAbsent(T element) { boolean present = list.contains(element); if (!present) list.add(element); return !present; } } public class Main { public static void main(String[] args) throws Exception { ImproveList<Integer> list = new ImproveList<>(new ArrayList<>()); Thread t1 = new Thread(() -> { list.add(1); }); Thread t2 = new Thread(() -> { list.putIfAbsent(1); }); t1.start(); t2.start(); t1.join();  } }",
+    "ground_truth": {
+      "case_id": "87-rm_join-0",
+      "reasoning": "The mutation removes t2.join() from main, but main does nothing afterwards that depends on t2, so the program has no concurrency defect; the failure is on the JPF side and its mechanism is not established.",
+      "family": "other",
+      "bug_class": "no_defect",
+      "shared_objects": [],
+      "accesses": [
+        {
+          "method": "Main.main",
+          "op": "join",
+          "target": "t2"
+        }
+      ],
+      "missing_guarantee": "none",
+      "conflict": {
+        "type": "none",
+        "edges": [],
+        "field": null,
+        "methods": []
+      },
+      "fix_type": "other",
+      "fix_action": "restore_join",
+      "fix_where": [
+        "Main.main"
+      ],
+      "acceptable_alternatives": [],
+      "meta": {
+        "bug_status": "jpf-no-finish (mutation is program-level benign; failure is JPF-side)",
+        "confidence": "high that the removed t2.join() is the trigger, low for the mechanism",
+        "name_conflicts": []
+      }
+    },
+    "model_output": null
+  },
+  {
+    "id": 34,
+    "case_id": "87-rm_join-1",
+    "operator": "rm_join",
+    "failure_type": "hard_root_cause",
+    "root_cause_score": 0.0333,
+    "fix_score": 1.0,
+    "subscores": {
+      "family": 0.0,
+      "bug_class": 0.0,
+      "missing_guarantee": 0.0,
+      "conflict_type": 0.0,
+      "shared_objects": 0.0,
+      "accesses": 0.1667,
+      "conflict": 0.0,
+      "fix_type": 1.0,
+      "fix_action": 1.0,
+      "fix_exact": 1.0,
+      "fix_where": 1.0
+    },
+    "code": "import java.util.*; class ImproveList<T> extends AbstractList<T> implements List<T> { private final List<T> list; ImproveList(List<T> backing) { list = backing; } public int size() { return list.size(); } public T get(int index) { return list.get(index); } public synchronized T set(int index, T element) { return list.set(index, element); } public synchronized void add(int index, T element) { list.add(index, element); } public synchronized boolean add(T element) { return list.add(element); } public synchronized T remove(int index) { return list.remove(index); } public synchronized boolean remove(Object o) { return list.remove(o); } public synchronized boolean addAll(Collection<? extends T> c) { return list.addAll(c); } public synchronized boolean addAll(int index, Collection<? extends T> c) { return list.addAll(index, c); } public synchronized void clear() { list.clear(); } public synchronized boolean putIfAbsent(T element) { boolean present = list.contains(element); if (!present) list.add(element); return !present; } } public class Main { public static void main(String[] args) throws Exception { ImproveList<Integer> list = new ImproveList<>(new ArrayList<>()); Thread t1 = new Thread(() -> { list.add(1); }); Thread t2 = new Thread(() -> { list.putIfAbsent(1); }); t1.start(); t2.start();  t2.join(); } }",
+    "ground_truth": {
+      "case_id": "87-rm_join-1",
+      "reasoning": "The mutation removes t1.join() from main, but main does nothing afterwards that depends on t1, so the program has no concurrency defect; the failure is on the JPF side and its mechanism is not established.",
+      "family": "other",
+      "bug_class": "no_defect",
+      "shared_objects": [],
+      "accesses": [
+        {
+          "method": "Main.main",
+          "op": "join",
+          "target": "t1"
+        }
+      ],
+      "missing_guarantee": "none",
+      "conflict": {
+        "type": "none",
+        "edges": [],
+        "field": null,
+        "methods": []
+      },
+      "fix_type": "other",
+      "fix_action": "restore_join",
+      "fix_where": [
+        "Main.main"
+      ],
+      "acceptable_alternatives": [],
+      "meta": {
+        "bug_status": "jpf-no-finish (mutation is program-level benign; failure is JPF-side)",
+        "confidence": "high that the removed t1.join() is the trigger, low for the mechanism",
+        "name_conflicts": []
+      }
+    },
+    "model_output": null
+  },
+  {
+    "id": 35,
+    "case_id": "96-rm_join-0",
+    "operator": "rm_join",
+    "failure_type": "hard_root_cause",
+    "root_cause_score": 0.05,
+    "fix_score": 1.0,
+    "subscores": {
+      "family": 0.0,
+      "bug_class": 0.0,
+      "missing_guarantee": 0.0,
+      "conflict_type": 0.0,
+      "shared_objects": 0.0,
+      "accesses": 0.25,
+      "conflict": 0.0,
+      "fix_type": 1.0,
+      "fix_action": 1.0,
+      "fix_exact": 1.0,
+      "fix_where": 1.0
+    },
+    "code": "class StripedMap {\n    static final int N_LOCKS = 16;\n    private final Node[] buckets;\n    private final Object[] locks;\n    static class Node {\n        Object key;\n        Object value;\n        Node next;\n        Node(Object key, Object value, Node next) {\n            this.key = key;\n            this.value = value;\n            this.next = next;\n        }\n    }\n    StripedMap(int bucketCount) {\n        buckets = new Node[bucketCount];\n        locks = new Object[N_LOCKS];\n        for (int i = 0; i < N_LOCKS; i++) locks[i] = new Object();\n    }\n    int hashIndex(Object key) {\n        return (key.hashCode() & 0x7fffffff) % buckets.length;\n    }\n    Object get(Object key) {\n        int index = hashIndex(key);\n        synchronized (locks[index % N_LOCKS]) {\n            Node node = buckets[index];\n            while (node != null) {\n                if (node.key.equals(key)) return node.value;\n                node = node.next;\n            }\n            return null;\n        }\n    }\n    void put(Object key, Object value) {\n        int index = hashIndex(key);\n        synchronized (locks[index % N_LOCKS]) {\n            buckets[index] = new Node(key, value, buckets[index]);\n        }\n    }\n    void clear() {\n        for (int i = 0; i < buckets.length; i++) {\n            synchronized (locks[i % N_LOCKS]) {\n                buckets[i] = null;\n            }\n        }\n    }\n}\n\npublic class Main {\n    public static void main(String[] args) throws Exception {\n        StripedMap map = new StripedMap(4);\n        Thread t1 = new Thread(() -> { map.put(1, 2); });\n        Thread t2 = new Thread(() -> { map.get(1); });\n        Thread t3 = new Thread(() -> { map.put(3, 4); });\n        Thread t4 = new Thread(() -> { map.clear(); });\n        t1.start(); t2.start(); t3.start(); t4.start();\n        t1.join();  t3.join(); t4.join();\n    }\n}",
+    "ground_truth": {
+      "case_id": "96-rm_join-0",
+      "reasoning": "The mutation removes t2.join() from main, but main does nothing afterwards that depends on t2, so the program has no concurrency defect; the failure is on the JPF side and its mechanism is not established.",
+      "family": "other",
+      "bug_class": "no_defect",
+      "shared_objects": [],
+      "accesses": [
+        {
+          "method": "Main.main",
+          "op": "join",
+          "target": "t2"
+        }
+      ],
+      "missing_guarantee": "none",
+      "conflict": {
+        "type": "none",
+        "edges": [],
+        "field": null,
+        "methods": []
+      },
+      "fix_type": "other",
+      "fix_action": "restore_join",
+      "fix_where": [
+        "Main.main"
+      ],
+      "acceptable_alternatives": [],
+      "meta": {
+        "bug_status": "jpf-no-finish (mutation is program-level benign; failure is JPF-side)",
+        "confidence": "high that the removed t2.join() is the trigger, low for the mechanism",
+        "name_conflicts": []
+      }
+    },
+    "model_output": null
+  },
+  {
+    "id": 36,
+    "case_id": "96-rm_join-1",
+    "operator": "rm_join",
+    "failure_type": "hard_root_cause",
+    "root_cause_score": 0.05,
+    "fix_score": 1.0,
+    "subscores": {
+      "family": 0.0,
+      "bug_class": 0.0,
+      "missing_guarantee": 0.0,
+      "conflict_type": 0.0,
+      "shared_objects": 0.0,
+      "accesses": 0.25,
+      "conflict": 0.0,
+      "fix_type": 1.0,
+      "fix_action": 1.0,
+      "fix_exact": 1.0,
+      "fix_where": 1.0
+    },
+    "code": "class StripedMap {\n    static final int N_LOCKS = 16;\n    private final Node[] buckets;\n    private final Object[] locks;\n    static class Node {\n        Object key;\n        Object value;\n        Node next;\n        Node(Object key, Object value, Node next) {\n            this.key = key;\n            this.value = value;\n            this.next = next;\n        }\n    }\n    StripedMap(int bucketCount) {\n        buckets = new Node[bucketCount];\n        locks = new Object[N_LOCKS];\n        for (int i = 0; i < N_LOCKS; i++) locks[i] = new Object();\n    }\n    int hashIndex(Object key) {\n        return (key.hashCode() & 0x7fffffff) % buckets.length;\n    }\n    Object get(Object key) {\n        int index = hashIndex(key);\n        synchronized (locks[index % N_LOCKS]) {\n            Node node = buckets[index];\n            while (node != null) {\n                if (node.key.equals(key)) return node.value;\n                node = node.next;\n            }\n            return null;\n        }\n    }\n    void put(Object key, Object value) {\n        int index = hashIndex(key);\n        synchronized (locks[index % N_LOCKS]) {\n            buckets[index] = new Node(key, value, buckets[index]);\n        }\n    }\n    void clear() {\n        for (int i = 0; i < buckets.length; i++) {\n            synchronized (locks[i % N_LOCKS]) {\n                buckets[i] = null;\n            }\n        }\n    }\n}\n\npublic class Main {\n    public static void main(String[] args) throws Exception {\n        StripedMap map = new StripedMap(4);\n        Thread t1 = new Thread(() -> { map.put(1, 2); });\n        Thread t2 = new Thread(() -> { map.get(1); });\n        Thread t3 = new Thread(() -> { map.put(3, 4); });\n        Thread t4 = new Thread(() -> { map.clear(); });\n        t1.start(); t2.start(); t3.start(); t4.start();\n        t1.join(); t2.join(); t3.join(); \n    }\n}",
+    "ground_truth": {
+      "case_id": "96-rm_join-1",
+      "reasoning": "The mutation removes t4.join() from main, but main does nothing afterwards that depends on t4, so the program has no concurrency defect; the failure is on the JPF side and its mechanism is not established.",
+      "family": "other",
+      "bug_class": "no_defect",
+      "shared_objects": [],
+      "accesses": [
+        {
+          "method": "Main.main",
+          "op": "join",
+          "target": "t4"
+        }
+      ],
+      "missing_guarantee": "none",
+      "conflict": {
+        "type": "none",
+        "edges": [],
+        "field": null,
+        "methods": []
+      },
+      "fix_type": "other",
+      "fix_action": "restore_join",
+      "fix_where": [
+        "Main.main"
+      ],
+      "acceptable_alternatives": [],
+      "meta": {
+        "bug_status": "jpf-no-finish (mutation is program-level benign; failure is JPF-side)",
+        "confidence": "high that the removed t4.join() is the trigger, low for the mechanism",
+        "name_conflicts": []
+      }
+    },
+    "model_output": null
+  },
+  {
+    "id": 37,
+    "case_id": "96-rm_join-2",
+    "operator": "rm_join",
+    "failure_type": "hard_root_cause",
+    "root_cause_score": 0.05,
+    "fix_score": 1.0,
+    "subscores": {
+      "family": 0.0,
+      "bug_class": 0.0,
+      "missing_guarantee": 0.0,
+      "conflict_type": 0.0,
+      "shared_objects": 0.0,
+      "accesses": 0.25,
+      "conflict": 0.0,
+      "fix_type": 1.0,
+      "fix_action": 1.0,
+      "fix_exact": 1.0,
+      "fix_where": 1.0
+    },
+    "code": "class StripedMap {\n    static final int N_LOCKS = 16;\n    private final Node[] buckets;\n    private final Object[] locks;\n    static class Node {\n        Object key;\n        Object value;\n        Node next;\n        Node(Object key, Object value, Node next) {\n            this.key = key;\n            this.value = value;\n            this.next = next;\n        }\n    }\n    StripedMap(int bucketCount) {\n        buckets = new Node[bucketCount];\n        locks = new Object[N_LOCKS];\n        for (int i = 0; i < N_LOCKS; i++) locks[i] = new Object();\n    }\n    int hashIndex(Object key) {\n        return (key.hashCode() & 0x7fffffff) % buckets.length;\n    }\n    Object get(Object key) {\n        int index = hashIndex(key);\n        synchronized (locks[index % N_LOCKS]) {\n            Node node = buckets[index];\n            while (node != null) {\n                if (node.key.equals(key)) return node.value;\n                node = node.next;\n            }\n            return null;\n        }\n    }\n    void put(Object key, Object value) {\n        int index = hashIndex(key);\n        synchronized (locks[index % N_LOCKS]) {\n            buckets[index] = new Node(key, value, buckets[index]);\n        }\n    }\n    void clear() {\n        for (int i = 0; i < buckets.length; i++) {\n            synchronized (locks[i % N_LOCKS]) {\n                buckets[i] = null;\n            }\n        }\n    }\n}\n\npublic class Main {\n    public static void main(String[] args) throws Exception {\n        StripedMap map = new StripedMap(4);\n        Thread t1 = new Thread(() -> { map.put(1, 2); });\n        Thread t2 = new Thread(() -> { map.get(1); });\n        Thread t3 = new Thread(() -> { map.put(3, 4); });\n        Thread t4 = new Thread(() -> { map.clear(); });\n        t1.start(); t2.start(); t3.start(); t4.start();\n        t1.join(); t2.join();  t4.join();\n    }\n}",
+    "ground_truth": {
+      "case_id": "96-rm_join-2",
+      "reasoning": "The mutation removes t3.join() from main, but main does nothing afterwards that depends on t3, so the program has no concurrency defect; the failure is on the JPF side and its mechanism is not established.",
+      "family": "other",
+      "bug_class": "no_defect",
+      "shared_objects": [],
+      "accesses": [
+        {
+          "method": "Main.main",
+          "op": "join",
+          "target": "t3"
+        }
+      ],
+      "missing_guarantee": "none",
+      "conflict": {
+        "type": "none",
+        "edges": [],
+        "field": null,
+        "methods": []
+      },
+      "fix_type": "other",
+      "fix_action": "restore_join",
+      "fix_where": [
+        "Main.main"
+      ],
+      "acceptable_alternatives": [],
+      "meta": {
+        "bug_status": "jpf-no-finish (mutation is program-level benign; failure is JPF-side)",
+        "confidence": "high that the removed t3.join() is the trigger, low for the mechanism",
+        "name_conflicts": []
+      }
+    },
+    "model_output": null
+  },
+  {
+    "id": 38,
+    "case_id": "96-rm_sync_block-1",
+    "operator": "rm_sync_block",
+    "failure_type": "soft_root_cause",
+    "root_cause_score": 0.8167,
+    "fix_score": 1.0,
+    "subscores": {
+      "family": 1.0,
+      "bug_class": 1.0,
+      "missing_guarantee": 1.0,
+      "conflict_type": 1.0,
+      "shared_objects": 1.0,
+      "accesses": 0.3333,
+      "conflict": 0.75,
+      "fix_type": 1.0,
+      "fix_action": 1.0,
+      "fix_exact": 1.0,
+      "fix_where": 1.0
+    },
+    "code": "class StripedMap {\n    static final int N_LOCKS = 16;\n    private final Node[] buckets;\n    private final Object[] locks;\n    static class Node {\n        Object key;\n        Object value;\n        Node next;\n        Node(Object key, Object value, Node next) {\n            this.key = key;\n            this.value = value;\n            this.next = next;\n        }\n    }\n    StripedMap(int bucketCount) {\n        buckets = new Node[bucketCount];\n        locks = new Object[N_LOCKS];\n        for (int i = 0; i < N_LOCKS; i++) locks[i] = new Object();\n    }\n    int hashIndex(Object key) {\n        return (key.hashCode() & 0x7fffffff) % buckets.length;\n    }\n    Object get(Object key) {\n        int index = hashIndex(key);\n        {\n            Node node = buckets[index];\n            while (node != null) {\n                if (node.key.equals(key)) return node.value;\n                node = node.next;\n            }\n            return null;\n        }\n    }\n    void put(Object key, Object value) {\n        int index = hashIndex(key);\n        synchronized (locks[index % N_LOCKS]) {\n            buckets[index] = new Node(key, value, buckets[index]);\n        }\n    }\n    void clear() {\n        for (int i = 0; i < buckets.length; i++) {\n            synchronized (locks[i % N_LOCKS]) {\n                buckets[i] = null;\n            }\n        }\n    }\n}\n\npublic class Main {\n    public static void main(String[] args) throws Exception {\n        StripedMap map = new StripedMap(4);\n        Thread t1 = new Thread(() -> { map.put(1, 2); });\n        Thread t2 = new Thread(() -> { map.get(1); });\n        Thread t3 = new Thread(() -> { map.put(3, 4); });\n        Thread t4 = new Thread(() -> { map.clear(); });\n        t1.start(); t2.start(); t3.start(); t4.start();\n        t1.join(); t2.join(); t3.join(); t4.join();\n    }\n}",
+    "ground_truth": {
+      "case_id": "96-rm_sync_block-1",
+      "reasoning": "StripedMap.get no longer wraps its read of StripedMap.buckets in a block on locks, while StripedMap.clear still holds locks for its write, so the two accesses share no common lock and race.",
+      "family": "non_deadlock",
+      "bug_class": "data_race",
+      "shared_objects": [
+        "StripedMap.buckets",
+        "locks"
+      ],
+      "accesses": [
+        {
+          "method": "StripedMap.get",
+          "op": "read",
+          "target": "StripedMap.buckets"
+        },
+        {
+          "method": "StripedMap.clear",
+          "op": "lock",
+          "target": "locks"
+        },
+        {
+          "method": "StripedMap.clear",
+          "op": "write",
+          "target": "StripedMap.buckets"
+        }
+      ],
+      "missing_guarantee": "mutual_exclusion",
+      "conflict": {
+        "type": "read_write_race",
+        "edges": [],
+        "field": "StripedMap.buckets",
+        "methods": [
+          "StripedMap.get",
+          "StripedMap.clear"
+        ]
+      },
+      "fix_type": "add_or_widen_synchronization",
+      "fix_action": "restore_sync_block",
+      "fix_where": [
+        "StripedMap.get"
+      ],
+      "acceptable_alternatives": [
+        {
+          "fix_type": "add_volatile",
+          "fix_action": "add_volatile_or_atomic"
+        }
+      ],
+      "meta": {
+        "bug_status": "injected-race-confirmed-by-JPF",
+        "confidence": "high; single edit and JPF race report involves the mutated method",
+        "name_conflicts": []
+      }
+    },
+    "model_output": null
+  },
+  {
+    "id": 39,
+    "case_id": "96-rm_sync_block-2",
+    "operator": "rm_sync_block",
+    "failure_type": "soft_root_cause",
+    "root_cause_score": 0.7167,
+    "fix_score": 1.0,
+    "subscores": {
+      "family": 1.0,
+      "bug_class": 1.0,
+      "missing_guarantee": 1.0,
+      "conflict_type": 0.0,
+      "shared_objects": 1.0,
+      "accesses": 0.3333,
+      "conflict": 0.75,
+      "fix_type": 1.0,
+      "fix_action": 1.0,
+      "fix_exact": 1.0,
+      "fix_where": 1.0
+    },
+    "code": "class StripedMap {\n    static final int N_LOCKS = 16;\n    private final Node[] buckets;\n    private final Object[] locks;\n    static class Node {\n        Object key;\n        Object value;\n        Node next;\n        Node(Object key, Object value, Node next) {\n            this.key = key;\n            this.value = value;\n            this.next = next;\n        }\n    }\n    StripedMap(int bucketCount) {\n        buckets = new Node[bucketCount];\n        locks = new Object[N_LOCKS];\n        for (int i = 0; i < N_LOCKS; i++) locks[i] = new Object();\n    }\n    int hashIndex(Object key) {\n        return (key.hashCode() & 0x7fffffff) % buckets.length;\n    }\n    Object get(Object key) {\n        int index = hashIndex(key);\n        synchronized (locks[index % N_LOCKS]) {\n            Node node = buckets[index];\n            while (node != null) {\n                if (node.key.equals(key)) return node.value;\n                node = node.next;\n            }\n            return null;\n        }\n    }\n    void put(Object key, Object value) {\n        int index = hashIndex(key);\n        {\n            buckets[index] = new Node(key, value, buckets[index]);\n        }\n    }\n    void clear() {\n        for (int i = 0; i < buckets.length; i++) {\n            synchronized (locks[i % N_LOCKS]) {\n                buckets[i] = null;\n            }\n        }\n    }\n}\n\npublic class Main {\n    public static void main(String[] args) throws Exception {\n        StripedMap map = new StripedMap(4);\n        Thread t1 = new Thread(() -> { map.put(1, 2); });\n        Thread t2 = new Thread(() -> { map.get(1); });\n        Thread t3 = new Thread(() -> { map.put(3, 4); });\n        Thread t4 = new Thread(() -> { map.clear(); });\n        t1.start(); t2.start(); t3.start(); t4.start();\n        t1.join(); t2.join(); t3.join(); t4.join();\n    }\n}",
+    "ground_truth": {
+      "case_id": "96-rm_sync_block-2",
+      "reasoning": "StripedMap.put no longer wraps its write of StripedMap.buckets in a block on locks, while StripedMap.clear still holds locks for its write, so the two accesses share no common lock and race.",
+      "family": "non_deadlock",
+      "bug_class": "data_race",
+      "shared_objects": [
+        "StripedMap.buckets",
+        "locks"
+      ],
+      "accesses": [
+        {
+          "method": "StripedMap.put",
+          "op": "write",
+          "target": "StripedMap.buckets"
+        },
+        {
+          "method": "StripedMap.clear",
+          "op": "lock",
+          "target": "locks"
+        },
+        {
+          "method": "StripedMap.clear",
+          "op": "write",
+          "target": "StripedMap.buckets"
+        }
+      ],
+      "missing_guarantee": "mutual_exclusion",
+      "conflict": {
+        "type": "write_write_race",
+        "edges": [],
+        "field": "StripedMap.buckets",
+        "methods": [
+          "StripedMap.put",
+          "StripedMap.clear"
+        ]
+      },
+      "fix_type": "add_or_widen_synchronization",
+      "fix_action": "restore_sync_block",
+      "fix_where": [
+        "StripedMap.put"
+      ],
+      "acceptable_alternatives": [
+        {
+          "fix_type": "add_volatile",
+          "fix_action": "add_volatile_or_atomic"
+        }
+      ],
+      "meta": {
+        "bug_status": "injected-race-confirmed-by-JPF",
+        "confidence": "high; single edit and JPF race report involves the mutated method",
+        "name_conflicts": []
+      }
+    },
+    "model_output": null
+  },
+  {
+    "id": 40,
+    "case_id": "96-wrong_lock-0",
+    "operator": "wrong_lock",
+    "failure_type": "soft_root_cause",
+    "root_cause_score": 0.75,
+    "fix_score": 0.65,
+    "subscores": {
+      "family": 1.0,
+      "bug_class": 1.0,
+      "missing_guarantee": 1.0,
+      "conflict_type": 0.0,
+      "shared_objects": 1.0,
+      "accesses": 0.5,
+      "conflict": 0.75,
+      "fix_type": 1.0,
+      "fix_action": 1.0,
+      "fix_exact": 0.0,
+      "fix_where": 0.0
+    },
+    "code": "class StripedMap { private static final Object monitorB = new Object(); \n    static final int N_LOCKS = 16;\n    private final Node[] buckets;\n    private final Object[] locks;\n    static class Node {\n        Object key;\n        Object value;\n        Node next;\n        Node(Object key, Object value, Node next) {\n            this.key = key;\n            this.value = value;\n            this.next = next;\n        }\n    }\n    StripedMap(int bucketCount) {\n        buckets = new Node[bucketCount];\n        locks = new Object[N_LOCKS];\n        for (int i = 0; i < N_LOCKS; i++) locks[i] = new Object();\n    }\n    int hashIndex(Object key) {\n        return (key.hashCode() & 0x7fffffff) % buckets.length;\n    }\n    Object get(Object key) {\n        int index = hashIndex(key);\n        synchronized (locks[index % N_LOCKS]) {\n            Node node = buckets[index];\n            while (node != null) {\n                if (node.key.equals(key)) return node.value;\n                node = node.next;\n            }\n            return null;\n        }\n    }\n    void put(Object key, Object value) {\n        int index = hashIndex(key);\n        synchronized (locks[index % N_LOCKS]) {\n            buckets[index] = new Node(key, value, buckets[index]);\n        }\n    }\n    void clear() {\n        for (int i = 0; i < buckets.length; i++) {\n            synchronized (monitorB) {\n                buckets[i] = null;\n            }\n        }\n    }\n}\n\npublic class Main {\n    public static void main(String[] args) throws Exception {\n        StripedMap map = new StripedMap(4);\n        Thread t1 = new Thread(() -> { map.put(1, 2); });\n        Thread t2 = new Thread(() -> { map.get(1); });\n        Thread t3 = new Thread(() -> { map.put(3, 4); });\n        Thread t4 = new Thread(() -> { map.clear(); });\n        t1.start(); t2.start(); t3.start(); t4.start();\n        t1.join(); t2.join(); t3.join(); t4.join();\n    }\n}",
+    "ground_truth": {
+      "case_id": "96-wrong_lock-0",
+      "reasoning": "StripedMap.clear guards its access to StripedMap.buckets with monitorB, which no other code uses, while StripedMap.put uses locks, so the two writes share no common lock and race.",
+      "family": "non_deadlock",
+      "bug_class": "data_race",
+      "shared_objects": [
+        "StripedMap.buckets",
+        "locks",
+        "monitorB"
+      ],
+      "accesses": [
+        {
+          "method": "StripedMap.put",
+          "op": "lock",
+          "target": "locks"
+        },
+        {
+          "method": "StripedMap.put",
+          "op": "write",
+          "target": "StripedMap.buckets"
+        },
+        {
+          "method": "StripedMap.clear",
+          "op": "lock",
+          "target": "monitorB"
+        },
+        {
+          "method": "StripedMap.clear",
+          "op": "write",
+          "target": "StripedMap.buckets"
+        }
+      ],
+      "missing_guarantee": "common_lock",
+      "conflict": {
+        "type": "write_write_race",
+        "edges": [],
+        "field": "StripedMap.buckets",
+        "methods": [
+          "StripedMap.put",
+          "StripedMap.clear"
+        ]
+      },
+      "fix_type": "change_lock_order_or_granularity",
+      "fix_action": "unify_lock",
+      "fix_where": [
+        "StripedMap.clear"
+      ],
+      "acceptable_alternatives": [
+        {
+          "fix_type": "add_or_widen_synchronization",
+          "fix_action": "unify_lock"
+        }
+      ],
+      "meta": {
+        "bug_status": "injected-race-confirmed-by-JPF",
+        "confidence": "high; single edit and JPF race report involves the mutated method",
+        "name_conflicts": []
+      }
+    },
+    "model_output": null
+  },
+  {
+    "id": 41,
+    "case_id": "96-wrong_lock-1",
+    "operator": "wrong_lock",
+    "failure_type": "soft_root_cause",
+    "root_cause_score": 0.825,
+    "fix_score": 0.8833,
+    "subscores": {
+      "family": 1.0,
+      "bug_class": 1.0,
+      "missing_guarantee": 1.0,
+      "conflict_type": 1.0,
+      "shared_objects": 1.0,
+      "accesses": 0.375,
+      "conflict": 0.75,
+      "fix_type": 1.0,
+      "fix_action": 1.0,
+      "fix_exact": 0.0,
+      "fix_where": 0.6667
+    },
+    "code": "class StripedMap { private static final Object monitorB = new Object(); \n    static final int N_LOCKS = 16;\n    private final Node[] buckets;\n    private final Object[] locks;\n    static class Node {\n        Object key;\n        Object value;\n        Node next;\n        Node(Object key, Object value, Node next) {\n            this.key = key;\n            this.value = value;\n            this.next = next;\n        }\n    }\n    StripedMap(int bucketCount) {\n        buckets = new Node[bucketCount];\n        locks = new Object[N_LOCKS];\n        for (int i = 0; i < N_LOCKS; i++) locks[i] = new Object();\n    }\n    int hashIndex(Object key) {\n        return (key.hashCode() & 0x7fffffff) % buckets.length;\n    }\n    Object get(Object key) {\n        int index = hashIndex(key);\n        synchronized (monitorB) {\n            Node node = buckets[index];\n            while (node != null) {\n                if (node.key.equals(key)) return node.value;\n                node = node.next;\n            }\n            return null;\n        }\n    }\n    void put(Object key, Object value) {\n        int index = hashIndex(key);\n        synchronized (locks[index % N_LOCKS]) {\n            buckets[index] = new Node(key, value, buckets[index]);\n        }\n    }\n    void clear() {\n        for (int i = 0; i < buckets.length; i++) {\n            synchronized (locks[i % N_LOCKS]) {\n                buckets[i] = null;\n            }\n        }\n    }\n}\n\npublic class Main {\n    public static void main(String[] args) throws Exception {\n        StripedMap map = new StripedMap(4);\n        Thread t1 = new Thread(() -> { map.put(1, 2); });\n        Thread t2 = new Thread(() -> { map.get(1); });\n        Thread t3 = new Thread(() -> { map.put(3, 4); });\n        Thread t4 = new Thread(() -> { map.clear(); });\n        t1.start(); t2.start(); t3.start(); t4.start();\n        t1.join(); t2.join(); t3.join(); t4.join();\n    }\n}",
+    "ground_truth": {
+      "case_id": "96-wrong_lock-1",
+      "reasoning": "StripedMap.get guards its access to StripedMap.buckets with monitorB, which no other code uses, while StripedMap.clear uses locks, so the read and the write share no common lock and race.",
+      "family": "non_deadlock",
+      "bug_class": "data_race",
+      "shared_objects": [
+        "StripedMap.buckets",
+        "monitorB",
+        "locks"
+      ],
+      "accesses": [
+        {
+          "method": "StripedMap.get",
+          "op": "lock",
+          "target": "monitorB"
+        },
+        {
+          "method": "StripedMap.get",
+          "op": "read",
+          "target": "StripedMap.buckets"
+        },
+        {
+          "method": "StripedMap.clear",
+          "op": "lock",
+          "target": "locks"
+        },
+        {
+          "method": "StripedMap.clear",
+          "op": "write",
+          "target": "StripedMap.buckets"
+        }
+      ],
+      "missing_guarantee": "common_lock",
+      "conflict": {
+        "type": "read_write_race",
+        "edges": [],
+        "field": "StripedMap.buckets",
+        "methods": [
+          "StripedMap.get",
+          "StripedMap.clear"
+        ]
+      },
+      "fix_type": "change_lock_order_or_granularity",
+      "fix_action": "unify_lock",
+      "fix_where": [
+        "StripedMap.get"
+      ],
+      "acceptable_alternatives": [
+        {
+          "fix_type": "add_or_widen_synchronization",
+          "fix_action": "unify_lock"
+        }
+      ],
+      "meta": {
+        "bug_status": "injected-race-confirmed-by-JPF",
+        "confidence": "high; single edit and JPF race report involves the mutated method",
+        "name_conflicts": []
+      }
+    },
+    "model_output": null
+  },
+  {
+    "id": 42,
+    "case_id": "97-missing_release-1",
+    "operator": "missing_release",
+    "failure_type": "soft_root_cause",
+    "root_cause_score": 0.7155,
+    "fix_score": 1.0,
+    "subscores": {
+      "family": 1.0,
+      "bug_class": 1.0,
+      "missing_guarantee": 1.0,
+      "conflict_type": 1.0,
+      "shared_objects": 0.5,
+      "accesses": 0.2857,
+      "conflict": 0.6667,
+      "fix_type": 1.0,
+      "fix_action": 1.0,
+      "fix_exact": 1.0,
+      "fix_where": 1.0
+    },
+    "code": "import java.util.concurrent.Semaphore;\n\nclass BoundedBuffer<E> {\n    private final Object[] items;\n    private int putPtr;\n    private int takePtr;\n    private int count;\n    private final Semaphore availableItems;\n    private final Semaphore availableSpaces;\n    BoundedBuffer(int capacity) {\n        items = new Object[capacity];\n        availableItems = new Semaphore(0);\n        availableSpaces = new Semaphore(capacity);\n    }\n    boolean isEmpty() {\n        synchronized (this) {\n            return count == 0;\n        }\n    }\n    boolean isFull() {\n        synchronized (this) {\n            return count == items.length;\n        }\n    }\n    void put(E item) throws InterruptedException {\n        availableSpaces.acquire();\n        synchronized (this) {\n            items[putPtr] = item;\n            if (++putPtr == items.length) putPtr = 0;\n            count++;\n        }\n        \n    }\n    E take() throws InterruptedException {\n        availableItems.acquire();\n        E item;\n        synchronized (this) {\n            item = (E) items[takePtr];\n            items[takePtr] = null;\n            if (++takePtr == items.length) takePtr = 0;\n            count--;\n        }\n        availableSpaces.release();\n        return item;\n    }\n}\n\npublic class Main {\n    public static void main(String[] args) throws Exception {\n        BoundedBuffer<Integer> buffer = new BoundedBuffer<>(1);\n        Thread t1 = new Thread(() -> {\n            try {\n                buffer.put(1);\n            } catch (InterruptedException e) {\n                Thread.currentThread().interrupt();\n            }\n        });\n        Thread t2 = new Thread(() -> {\n            try {\n                buffer.take();\n            } catch (InterruptedException e) {\n                Thread.currentThread().interrupt();\n            }\n        });\n        t1.start(); t2.start();\n        t1.join(); t2.join();\n    }\n}",
+    "ground_truth": {
+      "case_id": "97-missing_release-1",
+      "reasoning": "put() no longer releases availableItems after adding an item, so take() blocks forever on acquire() and the producer and consumer stop making progress.",
+      "family": "deadlock",
+      "bug_class": "resource_deadlock",
+      "shared_objects": [
+        "availableItems"
+      ],
+      "accesses": [
+        {
+          "method": "BoundedBuffer.put",
+          "op": "release",
+          "target": "availableItems"
+        },
+        {
+          "method": "BoundedBuffer.take",
+          "op": "acquire",
+          "target": "availableItems"
+        }
+      ],
+      "missing_guarantee": "semaphore_permits",
+      "conflict": {
+        "type": "permit_starvation",
+        "edges": [],
+        "field": null,
+        "methods": [
+          "BoundedBuffer.take"
+        ]
+      },
+      "fix_type": "other",
+      "fix_action": "restore_release",
+      "fix_where": [
+        "BoundedBuffer.put"
+      ],
+      "acceptable_alternatives": [],
+      "meta": {
+        "bug_status": "injected-deadlock-confirmed-by-JPF",
+        "confidence": "high",
+        "name_conflicts": []
+      }
+    },
+    "model_output": null
+  },
+  {
+    "id": 43,
+    "case_id": "97-rm_join-0",
+    "operator": "rm_join",
+    "failure_type": "hard_root_cause",
+    "root_cause_score": 0.0333,
+    "fix_score": 1.0,
+    "subscores": {
+      "family": 0.0,
+      "bug_class": 0.0,
+      "missing_guarantee": 0.0,
+      "conflict_type": 0.0,
+      "shared_objects": 0.0,
+      "accesses": 0.1667,
+      "conflict": 0.0,
+      "fix_type": 1.0,
+      "fix_action": 1.0,
+      "fix_exact": 1.0,
+      "fix_where": 1.0
+    },
+    "code": "import java.util.concurrent.Semaphore;\n\nclass BoundedBuffer<E> {\n    private final Object[] items;\n    private int putPtr;\n    private int takePtr;\n    private int count;\n    private final Semaphore availableItems;\n    private final Semaphore availableSpaces;\n    BoundedBuffer(int capacity) {\n        items = new Object[capacity];\n        availableItems = new Semaphore(0);\n        availableSpaces = new Semaphore(capacity);\n    }\n    boolean isEmpty() {\n        synchronized (this) {\n            return count == 0;\n        }\n    }\n    boolean isFull() {\n        synchronized (this) {\n            return count == items.length;\n        }\n    }\n    void put(E item) throws InterruptedException {\n        availableSpaces.acquire();\n        synchronized (this) {\n            items[putPtr] = item;\n            if (++putPtr == items.length) putPtr = 0;\n            count++;\n        }\n        availableItems.release();\n    }\n    E take() throws InterruptedException {\n        availableItems.acquire();\n        E item;\n        synchronized (this) {\n            item = (E) items[takePtr];\n            items[takePtr] = null;\n            if (++takePtr == items.length) takePtr = 0;\n            count--;\n        }\n        availableSpaces.release();\n        return item;\n    }\n}\n\npublic class Main {\n    public static void main(String[] args) throws Exception {\n        BoundedBuffer<Integer> buffer = new BoundedBuffer<>(1);\n        Thread t1 = new Thread(() -> {\n            try {\n                buffer.put(1);\n            } catch (InterruptedException e) {\n                Thread.currentThread().interrupt();\n            }\n        });\n        Thread t2 = new Thread(() -> {\n            try {\n                buffer.take();\n            } catch (InterruptedException e) {\n                Thread.currentThread().interrupt();\n            }\n        });\n        t1.start(); t2.start();\n        t1.join(); \n    }\n}",
+    "ground_truth": {
+      "case_id": "97-rm_join-0",
+      "reasoning": "The mutation removes t2.join() from main, but main does nothing afterwards that depends on t2, so the program has no concurrency defect; the failure is on the JPF side and its mechanism is not established.",
+      "family": "other",
+      "bug_class": "no_defect",
+      "shared_objects": [],
+      "accesses": [
+        {
+          "method": "Main.main",
+          "op": "join",
+          "target": "t2"
+        }
+      ],
+      "missing_guarantee": "none",
+      "conflict": {
+        "type": "none",
+        "edges": [],
+        "field": null,
+        "methods": []
+      },
+      "fix_type": "other",
+      "fix_action": "restore_join",
+      "fix_where": [
+        "Main.main"
+      ],
+      "acceptable_alternatives": [],
+      "meta": {
+        "bug_status": "jpf-no-finish (mutation is program-level benign; failure is JPF-side)",
+        "confidence": "high that the removed t2.join() is the trigger, low for the mechanism",
+        "name_conflicts": []
+      }
+    },
+    "model_output": null
+  },
+  {
+    "id": 44,
+    "case_id": "99-lock_order_inversion_methods-0",
+    "operator": "lock_order_inversion_methods",
+    "failure_type": "soft_root_cause",
+    "root_cause_score": 0.7933,
+    "fix_score": 0.825,
+    "subscores": {
+      "family": 1.0,
+      "bug_class": 1.0,
+      "missing_guarantee": 1.0,
+      "conflict_type": 1.0,
+      "shared_objects": 0.8,
+      "accesses": 0.3667,
+      "conflict": 0.75,
+      "fix_type": 1.0,
+      "fix_action": 1.0,
+      "fix_exact": 0.0,
+      "fix_where": 0.5
+    },
+    "code": "import java.util.*; import java.util.concurrent.*; class ReadWriteMap<K, V> { private static final Object monitorC = new Object();  private final Map<K, V> map; ReadWriteMap(Map<K, V> map) { this.map = map; } public synchronized V put(K key, V value) { return map.put(key, value); } public synchronized V remove(Object key) { return map.remove(key); } public synchronized void putAll(Map<? extends K, ? extends V> m) { map.putAll(m); } public synchronized void clear() { map.clear(); } public synchronized V get(Object key) { synchronized (monitorC) {  return map.get(key);  } } public int size() { synchronized (monitorC) { synchronized (this) {  return map.size();  } } } public synchronized boolean isEmpty() { return map.isEmpty(); } public synchronized boolean containsKey(Object key) { return map.containsKey(key); } public synchronized boolean containsValue(Object value) { return map.containsValue(value); } } public class Main { public static void main(String[] args) throws Exception { ReadWriteMap<Integer, Integer> map = new ReadWriteMap<>(new HashMap<>()); ExecutorService es = Executors.newFixedThreadPool(3); es.execute(() -> { map.put(1, 1); }); es.execute(() -> { map.get(1); }); es.execute(() -> { map.size(); }); es.shutdown(); es.awaitTermination(1, TimeUnit.SECONDS); } }",
+    "ground_truth": {
+      "case_id": "99-lock_order_inversion_methods-0",
+      "reasoning": "get acquires this then monitorC while size acquires monitorC then this; if each thread takes its outer lock first, each waits forever for the lock the other holds.",
+      "family": "deadlock",
+      "bug_class": "resource_deadlock",
+      "shared_objects": [
+        "this",
+        "monitorC"
+      ],
+      "accesses": [
+        {
+          "method": "ReadWriteMap.get",
+          "op": "lock",
+          "target": "this"
+        },
+        {
+          "method": "ReadWriteMap.get",
+          "op": "lock",
+          "target": "monitorC"
+        },
+        {
+          "method": "ReadWriteMap.size",
+          "op": "lock",
+          "target": "monitorC"
+        },
+        {
+          "method": "ReadWriteMap.size",
+          "op": "lock",
+          "target": "this"
+        }
+      ],
+      "missing_guarantee": "consistent_lock_order",
+      "conflict": {
+        "type": "lock_cycle",
+        "edges": [
+          [
+            "this",
+            "monitorC"
+          ],
+          [
+            "monitorC",
+            "this"
+          ]
+        ],
+        "field": null,
+        "methods": [
+          "ReadWriteMap.get",
+          "ReadWriteMap.size"
+        ]
+      },
+      "fix_type": "change_lock_order_or_granularity",
+      "fix_action": "remove_nested_lock",
+      "fix_where": [
+        "ReadWriteMap.get",
+        "ReadWriteMap.size"
+      ],
+      "acceptable_alternatives": [
+        {
+          "fix_type": "change_lock_order_or_granularity",
+          "fix_action": "reorder_locks"
+        },
+        {
+          "fix_type": "change_lock_order_or_granularity",
+          "fix_action": "single_lock"
+        }
+      ],
+      "meta": {
+        "bug_status": "injected-deadlock-confirmed-by-JPF",
+        "confidence": "high; derived from the single known mutation (JPF prints only thread states, so the lock cycle is derived)",
+        "name_conflicts": []
+      }
+    },
+    "model_output": null
+  }
+]

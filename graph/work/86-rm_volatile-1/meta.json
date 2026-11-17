@@ -1,0 +1,6 @@
+{
+  "id": "86-rm_volatile-1",
+  "safe_id": "86-rm_volatile-1",
+  "class": "Main",
+  "classification": "Starvation"
+}

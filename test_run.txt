@@ -1,0 +1,13 @@
+cd ~/jpf/jpf-core/pipeline
+
+# Make sure JDK 8 is active in this shell
+export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+export PATH=$JAVA_HOME/bin:$PATH
+java -version   # confirm 1.8.0_...
+
+# Your Qwen key
+export QWEN_API_KEY="your-real-key"
+
+# Run just 1 prompt, just the qwen model -- no --build-once needed,
+# you already did the full build earlier
+python3 jpf_reproduction/run_concur_validation.py --models qwen --limit 1

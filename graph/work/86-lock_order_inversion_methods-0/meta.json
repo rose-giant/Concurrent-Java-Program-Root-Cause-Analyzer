@@ -1,0 +1,6 @@
+{
+  "id": "86-lock_order_inversion_methods-0",
+  "safe_id": "86-lock_order_inversion_methods-0",
+  "class": "Main",
+  "classification": "Starvation"
+}

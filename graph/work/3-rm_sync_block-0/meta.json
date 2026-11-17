@@ -1,0 +1,6 @@
+{
+  "id": "3-rm_sync_block-0",
+  "safe_id": "3-rm_sync_block-0",
+  "class": "CountingFireflies",
+  "classification": "Race Condition"
+}

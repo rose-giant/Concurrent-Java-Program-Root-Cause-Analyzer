@@ -1,0 +1,23 @@
+JavaPathfinder core system v8.0 (rev 2345caaa002e15c6147d001d1ccd71e4b538f8e9) - (C) 2005-2014 United States Government. All rights reserved.
+
+
+====================================================== system under test
+Main.main()
+
+====================================================== search started: 11/1/26 3:42 PM
+
+====================================================== results
+no errors detected
+
+====================================================== statistics
+elapsed time:       00:00:00
+states:             new=134,visited=150,backtracked=284,end=5
+search:             maxDepth=20,constraints=0
+choice generators:  thread=134 (signal=0,lock=1,sharedRef=63,threadApi=12,reschedule=58), data=0
+heap:               new=983,released=278,maxLive=857,gcCycles=241
+instructions:       19839
+max memory:         117MB
+loaded code:        classes=88,methods=2174
+
+====================================================== search finished: 11/1/26 3:42 PM
+

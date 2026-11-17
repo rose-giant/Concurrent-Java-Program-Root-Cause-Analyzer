@@ -1,0 +1,6 @@
+{
+  "id": "115-wrong_lock-1",
+  "safe_id": "115-wrong_lock-1",
+  "class": "SimulatedCAS",
+  "classification": "Race Condition"
+}

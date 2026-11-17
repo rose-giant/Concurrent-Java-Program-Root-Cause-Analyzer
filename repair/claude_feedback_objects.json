@@ -1,0 +1,645 @@
+[
+  {
+    "id": 13,
+    "model": "claude",
+    "topic": "Avoiding lock-ordering deadlock using try Lock. M1",
+    "classification": "Race Condition",
+    "feedback": {
+      "error_type": "Race Condition",
+      "racing_class": "LockerMover$ParcelCount",
+      "racing_field": "items",
+      "raw_message": "error #1: gov.nasa.jpf.listener.PreciseRaceDetector \"race for field LockerMover$ParcelCount@1f5.items  ...\"",
+      "truncated": true,
+      "racing_accesses": [
+        {
+          "thread": "pool-1-thread-1",
+          "location": "LockerMover$ParcelCount.add(LockerMover.java:21)",
+          "access_type": "WRITE",
+          "source_line": "items += delta;"
+        },
+        {
+          "thread": "pool-1-thread-2",
+          "location": "LockerMover$ParcelCount.getItems(LockerMover.java:17)",
+          "access_type": "READ",
+          "source_line": "return items;"
+        }
+      ],
+      "stack_trace_user_frames": [
+        "[pool-1-thread-1] LockerMover$ParcelCount.add(LockerMover.java:21)",
+        "[pool-1-thread-2] LockerMover$ParcelCount.getItems(LockerMover.java:17)"
+      ],
+      "stack_trace_internal_frame_count": 0,
+      "notes": "JPF's PreciseRaceDetector flagged this field as accessed by multiple threads without a happens-before ordering between them (missing/incorrect synchronization)."
+    }
+  },
+  {
+    "id": 14,
+    "model": "claude",
+    "topic": "Avoiding lock-ordering deadlock using try Lock. M2",
+    "classification": "Race Condition",
+    "feedback": {
+      "error_type": "Race Condition",
+      "racing_class": "ContainerSwapper$ElementCount",
+      "racing_field": "elements",
+      "raw_message": "error #1: gov.nasa.jpf.listener.PreciseRaceDetector \"race for field ContainerSwapper$ElementCount@1f5.e...\"",
+      "truncated": true,
+      "racing_accesses": [
+        {
+          "thread": "pool-1-thread-1",
+          "location": "ContainerSwapper$ElementCount.add(ContainerSwapper.java:21)",
+          "access_type": "WRITE",
+          "source_line": "elements += delta;"
+        },
+        {
+          "thread": "pool-1-thread-2",
+          "location": "ContainerSwapper$ElementCount.getElements(ContainerSwapper.java:17)",
+          "access_type": "READ",
+          "source_line": "return elements;"
+        }
+      ],
+      "stack_trace_user_frames": [
+        "[pool-1-thread-1] ContainerSwapper$ElementCount.add(ContainerSwapper.java:21)",
+        "[pool-1-thread-2] ContainerSwapper$ElementCount.getElements(ContainerSwapper.java:17)"
+      ],
+      "stack_trace_internal_frame_count": 0,
+      "notes": "JPF's PreciseRaceDetector flagged this field as accessed by multiple threads without a happens-before ordering between them (missing/incorrect synchronization)."
+    }
+  },
+  {
+    "id": 15,
+    "model": "claude",
+    "topic": "Avoiding lock-ordering deadlock using try Lock. M3",
+    "classification": "Race Condition",
+    "feedback": {
+      "error_type": "Race Condition",
+      "racing_class": "BinMover$WidgetCount",
+      "racing_field": "widgets",
+      "raw_message": "error #1: gov.nasa.jpf.listener.PreciseRaceDetector \"race for field BinMover$WidgetCount@1f5.widgets   ...\"",
+      "truncated": true,
+      "racing_accesses": [
+        {
+          "thread": "pool-1-thread-1",
+          "location": "BinMover$WidgetCount.add(BinMover.java:21)",
+          "access_type": "WRITE",
+          "source_line": "widgets += delta;"
+        },
+        {
+          "thread": "pool-1-thread-2",
+          "location": "BinMover$WidgetCount.getWidgets(BinMover.java:17)",
+          "access_type": "READ",
+          "source_line": "return widgets;"
+        }
+      ],
+      "stack_trace_user_frames": [
+        "[pool-1-thread-1] BinMover$WidgetCount.add(BinMover.java:21)",
+        "[pool-1-thread-2] BinMover$WidgetCount.getWidgets(BinMover.java:17)"
+      ],
+      "stack_trace_internal_frame_count": 0,
+      "notes": "JPF's PreciseRaceDetector flagged this field as accessed by multiple threads without a happens-before ordering between them (missing/incorrect synchronization)."
+    }
+  },
+  {
+    "id": 49,
+    "model": "claude",
+    "topic": "Wrapping a Map with a read-write lock. M1",
+    "classification": "Uncaught Exception",
+    "feedback": {
+      "error_type": "Uncaught Exception",
+      "exception_class": "java.lang.NoSuchFieldException",
+      "wrapper_class": "java.lang.Error",
+      "message": "tid",
+      "truncated": false,
+      "exception_chain": [
+        {
+          "exception_class": "java.lang.Error",
+          "message": "java.lang.NoSuchFieldException: tid",
+          "stack_trace_user_frames": [
+            "CrystalCacheSystem$CrystalCache.<init>(CrystalCacheSystem.java:13)",
+            "CrystalCacheSystem.main(CrystalCacheSystem.java:113)"
+          ],
+          "stack_trace_internal_frame_count": 1
+        },
+        {
+          "exception_class": "java.lang.NoSuchFieldException",
+          "message": "tid",
+          "stack_trace_user_frames": [
+            "CrystalCacheSystem$CrystalCache.<init>(CrystalCacheSystem.java:13)",
+            "CrystalCacheSystem.main(CrystalCacheSystem.java:113)"
+          ],
+          "stack_trace_internal_frame_count": 2
+        }
+      ],
+      "stack_trace_user_frames": [
+        "CrystalCacheSystem$CrystalCache.<init>(CrystalCacheSystem.java:13)",
+        "CrystalCacheSystem.main(CrystalCacheSystem.java:113)"
+      ],
+      "stack_trace_internal_frame_count": 3,
+      "max_depth_at_failure": 1,
+      "reflection_suspected": null,
+      "notes": "This exception was thrown during at least one explored thread interleaving and was never caught. Full exception chain recovered: java.lang.Error wrapping java.lang.NoSuchFieldException, with a real stack trace for each link. Failed almost immediately (maxDepth=1) -- likely an initialization-time bug, not something that depends on a rare thread interleaving. Exception class suggests a reflection-related failure, but the generated code wasn't available to confirm reflection API usage (pass a code-lookup file to check)."
+    }
+  },
+  {
+    "id": 50,
+    "model": "claude",
+    "topic": "Wrapping a Map with a read-write lock. M2",
+    "classification": "Uncaught Exception",
+    "feedback": {
+      "error_type": "Uncaught Exception",
+      "exception_class": "java.lang.NoSuchFieldException",
+      "wrapper_class": "java.lang.Error",
+      "message": "tid",
+      "truncated": false,
+      "exception_chain": [
+        {
+          "exception_class": "java.lang.Error",
+          "message": "java.lang.NoSuchFieldException: tid",
+          "stack_trace_user_frames": [
+            "SigilLedgerSystem$SigilLedger.<init>(SigilLedgerSystem.java:13)",
+            "SigilLedgerSystem.main(SigilLedgerSystem.java:113)"
+          ],
+          "stack_trace_internal_frame_count": 1
+        },
+        {
+          "exception_class": "java.lang.NoSuchFieldException",
+          "message": "tid",
+          "stack_trace_user_frames": [
+            "SigilLedgerSystem$SigilLedger.<init>(SigilLedgerSystem.java:13)",
+            "SigilLedgerSystem.main(SigilLedgerSystem.java:113)"
+          ],
+          "stack_trace_internal_frame_count": 2
+        }
+      ],
+      "stack_trace_user_frames": [
+        "SigilLedgerSystem$SigilLedger.<init>(SigilLedgerSystem.java:13)",
+        "SigilLedgerSystem.main(SigilLedgerSystem.java:113)"
+      ],
+      "stack_trace_internal_frame_count": 3,
+      "max_depth_at_failure": 1,
+      "reflection_suspected": null,
+      "notes": "This exception was thrown during at least one explored thread interleaving and was never caught. Full exception chain recovered: java.lang.Error wrapping java.lang.NoSuchFieldException, with a real stack trace for each link. Failed almost immediately (maxDepth=1) -- likely an initialization-time bug, not something that depends on a rare thread interleaving. Exception class suggests a reflection-related failure, but the generated code wasn't available to confirm reflection API usage (pass a code-lookup file to check)."
+    }
+  },
+  {
+    "id": 51,
+    "model": "claude",
+    "topic": "Wrapping a Map with a read-write lock. M3",
+    "classification": "Uncaught Exception",
+    "feedback": {
+      "error_type": "Uncaught Exception",
+      "exception_class": "java.lang.NoSuchFieldException",
+      "wrapper_class": "java.lang.Error",
+      "message": "tid",
+      "truncated": false,
+      "exception_chain": [
+        {
+          "exception_class": "java.lang.Error",
+          "message": "java.lang.NoSuchFieldException: tid",
+          "stack_trace_user_frames": [
+            "EnchantedRegistrySystem$EnchantedRegistry.<init>(EnchantedRegistrySystem.java:13)",
+            "EnchantedRegistrySystem.main(EnchantedRegistrySystem.java:113)"
+          ],
+          "stack_trace_internal_frame_count": 1
+        },
+        {
+          "exception_class": "java.lang.NoSuchFieldException",
+          "message": "tid",
+          "stack_trace_user_frames": [
+            "EnchantedRegistrySystem$EnchantedRegistry.<init>(EnchantedRegistrySystem.java:13)",
+            "EnchantedRegistrySystem.main(EnchantedRegistrySystem.java:113)"
+          ],
+          "stack_trace_internal_frame_count": 2
+        }
+      ],
+      "stack_trace_user_frames": [
+        "EnchantedRegistrySystem$EnchantedRegistry.<init>(EnchantedRegistrySystem.java:13)",
+        "EnchantedRegistrySystem.main(EnchantedRegistrySystem.java:113)"
+      ],
+      "stack_trace_internal_frame_count": 3,
+      "max_depth_at_failure": 1,
+      "reflection_suspected": null,
+      "notes": "This exception was thrown during at least one explored thread interleaving and was never caught. Full exception chain recovered: java.lang.Error wrapping java.lang.NoSuchFieldException, with a real stack trace for each link. Failed almost immediately (maxDepth=1) -- likely an initialization-time bug, not something that depends on a rare thread interleaving. Exception class suggests a reflection-related failure, but the generated code wasn't available to confirm reflection API usage (pass a code-lookup file to check)."
+    }
+  },
+  {
+    "id": 60,
+    "model": "claude",
+    "topic": "Monitor-based vehicle tracker implementation. M3",
+    "classification": "Uncaught Exception",
+    "feedback": {
+      "error_type": "Uncaught Exception",
+      "exception_class": "java.lang.UnsupportedOperationException",
+      "wrapper_class": null,
+      "message": null,
+      "truncated": false,
+      "exception_chain": [
+        {
+          "exception_class": "java.lang.UnsupportedOperationException",
+          "message": null,
+          "stack_trace_user_frames": [
+            "[java.lang.UnsupportedOperationException] CelestialGriffinTracker$1.put(CelestialGriffinTracker.java:75)",
+            "CelestialGriffinTracker$1.put(CelestialGriffinTracker.java:72)",
+            "CelestialGriffinTracker.unmodifiableStarlightMap(CelestialGriffinTracker.java:95)",
+            "CelestialGriffinTracker.getStarlights(CelestialGriffinTracker.java:67)",
+            "CelestialGriffinTracker.main(CelestialGriffinTracker.java:179)"
+          ],
+          "stack_trace_internal_frame_count": 0
+        }
+      ],
+      "stack_trace_user_frames": [
+        "[java.lang.UnsupportedOperationException] CelestialGriffinTracker$1.put(CelestialGriffinTracker.java:75)",
+        "CelestialGriffinTracker$1.put(CelestialGriffinTracker.java:72)",
+        "CelestialGriffinTracker.unmodifiableStarlightMap(CelestialGriffinTracker.java:95)",
+        "CelestialGriffinTracker.getStarlights(CelestialGriffinTracker.java:67)",
+        "CelestialGriffinTracker.main(CelestialGriffinTracker.java:179)"
+      ],
+      "stack_trace_internal_frame_count": 0,
+      "max_depth_at_failure": 510,
+      "reflection_suspected": false,
+      "notes": "This exception was thrown during at least one explored thread interleaving and was never caught. Full exception text and stack trace were recovered for this run. Failed after 510 explored steps -- may only surface under a specific thread interleaving rather than every run."
+    }
+  },
+  {
+    "id": 67,
+    "model": "claude",
+    "topic": "Nonblocking counter using CAS. M1",
+    "classification": "Race Condition",
+    "feedback": {
+      "error_type": "Race Condition",
+      "racing_class": "PixieDustCounter$EnchantedCAS",
+      "racing_field": "dustLevel",
+      "raw_message": "error #1: gov.nasa.jpf.listener.PreciseRaceDetector \"race for field PixieDustCounter$EnchantedCAS@1c1.d...\"",
+      "truncated": true,
+      "racing_accesses": [
+        {
+          "thread": "pool-1-thread-1",
+          "location": "PixieDustCounter$EnchantedCAS.compareAndSwap(PixieDustCounter.java:40)",
+          "access_type": "WRITE",
+          "source_line": "dustLevel = newValue;"
+        },
+        {
+          "thread": "pool-1-thread-2",
+          "location": "PixieDustCounter$EnchantedCAS.get(PixieDustCounter.java:34)",
+          "access_type": "READ",
+          "source_line": "return dustLevel;"
+        }
+      ],
+      "stack_trace_user_frames": [
+        "[pool-1-thread-1] PixieDustCounter$EnchantedCAS.compareAndSwap(PixieDustCounter.java:40)",
+        "[pool-1-thread-2] PixieDustCounter$EnchantedCAS.get(PixieDustCounter.java:34)"
+      ],
+      "stack_trace_internal_frame_count": 0,
+      "notes": "JPF's PreciseRaceDetector flagged this field as accessed by multiple threads without a happens-before ordering between them (missing/incorrect synchronization)."
+    }
+  },
+  {
+    "id": 68,
+    "model": "claude",
+    "topic": "Nonblocking counter using CAS. M2",
+    "classification": "Race Condition",
+    "feedback": {
+      "error_type": "Race Condition",
+      "racing_class": "DragonScaleCounter$MysticCAS",
+      "racing_field": "scaleCount",
+      "raw_message": "error #1: gov.nasa.jpf.listener.PreciseRaceDetector \"race for field DragonScaleCounter$MysticCAS@1c1.sc...\"",
+      "truncated": true,
+      "racing_accesses": [
+        {
+          "thread": "main",
+          "location": "DragonScaleCounter$MysticCAS.get(DragonScaleCounter.java:34)",
+          "access_type": "READ",
+          "source_line": "return scaleCount;"
+        },
+        {
+          "thread": "pool-1-thread-2",
+          "location": "DragonScaleCounter$MysticCAS.compareAndSwap(DragonScaleCounter.java:40)",
+          "access_type": "WRITE",
+          "source_line": "scaleCount = newValue;"
+        }
+      ],
+      "stack_trace_user_frames": [
+        "[main] DragonScaleCounter$MysticCAS.get(DragonScaleCounter.java:34)",
+        "[pool-1-thread-2] DragonScaleCounter$MysticCAS.compareAndSwap(DragonScaleCounter.java:40)"
+      ],
+      "stack_trace_internal_frame_count": 0,
+      "notes": "JPF's PreciseRaceDetector flagged this field as accessed by multiple threads without a happens-before ordering between them (missing/incorrect synchronization)."
+    }
+  },
+  {
+    "id": 69,
+    "model": "claude",
+    "topic": "Nonblocking counter using CAS. M3",
+    "classification": "Race Condition",
+    "feedback": {
+      "error_type": "Race Condition",
+      "racing_class": "StarlightShardCounter$QuantumCAS",
+      "racing_field": "shardLevel",
+      "raw_message": "error #1: gov.nasa.jpf.listener.PreciseRaceDetector \"race for field StarlightShardCounter$QuantumCAS@1c...\"",
+      "truncated": true,
+      "racing_accesses": [
+        {
+          "thread": "main",
+          "location": "StarlightShardCounter$QuantumCAS.get(StarlightShardCounter.java:34)",
+          "access_type": "READ",
+          "source_line": "return shardLevel;"
+        },
+        {
+          "thread": "pool-1-thread-2",
+          "location": "StarlightShardCounter$QuantumCAS.compareAndSwap(StarlightShardCounter.java:40)",
+          "access_type": "WRITE",
+          "source_line": "shardLevel = newValue;"
+        }
+      ],
+      "stack_trace_user_frames": [
+        "[main] StarlightShardCounter$QuantumCAS.get(StarlightShardCounter.java:34)",
+        "[pool-1-thread-2] StarlightShardCounter$QuantumCAS.compareAndSwap(StarlightShardCounter.java:40)"
+      ],
+      "stack_trace_internal_frame_count": 0,
+      "notes": "JPF's PreciseRaceDetector flagged this field as accessed by multiple threads without a happens-before ordering between them (missing/incorrect synchronization)."
+    }
+  },
+  {
+    "id": 74,
+    "model": "claude",
+    "topic": "74_CountingSheep.java",
+    "classification": "Race Condition",
+    "feedback": {
+      "error_type": "Race Condition",
+      "racing_class": "CountingSheep",
+      "racing_field": "asleep",
+      "raw_message": "error #1: gov.nasa.jpf.listener.PreciseRaceDetector \"race for field CountingSheep@1bd.asleep   main at ...\"",
+      "truncated": true,
+      "racing_accesses": [
+        {
+          "thread": "main",
+          "location": "CountingSheep.wakeToSleep(CountingSheep.java:15)",
+          "access_type": "WRITE",
+          "source_line": "asleep = true;"
+        },
+        {
+          "thread": "sleeper-thread",
+          "location": "CountingSheep.tryToSleep(CountingSheep.java:5)",
+          "access_type": "READ",
+          "source_line": "while (!asleep) {"
+        }
+      ],
+      "stack_trace_user_frames": [
+        "[main] CountingSheep.wakeToSleep(CountingSheep.java:15)",
+        "[sleeper-thread] CountingSheep.tryToSleep(CountingSheep.java:5)"
+      ],
+      "stack_trace_internal_frame_count": 0,
+      "notes": "JPF's PreciseRaceDetector flagged this field as accessed by multiple threads without a happens-before ordering between them (missing/incorrect synchronization)."
+    }
+  },
+  {
+    "id": 80,
+    "model": "claude",
+    "topic": "80_CachingServlet.java",
+    "classification": "Race Condition",
+    "feedback": {
+      "error_type": "Race Condition",
+      "racing_class": "CachingServlet",
+      "racing_field": "cache",
+      "raw_message": "error #1: gov.nasa.jpf.listener.PreciseRaceDetector \"race for field CachingServlet@1bd.cache   request-...\"",
+      "truncated": true,
+      "racing_accesses": [
+        {
+          "thread": "request-thread-1",
+          "location": "CachingServlet.handleRequest(CachingServlet.java:29)",
+          "access_type": "WRITE",
+          "source_line": "cache = new OneValueCache(value, factors);"
+        },
+        {
+          "thread": "request-thread-2",
+          "location": "CachingServlet.handleRequest(CachingServlet.java:26)",
+          "access_type": "READ",
+          "source_line": "BigInteger[] factors = cache.getFactors(value);"
+        }
+      ],
+      "stack_trace_user_frames": [
+        "[request-thread-1] CachingServlet.handleRequest(CachingServlet.java:29)",
+        "[request-thread-2] CachingServlet.handleRequest(CachingServlet.java:26)"
+      ],
+      "stack_trace_internal_frame_count": 0,
+      "notes": "JPF's PreciseRaceDetector flagged this field as accessed by multiple threads without a happens-before ordering between them (missing/incorrect synchronization)."
+    }
+  },
+  {
+    "id": 84,
+    "model": "claude",
+    "topic": "84_DelegatingVehicleTracker.java",
+    "classification": "Uncaught Exception",
+    "feedback": {
+      "error_type": "Uncaught Exception",
+      "exception_class": "java.lang.NullPointerException",
+      "wrapper_class": null,
+      "message": "Calling 'setLocation(Ljava/lang/String;II)V' on null object",
+      "truncated": false,
+      "exception_chain": [
+        {
+          "exception_class": "java.lang.NullPointerException",
+          "message": "Calling 'setLocation(Ljava/lang/String;II)V' on null object",
+          "stack_trace_user_frames": [
+            "DelegatingVehicleTracker.lambda$main$0(DelegatingVehicleTracker.java:54)",
+            "DelegatingVehicleTracker$$Lambda$0.run"
+          ],
+          "stack_trace_internal_frame_count": 0
+        }
+      ],
+      "stack_trace_user_frames": [
+        "DelegatingVehicleTracker.lambda$main$0(DelegatingVehicleTracker.java:54)",
+        "DelegatingVehicleTracker$$Lambda$0.run"
+      ],
+      "stack_trace_internal_frame_count": 0,
+      "max_depth_at_failure": 5,
+      "reflection_suspected": false,
+      "notes": "This exception was thrown during at least one explored thread interleaving and was never caught. Full exception text and stack trace were recovered for this run. Failed after 5 explored steps -- may only surface under a specific thread interleaving rather than every run."
+    }
+  },
+  {
+    "id": 85,
+    "model": "claude",
+    "topic": "85_DelegatingVehicleTrackerLiveVsStatic.java",
+    "classification": "Uncaught Exception",
+    "feedback": {
+      "error_type": "Uncaught Exception",
+      "exception_class": "java.lang.NullPointerException",
+      "wrapper_class": null,
+      "message": "Calling 'setLocation(Ljava/lang/String;II)V' on null object",
+      "truncated": false,
+      "exception_chain": [
+        {
+          "exception_class": "java.lang.NullPointerException",
+          "message": "Calling 'setLocation(Ljava/lang/String;II)V' on null object",
+          "stack_trace_user_frames": [
+            "DelegatingVehicleTrackerLiveVsStatic.lambda$main$0(DelegatingVehicleTrackerLiveVsStatic.java:53)",
+            "DelegatingVehicleTrackerLiveVsStatic$$Lambda$0.run"
+          ],
+          "stack_trace_internal_frame_count": 0
+        }
+      ],
+      "stack_trace_user_frames": [
+        "DelegatingVehicleTrackerLiveVsStatic.lambda$main$0(DelegatingVehicleTrackerLiveVsStatic.java:53)",
+        "DelegatingVehicleTrackerLiveVsStatic$$Lambda$0.run"
+      ],
+      "stack_trace_internal_frame_count": 0,
+      "max_depth_at_failure": 3,
+      "reflection_suspected": false,
+      "notes": "This exception was thrown during at least one explored thread interleaving and was never caught. Full exception text and stack trace were recovered for this run. Failed after 3 explored steps -- may only surface under a specific thread interleaving rather than every run."
+    }
+  },
+  {
+    "id": 90,
+    "model": "claude",
+    "topic": "90_PrimeGenerator.java",
+    "classification": "Race Condition",
+    "feedback": {
+      "error_type": "Race Condition",
+      "racing_class": "PrimeGenerator",
+      "racing_field": "cancelled",
+      "raw_message": "error #1: gov.nasa.jpf.listener.PreciseRaceDetector \"race for field PrimeGenerator@1bd.cancelled   main...\"",
+      "truncated": true,
+      "racing_accesses": [
+        {
+          "thread": "main",
+          "location": "PrimeGenerator.cancel(PrimeGenerator.java:24)",
+          "access_type": "WRITE",
+          "source_line": "cancelled = true;"
+        },
+        {
+          "thread": "pool-1-thread-1",
+          "location": "PrimeGenerator.run(PrimeGenerator.java:15)",
+          "access_type": "READ",
+          "source_line": "while (!cancelled) {"
+        }
+      ],
+      "stack_trace_user_frames": [
+        "[main] PrimeGenerator.cancel(PrimeGenerator.java:24)",
+        "[pool-1-thread-1] PrimeGenerator.run(PrimeGenerator.java:15)"
+      ],
+      "stack_trace_internal_frame_count": 0,
+      "notes": "JPF's PreciseRaceDetector flagged this field as accessed by multiple threads without a happens-before ordering between them (missing/incorrect synchronization)."
+    }
+  },
+  {
+    "id": 91,
+    "model": "claude",
+    "topic": "91_PrimeGenerator10.java",
+    "classification": "Race Condition",
+    "feedback": {
+      "error_type": "Race Condition",
+      "racing_class": "PrimeGenerator10",
+      "racing_field": "cancelled",
+      "raw_message": "error #1: gov.nasa.jpf.listener.PreciseRaceDetector \"race for field PrimeGenerator10@1bd.cancelled   ma...\"",
+      "truncated": true,
+      "racing_accesses": [
+        {
+          "thread": "main",
+          "location": "PrimeGenerator10.cancel(PrimeGenerator10.java:22)",
+          "access_type": "WRITE",
+          "source_line": "cancelled = true;"
+        },
+        {
+          "thread": "prime-generator-thread",
+          "location": "PrimeGenerator10.run(PrimeGenerator10.java:15)",
+          "access_type": "READ",
+          "source_line": "while (!cancelled && primes.size() < LIMIT) {"
+        }
+      ],
+      "stack_trace_user_frames": [
+        "[main] PrimeGenerator10.cancel(PrimeGenerator10.java:22)",
+        "[prime-generator-thread] PrimeGenerator10.run(PrimeGenerator10.java:15)"
+      ],
+      "stack_trace_internal_frame_count": 0,
+      "notes": "JPF's PreciseRaceDetector flagged this field as accessed by multiple threads without a happens-before ordering between them (missing/incorrect synchronization)."
+    }
+  },
+  {
+    "id": 99,
+    "model": "claude",
+    "topic": "99_ReadWriteMap.java",
+    "classification": "Uncaught Exception",
+    "feedback": {
+      "error_type": "Uncaught Exception",
+      "exception_class": "java.lang.NoSuchFieldException",
+      "wrapper_class": "java.lang.Error",
+      "message": "tid",
+      "truncated": false,
+      "exception_chain": [
+        {
+          "exception_class": "java.lang.Error",
+          "message": "java.lang.NoSuchFieldException: tid",
+          "stack_trace_user_frames": [
+            "ReadWriteMap.<init>(ReadWriteMap.java:8)",
+            "ReadWriteMap.main(ReadWriteMap.java:96)"
+          ],
+          "stack_trace_internal_frame_count": 1
+        },
+        {
+          "exception_class": "java.lang.NoSuchFieldException",
+          "message": "tid",
+          "stack_trace_user_frames": [
+            "ReadWriteMap.<init>(ReadWriteMap.java:8)",
+            "ReadWriteMap.main(ReadWriteMap.java:96)"
+          ],
+          "stack_trace_internal_frame_count": 2
+        }
+      ],
+      "stack_trace_user_frames": [
+        "ReadWriteMap.<init>(ReadWriteMap.java:8)",
+        "ReadWriteMap.main(ReadWriteMap.java:96)"
+      ],
+      "stack_trace_internal_frame_count": 3,
+      "max_depth_at_failure": 1,
+      "reflection_suspected": null,
+      "notes": "This exception was thrown during at least one explored thread interleaving and was never caught. Full exception chain recovered: java.lang.Error wrapping java.lang.NoSuchFieldException, with a real stack trace for each link. Failed almost immediately (maxDepth=1) -- likely an initialization-time bug, not something that depends on a rare thread interleaving. Exception class suggests a reflection-related failure, but the generated code wasn't available to confirm reflection API usage (pass a code-lookup file to check)."
+    }
+  },
+  {
+    "id": 107,
+    "model": "claude",
+    "topic": "107_BoundedHashSet.java",
+    "classification": "Termination Error",
+    "feedback": {
+      "error_type": "Termination Error",
+      "raw_tail_of_log": "ch.DFSearch.search(DFSearch.java:79)\n\tat gov.nasa.jpf.JPF.run(JPF.java:613)\n\tat gov.nasa.jpf.JPF.start(JPF.java:189)\n\tat sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)\n\tat sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)\n\tat sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\n\tat java.lang.reflect.Method.invoke(Method.java:498)\n\tat gov.nasa.jpf.tool.Run.call(Run.java:80)\n\tat gov.nasa.jpf.tool.RunJPF.main(RunJPF.java:116)",
+      "stack_trace_user_frames": [],
+      "stack_trace_internal_frame_count": 14,
+      "notes": "JPF terminated abnormally while exploring this program rather than completing its search or reporting a specific property violation. This can mean the model checker ran out of a resource bound (states/time/depth), or it can mask a genuine concurrency defect (e.g. a livelock) that JPF cannot name directly. Treat as inconclusive rather than a confirmed specific bug; do not assume the code is otherwise correct. The termination trace is entirely inside JPF/JVM internals with no user-code frames, consistent with a resource-bound or search-engine-level termination rather than a bug reachable in the generated code."
+    }
+  },
+  {
+    "id": 111,
+    "model": "claude",
+    "topic": "111_BetterAttributeStore.java",
+    "classification": "Uncaught Exception",
+    "feedback": {
+      "error_type": "Uncaught Exception",
+      "exception_class": "java.lang.NoSuchMethodException",
+      "wrapper_class": null,
+      "message": "java.util.regex.Pattern.matches(Ljava/lang/String;Ljava/lang/CharSequence;)Z",
+      "truncated": false,
+      "exception_chain": [
+        {
+          "exception_class": "java.lang.NoSuchMethodException",
+          "message": "java.util.regex.Pattern.matches(Ljava/lang/String;Ljava/lang/CharSequence;)Z",
+          "stack_trace_user_frames": [
+            "BetterAttributeStore.userLocationMatches(BetterAttributeStore.java:17)",
+            "BetterAttributeStore.lambda$main$0(BetterAttributeStore.java:30)",
+            "BetterAttributeStore$$Lambda$0.run"
+          ],
+          "stack_trace_internal_frame_count": 0
+        }
+      ],
+      "stack_trace_user_frames": [
+        "BetterAttributeStore.userLocationMatches(BetterAttributeStore.java:17)",
+        "BetterAttributeStore.lambda$main$0(BetterAttributeStore.java:30)",
+        "BetterAttributeStore$$Lambda$0.run"
+      ],
+      "stack_trace_internal_frame_count": 0,
+      "max_depth_at_failure": 9,
+      "reflection_suspected": null,
+      "notes": "This exception was thrown during at least one explored thread interleaving and was never caught. Full exception text and stack trace were recovered for this run. Failed after 9 explored steps -- may only surface under a specific thread interleaving rather than every run. Exception class suggests a reflection-related failure, but the generated code wasn't available to confirm reflection API usage (pass a code-lookup file to check)."
+    }
+  }
+]

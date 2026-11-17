@@ -1,0 +1,6 @@
+{
+  "id": "115-rm_sync_one-1",
+  "safe_id": "115-rm_sync_one-1",
+  "class": "SimulatedCAS",
+  "classification": "Race Condition"
+}

@@ -1,0 +1,930 @@
+1.
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
+public class CosmicCats {
+    private final Set<String> identifiers;
+
+    public CosmicCats() {
+        Set<String> mutableSet = new HashSet<>();
+        mutableSet.add("Whiskers");
+        mutableSet.add("Paws");
+        mutableSet.add("Claw");
+        this.identifiers = Collections.unmodifiableSet(mutableSet);
+    }
+
+    public boolean isCat(String id) {
+        return this.identifiers.contains(id);
+    }
+
+    public String getCatIdentifiers() {
+        List<String> catList = new ArrayList<>(this.identifiers);
+        return String.join(", ", catList);
+    }
+
+    public static void main(String[] args) {
+        CosmicCats cats = new CosmicCats();
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+
+        executor.submit(() -> {
+            System.out.println(cats.isCat("Whiskers"));
+            System.out.println(cats.isCat("Fido"));
+        });
+
+        executor.submit(() -> {
+            System.out.println(cats.getCatIdentifiers());
+        });
+
+        executor.shutdown();
+        try {
+            executor.awaitTermination(5, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+}
+
+2.
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
+public class MysticMonkeys {
+    private final Set<String> labels;
+
+    public MysticMonkeys() {
+        Set<String> mutableSet = new HashSet<>();
+        mutableSet.add("Banana");
+        mutableSet.add("Coco");
+        mutableSet.add("Mango");
+        this.labels = Collections.unmodifiableSet(mutableSet);
+    }
+
+    public boolean isMonkey(String label) {
+        return this.labels.contains(label);
+    }
+
+    public String getMonkeyLabels() {
+        return String.join(", ", this.labels);
+    }
+
+    public static void main(String[] args) {
+        MysticMonkeys monkeys = new MysticMonkeys();
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+
+        executor.submit(() -> {
+            System.out.println(monkeys.isMonkey("Banana"));
+            System.out.println(monkeys.isMonkey("Apple"));
+        });
+
+        executor.submit(() -> {
+            System.out.println(monkeys.getMonkeyLabels());
+        });
+
+        executor.shutdown();
+        try {
+            executor.awaitTermination(5, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+}
+
+3.
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
+public class StellarSprites {
+    private final Set<String> tags;
+
+    public StellarSprites() {
+        Set<String> mutableSet = new HashSet<>();
+        mutableSet.add("Flare");
+        mutableSet.add("Glint");
+        mutableSet.add("Spark");
+        this.tags = Collections.unmodifiableSet(mutableSet);
+    }
+
+    public boolean isSprite(String tag) {
+        return this.tags.contains(tag);
+    }
+
+    public String getSpriteTags() {
+        return String.join(", ", this.tags);
+    }
+
+    public static void main(String[] args) {
+        StellarSprites sprites = new StellarSprites();
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+
+        executor.submit(() -> {
+            System.out.println(sprites.isSprite("Flare"));
+            System.out.println(sprites.isSprite("Void"));
+        });
+
+        executor.submit(() -> {
+            System.out.println(sprites.getSpriteTags());
+        });
+
+        executor.shutdown();
+        try {
+            executor.awaitTermination(5, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+}
+
+4.
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
+public class DelegatingDeviceTracker {
+    private final ConcurrentMap<String, Point> locations;
+
+    public DelegatingDeviceTracker(Map<String, Point> initialPoints) {
+        this.locations = new ConcurrentHashMap<>(initialPoints);
+    }
+
+    public Point getPosition(String id) {
+        return locations.get(id);
+    }
+
+    public void updatePosition(String id, Point newPosition) {
+        locations.replace(id, newPosition);
+    }
+
+    public Map<String, Point> getLocationsLive() {
+        return Collections.unmodifiableMap(locations);
+    }
+
+    public Map<String, Point> getLocationsSnapshot() {
+        return Collections.unmodifiableMap(new HashMap<>(locations));
+    }
+
+    public static void main(String[] args) {
+        Map<String, Point> initialPositions = new HashMap<>();
+        initialPositions.put("Gadget1", new Point(0, 0));
+        initialPositions.put("Gadget2", new Point(10, 10));
+        initialPositions.put("Gadget3", new Point(20, 20));
+
+        DelegatingDeviceTracker tracker = new DelegatingDeviceTracker(initialPositions);
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+
+        executor.submit(() -> {
+            tracker.updatePosition("Gadget1", new Point(5, 5));
+            tracker.updatePosition("Gadget4", new Point(50, 50)); 
+            
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            
+            tracker.updatePosition("Gadget2", new Point(15, 15));
+        });
+
+        executor.submit(() -> {
+            Map<String, Point> snapshot = tracker.getLocationsSnapshot();
+            Map<String, Point> live = tracker.getLocationsLive();
+            
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            
+            System.out.println("Snapshot View (does not reflect later updates): " + snapshot);
+            System.out.println("Live View (reflects all updates): " + live);
+            System.out.println("Gadget1 Current Position: " + tracker.getPosition("Gadget1"));
+            System.out.println("Gadget4 Current Position (should be null): " + tracker.getPosition("Gadget4"));
+        });
+
+        executor.shutdown();
+        try {
+            executor.awaitTermination(5, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+}
+
+class Point {
+    private final int x;
+    private final int y;
+
+    public Point(int x, int y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    public int getX() {
+        return x;
+    }
+
+    public int getY() {
+        return y;
+    }
+
+    public String toString() {
+        return "[" + x + ", " + y + "]";
+    }
+}
+
+5.
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
+public class DelegatingParcelTracker {
+    private final ConcurrentMap<String, Position> locations;
+
+    public DelegatingParcelTracker(Map<String, Position> initialPositions) {
+        this.locations = new ConcurrentHashMap<>(initialPositions);
+    }
+
+    public Position getPosition(String packageId) {
+        return locations.get(packageId);
+    }
+
+    public void assignPosition(String packageId, Position position) {
+        locations.replace(packageId, position);
+    }
+
+    public Map<String, Position> getPositionsLive() {
+        return Collections.unmodifiableMap(locations);
+    }
+
+    public Map<String, Position> getPositionsSnapshot() {
+        return Collections.unmodifiableMap(new HashMap<>(locations));
+    }
+
+    public static void main(String[] args) {
+        Map<String, Position> initialPositions = new HashMap<>();
+        initialPositions.put("PKG-1001", new Position(1, 2));
+        initialPositions.put("PKG-1002", new Position(10, 20));
+        initialPositions.put("PKG-1003", new Position(50, 60));
+
+        DelegatingParcelTracker tracker = new DelegatingParcelTracker(initialPositions);
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+
+        executor.submit(() -> {
+            tracker.assignPosition("PKG-1001", new Position(5, 8));
+            tracker.assignPosition("PKG-9999", new Position(99, 99));
+
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+
+            tracker.assignPosition("PKG-1002", new Position(12, 24));
+        });
+
+        executor.submit(() -> {
+            Map<String, Position> snapshot = tracker.getPositionsSnapshot();
+            Map<String, Position> live = tracker.getPositionsLive();
+
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+
+            System.out.println("Snapshot View: " + snapshot);
+            System.out.println("Live View: " + live);
+            System.out.println("PKG-1001 Current Position: " + tracker.getPosition("PKG-1001"));
+            System.out.println("PKG-9999 Current Position (invalid ID): " + tracker.getPosition("PKG-9999"));
+        });
+
+        executor.shutdown();
+        try {
+            executor.awaitTermination(5, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+}
+
+class Position {
+    private final int x;
+    private final int y;
+
+    public Position(int x, int y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    public int getX() {
+        return x;
+    }
+
+    public int getY() {
+        return y;
+    }
+
+    public String toString() {
+        return "(" + x + ", " + y + ")";
+    }
+}
+
+6.
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
+public class DelegatingRobotTracker {
+    private final ConcurrentMap<String, Coordinate> coordinates;
+
+    public DelegatingRobotTracker(Map<String, Coordinate> initialCoordinates) {
+        this.coordinates = new ConcurrentHashMap<>(initialCoordinates);
+    }
+
+    public Coordinate getCoordinate(String robotId) {
+        return coordinates.get(robotId);
+    }
+
+    public void modifyCoordinate(String robotId, Coordinate newCoordinate) {
+        coordinates.replace(robotId, newCoordinate);
+    }
+
+    public Map<String, Coordinate> getCoordinatesLive() {
+        return Collections.unmodifiableMap(coordinates);
+    }
+
+    public Map<String, Coordinate> getCoordinatesSnapshot() {
+        return Collections.unmodifiableMap(new HashMap<>(coordinates));
+    }
+
+    public static void main(String[] args) {
+        Map<String, Coordinate> initialCoordinates = new HashMap<>();
+        initialCoordinates.put("ROBOT-A", new Coordinate(0, 0));
+        initialCoordinates.put("ROBOT-B", new Coordinate(100, 200));
+        initialCoordinates.put("ROBOT-C", new Coordinate(300, 400));
+
+        DelegatingRobotTracker tracker = new DelegatingRobotTracker(initialCoordinates);
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+
+        executor.submit(() -> {
+            tracker.modifyCoordinate("ROBOT-A", new Coordinate(10, 10));
+            tracker.modifyCoordinate("ROBOT-X", new Coordinate(999, 999)); 
+
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+
+            tracker.modifyCoordinate("ROBOT-B", new Coordinate(150, 250));
+        });
+
+        executor.submit(() -> {
+            Map<String, Coordinate> snapshot = tracker.getCoordinatesSnapshot();
+            Map<String, Coordinate> live = tracker.getCoordinatesLive();
+
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+
+            System.out.println("Snapshot View: " + snapshot);
+            System.out.println("Live View: " + live);
+            System.out.println("ROBOT-A Current Coordinate: " + tracker.getCoordinate("ROBOT-A"));
+            System.out.println("ROBOT-X Current Coordinate (should be null): " + tracker.getCoordinate("ROBOT-X"));
+        });
+
+        executor.shutdown();
+        try {
+            executor.awaitTermination(5, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+}
+
+class Coordinate {
+    private final int x;
+    private final int y;
+
+    public Coordinate(int x, int y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    public int getX() {
+        return x;
+    }
+
+    public int getY() {
+        return y;
+    }
+
+    public String toString() {
+        return "(" + x + ", " + y + ")";
+    }
+}
+
+7.
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
+public class QuantumQuokkas {
+    private final List<String> labels;
+
+    public QuantumQuokkas() {
+        this.labels = Collections.unmodifiableList(Arrays.asList("Zig", "Zag", "Zog"));
+    }
+
+    public boolean isQuokka(String label) {
+        return this.labels.contains(label);
+    }
+
+    public String getQuokkaLabels() {
+        return this.labels.toString();
+    }
+
+    public static void main(String[] args) {
+        QuantumQuokkas quokkas = new QuantumQuokkas();
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+
+        executor.submit(() -> {
+            System.out.println(quokkas.isQuokka("Zig"));
+            System.out.println(quokkas.isQuokka("Zap"));
+        });
+
+        executor.submit(() -> {
+            System.out.println(quokkas.getQuokkaLabels());
+        });
+
+        executor.shutdown();
+        try {
+            executor.awaitTermination(5, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+}
+
+8.
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
+public final class SolarSquirrels {
+    
+    private final List<String> identifiers;
+
+    public SolarSquirrels() {
+        this.identifiers = Collections.unmodifiableList(Arrays.asList("Nutty", "Whisk", "Fidget"));
+    }
+
+    public boolean isSquirrel(String identifier) {
+        return identifiers.contains(identifier);
+    }
+
+    public String getSquirrelIdentifiers() {
+        return identifiers.toString();
+    }
+
+    public static void main(String[] args) {
+        SolarSquirrels squirrels = new SolarSquirrels();
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+
+        executor.submit(() -> {
+            boolean isNutty = squirrels.isSquirrel("Nutty");
+            boolean isShadow = squirrels.isSquirrel("Shadow");
+        });
+
+        executor.submit(() -> {
+            String allSquirrels = squirrels.getSquirrelIdentifiers();
+        });
+
+        executor.shutdown();
+        try {
+            if (!executor.awaitTermination(5, TimeUnit.SECONDS)) {
+                executor.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            executor.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
+    }
+}
+
+9.
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
+public final class MysticMantas {
+    
+    private final List<String> tags;
+
+    public MysticMantas() {
+        this.tags = Collections.unmodifiableList(Arrays.asList("Glimmer", "Ripple", "Twist"));
+    }
+
+    public boolean isManta(String tag) {
+        return tags.contains(tag);
+    }
+
+    public String getMantaTags() {
+        return tags.toString();
+    }
+
+    public static void main(String[] args) {
+        MysticMantas mantas = new MysticMantas();
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+
+        executor.submit(() -> {
+            System.out.println(mantas.isManta("Glimmer"));
+            System.out.println(mantas.isManta("Shadow"));
+        });
+
+        executor.submit(() -> {
+            System.out.println(mantas.getMantaTags());
+        });
+
+        executor.shutdown();
+        try {
+            if (!executor.awaitTermination(5, TimeUnit.SECONDS)) {
+                executor.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            executor.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
+    }
+}
+
+10.
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
+public class LockerSystem {
+
+    public static void main(String[] args) {
+        Locker locker1 = new Locker(100);
+        Locker locker2 = new Locker(100);
+
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+
+        executor.submit(() -> {
+            try {
+                move(locker1, locker2, 30, 2, TimeUnit.SECONDS);
+            } catch (NotEnoughItemsException e) {
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        });
+
+        executor.submit(() -> {
+            try {
+                move(locker2, locker1, 40, 2, TimeUnit.SECONDS);
+            } catch (NotEnoughItemsException e) {
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        });
+
+        executor.shutdown();
+        try {
+            executor.awaitTermination(5, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    public static boolean move(Locker from, Locker to, int amount, long timeout, TimeUnit unit) throws NotEnoughItemsException, InterruptedException {
+        long stopTime = System.nanoTime() + unit.toNanos(timeout);
+        while (true) {
+            if (System.nanoTime() >= stopTime) {
+                return false;
+            }
+            
+            if (from.getLock().tryLock()) {
+                try {
+                    if (to.getLock().tryLock()) {
+                        try {
+                            if (from.getCount().getQuantity() < amount) {
+                                throw new NotEnoughItemsException();
+                            }
+                            from.getCount().setQuantity(from.getCount().getQuantity() - amount);
+                            to.getCount().setQuantity(to.getCount().getQuantity() + amount);
+                            return true;
+                        } finally {
+                            to.getLock().unlock();
+                        }
+                    }
+                } finally {
+                    from.getLock().unlock();
+                }
+            }
+            
+            if (System.nanoTime() >= stopTime) {
+                return false;
+            }
+            
+            long sleepTimeNanos = getFixedDelayComponent() + getRandomDelayComponent();
+            long sleepTimeMillis = sleepTimeNanos / 1000000L;
+            int sleepTimeNanosRemainder = (int) (sleepTimeNanos % 1000000L);
+            Thread.sleep(sleepTimeMillis, sleepTimeNanosRemainder);
+        }
+    }
+
+    private static long getFixedDelayComponent() {
+        return 1000000L;
+    }
+
+    private static long getRandomDelayComponent() {
+        return (long) (Math.random() * 2000000L);
+    }
+
+    static class Locker {
+        private final Lock lock = new ReentrantLock();
+        private final ParcelCount count;
+
+        public Locker(int initialAmount) {
+            this.count = new ParcelCount(initialAmount);
+        }
+
+        public Lock getLock() {
+            return lock;
+        }
+
+        public ParcelCount getCount() {
+            return count;
+        }
+    }
+
+    static class ParcelCount {
+        private int quantity;
+
+        public ParcelCount(int quantity) {
+            this.quantity = quantity;
+        }
+
+        public int getQuantity() {
+            return quantity;
+        }
+
+        public void setQuantity(int quantity) {
+            this.quantity = quantity;
+        }
+    }
+
+    static class NotEnoughItemsException extends Exception {
+        public NotEnoughItemsException() {
+            super();
+        }
+    }
+}
+
+11.
+import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
+
+public class ContainerSwap {
+
+    static class InsufficientElementsException extends Exception {
+        public InsufficientElementsException(String message) {
+            super(message);
+        }
+    }
+
+    static class ElementCount {
+        int count;
+
+        public ElementCount(int count) {
+            this.count = count;
+        }
+    }
+
+    static class Container {
+        ElementCount elementCount;
+        ReentrantLock lock;
+
+        public Container(int initialCount) {
+            this.elementCount = new ElementCount(initialCount);
+            this.lock = new ReentrantLock();
+        }
+    }
+
+    public static boolean swap(Container origin, Container target, int amount, long timeout, TimeUnit unit) throws InsufficientElementsException, InterruptedException {
+        long stopTime = System.nanoTime() + unit.toNanos(timeout);
+        Random random = new Random();
+
+        while (System.nanoTime() < stopTime) {
+            if (origin.lock.tryLock()) {
+                try {
+                    if (target.lock.tryLock()) {
+                        try {
+                            if (origin.elementCount.count < amount) {
+                                throw new InsufficientElementsException("Origin container has insufficient elements.");
+                            }
+                            origin.elementCount.count -= amount;
+                            target.elementCount.count += amount;
+                            return true;
+                        } finally {
+                            target.lock.unlock();
+                        }
+                    }
+                } finally {
+                    origin.lock.unlock();
+                }
+            }
+            long delayNanos = getFixedDelay() + getRandomDelay(random);
+            TimeUnit.NANOSECONDS.sleep(delayNanos);
+        }
+        return false;
+    }
+
+    private static long getFixedDelay() {
+        return TimeUnit.MILLISECONDS.toNanos(5);
+    }
+
+    private static long getRandomDelay(Random random) {
+        return TimeUnit.MILLISECONDS.toNanos(random.nextInt(10));
+    }
+
+    public static void main(String[] args) {
+        Container containerA = new Container(50);
+        Container containerB = new Container(50);
+
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+
+        Runnable task1 = () -> {
+            try {
+                swap(containerA, containerB, 15, 3, TimeUnit.SECONDS);
+            } catch (InsufficientElementsException | InterruptedException e) {
+            }
+        };
+
+        Runnable task2 = () -> {
+            try {
+                swap(containerB, containerA, 25, 3, TimeUnit.SECONDS);
+            } catch (InsufficientElementsException | InterruptedException e) {
+            }
+        };
+
+        executor.submit(task1);
+        executor.submit(task2);
+
+        executor.shutdown();
+        try {
+            executor.awaitTermination(5, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+}
+
+12.
+import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
+
+public class ContainerSwap {
+
+    static class InsufficientElementsException extends Exception {
+        public InsufficientElementsException(String message) {
+            super(message);
+        }
+    }
+
+    static class ElementCount {
+        int count;
+
+        public ElementCount(int count) {
+            this.count = count;
+        }
+    }
+
+    static class Container {
+        ElementCount elementCount;
+        ReentrantLock lock;
+
+        public Container(int initialCount) {
+            this.elementCount = new ElementCount(initialCount);
+            this.lock = new ReentrantLock();
+        }
+    }
+
+    public static boolean swap(Container origin, Container target, int amount, long timeout, TimeUnit unit) throws InsufficientElementsException, InterruptedException {
+        long stopTime = System.nanoTime() + unit.toNanos(timeout);
+        Random random = new Random();
+
+        while (System.nanoTime() < stopTime) {
+            if (origin.lock.tryLock()) {
+                try {
+                    if (target.lock.tryLock()) {
+                        try {
+                            if (origin.elementCount.count < amount) {
+                                throw new InsufficientElementsException("Origin container has insufficient elements.");
+                            }
+                            origin.elementCount.count -= amount;
+                            target.elementCount.count += amount;
+                            return true;
+                        } finally {
+                            target.lock.unlock();
+                        }
+                    }
+                } finally {
+                    origin.lock.unlock();
+                }
+            }
+            long delayNanos = getFixedDelay() + getRandomDelay(random);
+            TimeUnit.NANOSECONDS.sleep(delayNanos);
+        }
+        return false;
+    }
+
+    private static long getFixedDelay() {
+        return TimeUnit.MILLISECONDS.toNanos(5);
+    }
+
+    private static long getRandomDelay(Random random) {
+        return TimeUnit.MILLISECONDS.toNanos(random.nextInt(10));
+    }
+
+    public static void main(String[] args) {
+        Container containerA = new Container(50);
+        Container containerB = new Container(50);
+
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+
+        Runnable task1 = () -> {
+            try {
+                swap(containerA, containerB, 15, 3, TimeUnit.SECONDS);
+            } catch (InsufficientElementsException | InterruptedException e) {
+            }
+        };
+
+        Runnable task2 = () -> {
+            try {
+                swap(containerB, containerA, 25, 3, TimeUnit.SECONDS);
+            } catch (InsufficientElementsException | InterruptedException e) {
+            }
+        };
+
+        executor.submit(task1);
+        executor.submit(task2);
+
+        executor.shutdown();
+        try {
+            executor.awaitTermination(5, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+}
+
+13.

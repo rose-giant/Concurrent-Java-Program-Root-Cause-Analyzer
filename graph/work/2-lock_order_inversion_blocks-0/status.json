@@ -1,0 +1,11 @@
+{
+  "id": "2-lock_order_inversion_blocks-0",
+  "class": "CountingComets",
+  "compiled": true,
+  "ran": true,
+  "returncode": 0,
+  "timed_out": false,
+  "violation": true,
+  "has_trace": true,
+  "seconds": 1.3
+}

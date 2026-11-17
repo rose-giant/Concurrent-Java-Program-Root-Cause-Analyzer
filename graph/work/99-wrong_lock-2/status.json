@@ -1,0 +1,11 @@
+{
+  "id": "99-wrong_lock-2",
+  "class": "Main",
+  "compiled": true,
+  "ran": true,
+  "returncode": null,
+  "timed_out": true,
+  "violation": false,
+  "has_trace": false,
+  "seconds": 300.1
+}

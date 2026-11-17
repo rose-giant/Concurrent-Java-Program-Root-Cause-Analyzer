@@ -1,0 +1,6 @@
+{
+  "id": "105-wrong_lock-1",
+  "safe_id": "105-wrong_lock-1",
+  "class": "Main",
+  "classification": "Race Condition"
+}

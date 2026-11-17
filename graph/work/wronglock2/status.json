@@ -1,0 +1,11 @@
+{
+  "id": "wronglock2",
+  "class": "Main",
+  "compiled": true,
+  "ran": true,
+  "returncode": 0,
+  "timed_out": false,
+  "violation": true,
+  "has_trace": true,
+  "seconds": 0.9
+}

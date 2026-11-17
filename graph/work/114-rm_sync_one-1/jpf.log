@@ -1,0 +1,23 @@
+JavaPathfinder core system v8.0 (rev 2345caaa002e15c6147d001d1ccd71e4b538f8e9) - (C) 2005-2014 United States Government. All rights reserved.
+
+
+====================================================== system under test
+BarrierTimer.main()
+
+====================================================== search started: 11/1/26 3:36 PM
+
+====================================================== results
+no errors detected
+
+====================================================== statistics
+elapsed time:       00:00:01
+states:             new=1291,visited=865,backtracked=2156,end=238
+search:             maxDepth=13,constraints=0
+choice generators:  thread=1291 (signal=0,lock=1,sharedRef=539,threadApi=194,reschedule=557), data=0
+heap:               new=475,released=4770,maxLive=465,gcCycles=1583
+instructions:       22638
+max memory:         147MB
+loaded code:        classes=83,methods=1821
+
+====================================================== search finished: 11/1/26 3:36 PM
+

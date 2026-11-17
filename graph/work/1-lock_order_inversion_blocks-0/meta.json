@@ -1,0 +1,6 @@
+{
+  "id": "1-lock_order_inversion_blocks-0",
+  "safe_id": "1-lock_order_inversion_blocks-0",
+  "class": "CountingLanterns",
+  "classification": "Deadlock"
+}

@@ -1,0 +1,38 @@
+[
+  {
+    "prompt_id": 1,
+    "topic": "Starvation Barging Lock",
+    "llm": "test",
+    "max_depth": "3000",
+    "code_present": true,
+    "code_compiled": true,
+    "compile_error": "",
+    "jpf_result": "error #1: gov.nasa.jpf.listener.StarvationListener \"starvation: thread Thread-2 (id 2) was enabled but...\"",
+    "jpf_details": "===== full exception (untruncated) =====\ngov.nasa.jpf.listener.StarvationListener\nstarvation: thread Thread-2 (id 2) was enabled but skipped 501 consecutive scheduling decisions (bound 500)\n\nUnique logical threads created during execution: 3\n[JPF-STARVATION] max consecutive skips seen on any path: 501 (bound 500)\n\n====================================================== results\nerror #1: gov.nasa.jpf.listener.StarvationListener \"starvation: thread Thread-2 (id 2) was enabled but...\"\n\n====================================================== statistics\nstates:             new=503,visited=0,backtracked=0,end=0\nsearch:             maxDepth=503,constraints=0\nchoice generators:  thread=503 (signal=0,lock=101,sharedRef=399,threadApi=3,reschedule=0), data=0\nheap:               new=473,released=10,maxLive=463,gcCycles=302\ninstructions:       8248\nmax memory:         117MB\nloaded code:        classes=85,methods=1819\n\n====================================================== search finished",
+    "classification": "Starvation"
+  },
+  {
+    "prompt_id": 2,
+    "topic": "Starvation Priority Queue",
+    "llm": "test",
+    "max_depth": "3000",
+    "code_present": true,
+    "code_compiled": true,
+    "compile_error": "",
+    "jpf_result": "no errors detected",
+    "jpf_details": "Unique logical threads created during execution: 3\n[JPF-STARVATION] max consecutive skips seen on any path: 55 (bound 500)\n\n====================================================== results\nno errors detected\n\n====================================================== statistics\nstates:             new=69621,visited=61854,backtracked=130715,end=285\nsearch:             maxDepth=3000,constraints=97\nchoice generators:  thread=69422 (signal=0,lock=9296,sharedRef=57119,threadApi=145,reschedule=2862), data=0\nheap:               new=5841,released=10150,maxLive=742,gcCycles=118590\ninstructions:       935146\nmax memory:         408MB\nloaded code:        classes=90,methods=1918\n\n====================================================== search finished",
+    "classification": "Pass"
+  },
+  {
+    "prompt_id": 3,
+    "topic": "Control Fair Counter",
+    "llm": "test",
+    "max_depth": "3000",
+    "code_present": true,
+    "code_compiled": true,
+    "compile_error": "",
+    "jpf_result": "no errors detected",
+    "jpf_details": "Unique logical threads created during execution: 3\n[JPF-STARVATION] max consecutive skips seen on any path: 29 (bound 500)\n\n====================================================== results\nno errors detected\n\n====================================================== statistics\nstates:             new=583,visited=703,backtracked=1286,end=3\nsearch:             maxDepth=30,constraints=0\nchoice generators:  thread=583 (signal=0,lock=211,sharedRef=297,threadApi=23,reschedule=52), data=0\nheap:               new=470,released=61,maxLive=460,gcCycles=1062\ninstructions:       14208\nmax memory:         147MB\nloaded code:        classes=84,methods=1817\n\n====================================================== search finished",
+    "classification": "Pass"
+  }
+]

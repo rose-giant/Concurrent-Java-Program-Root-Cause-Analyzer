@@ -1,0 +1,1002 @@
+[
+  {
+    "id": 1,
+    "model": "qwen",
+    "topic": "Counting sheep. M1",
+    "classification": "Race Condition",
+    "feedback": {
+      "error_type": "Race Condition",
+      "racing_class": "CountingLanterns",
+      "racing_field": "asleep",
+      "raw_message": "error #1: gov.nasa.jpf.listener.PreciseRaceDetector \"race for field CountingLanterns@1bd.asleep   Threa...\"",
+      "truncated": true,
+      "racing_accesses": [
+        {
+          "thread": "Thread-1",
+          "location": "CountingLanterns.tryToSleep(CountingLanterns.java:5)",
+          "access_type": "READ",
+          "source_line": "while (!asleep) {"
+        },
+        {
+          "thread": "Thread-2",
+          "location": "CountingLanterns.setAsleep(CountingLanterns.java:20)",
+          "access_type": "WRITE",
+          "source_line": "this.asleep = value;"
+        }
+      ],
+      "stack_trace_user_frames": [
+        "[Thread-1] CountingLanterns.tryToSleep(CountingLanterns.java:5)",
+        "[Thread-2] CountingLanterns.setAsleep(CountingLanterns.java:20)"
+      ],
+      "stack_trace_internal_frame_count": 0,
+      "notes": "JPF's PreciseRaceDetector flagged this field as accessed by multiple threads without a happens-before ordering between them (missing/incorrect synchronization)."
+    }
+  },
+  {
+    "id": 2,
+    "model": "qwen",
+    "topic": "Counting sheep. M2",
+    "classification": "Race Condition",
+    "feedback": {
+      "error_type": "Race Condition",
+      "racing_class": "CountingComets",
+      "racing_field": "asleep",
+      "raw_message": "error #1: gov.nasa.jpf.listener.PreciseRaceDetector \"race for field CountingComets@1bd.asleep   Thread-...\"",
+      "truncated": true,
+      "racing_accesses": [
+        {
+          "thread": "Thread-1",
+          "location": "CountingComets.tryToSleep(CountingComets.java:5)",
+          "access_type": "READ",
+          "source_line": "while (!asleep) {"
+        },
+        {
+          "thread": "Thread-2",
+          "location": "CountingComets.setAsleep(CountingComets.java:20)",
+          "access_type": "WRITE",
+          "source_line": "this.asleep = value;"
+        }
+      ],
+      "stack_trace_user_frames": [
+        "[Thread-1] CountingComets.tryToSleep(CountingComets.java:5)",
+        "[Thread-2] CountingComets.setAsleep(CountingComets.java:20)"
+      ],
+      "stack_trace_internal_frame_count": 0,
+      "notes": "JPF's PreciseRaceDetector flagged this field as accessed by multiple threads without a happens-before ordering between them (missing/incorrect synchronization)."
+    }
+  },
+  {
+    "id": 3,
+    "model": "qwen",
+    "topic": "Counting sheep. M3",
+    "classification": "Race Condition",
+    "feedback": {
+      "error_type": "Race Condition",
+      "racing_class": "CountingFireflies",
+      "racing_field": "asleep",
+      "raw_message": "error #1: gov.nasa.jpf.listener.PreciseRaceDetector \"race for field CountingFireflies@1bd.asleep   Thre...\"",
+      "truncated": true,
+      "racing_accesses": [
+        {
+          "thread": "Thread-1",
+          "location": "CountingFireflies.tryToSleep(CountingFireflies.java:5)",
+          "access_type": "READ",
+          "source_line": "while (!asleep) {"
+        },
+        {
+          "thread": "Thread-2",
+          "location": "CountingFireflies.setAsleep(CountingFireflies.java:20)",
+          "access_type": "WRITE",
+          "source_line": "this.asleep = value;"
+        }
+      ],
+      "stack_trace_user_frames": [
+        "[Thread-1] CountingFireflies.tryToSleep(CountingFireflies.java:5)",
+        "[Thread-2] CountingFireflies.setAsleep(CountingFireflies.java:20)"
+      ],
+      "stack_trace_internal_frame_count": 0,
+      "notes": "JPF's PreciseRaceDetector flagged this field as accessed by multiple threads without a happens-before ordering between them (missing/incorrect synchronization)."
+    }
+  },
+  {
+    "id": 7,
+    "model": "qwen",
+    "topic": "Returning a static copy of the location set instead of a 'live' one. M1",
+    "classification": "Uncaught Exception",
+    "feedback": {
+      "error_type": "Uncaught Exception",
+      "exception_class": "java.lang.NullPointerException",
+      "wrapper_class": null,
+      "message": "Calling 'updatePosition(Ljava/lang/String;Ljava/lang/String;)Z' on null object",
+      "truncated": false,
+      "exception_chain": [
+        {
+          "exception_class": "java.lang.NullPointerException",
+          "message": "Calling 'updatePosition(Ljava/lang/String;Ljava/lang/String;)Z' on null object",
+          "stack_trace_user_frames": [
+            "Main.lambda$main$0(Main.java:13)",
+            "Main$$Lambda$0.run"
+          ],
+          "stack_trace_internal_frame_count": 0
+        }
+      ],
+      "stack_trace_user_frames": [
+        "Main.lambda$main$0(Main.java:13)",
+        "Main$$Lambda$0.run"
+      ],
+      "stack_trace_internal_frame_count": 0,
+      "max_depth_at_failure": 5,
+      "reflection_suspected": false,
+      "notes": "This exception was thrown during at least one explored thread interleaving and was never caught. Full exception text and stack trace were recovered for this run. Failed after 5 explored steps -- may only surface under a specific thread interleaving rather than every run."
+    }
+  },
+  {
+    "id": 8,
+    "model": "qwen",
+    "topic": "Returning a static copy of the location set instead of a 'live' one. M2",
+    "classification": "Uncaught Exception",
+    "feedback": {
+      "error_type": "Uncaught Exception",
+      "exception_class": "java.lang.NullPointerException",
+      "wrapper_class": null,
+      "message": "Calling 'assignPosition(Ljava/lang/String;Ljava/lang/String;)Z' on null object",
+      "truncated": false,
+      "exception_chain": [
+        {
+          "exception_class": "java.lang.NullPointerException",
+          "message": "Calling 'assignPosition(Ljava/lang/String;Ljava/lang/String;)Z' on null object",
+          "stack_trace_user_frames": [
+            "Main.lambda$main$0(Main.java:13)",
+            "Main$$Lambda$0.run"
+          ],
+          "stack_trace_internal_frame_count": 0
+        }
+      ],
+      "stack_trace_user_frames": [
+        "Main.lambda$main$0(Main.java:13)",
+        "Main$$Lambda$0.run"
+      ],
+      "stack_trace_internal_frame_count": 0,
+      "max_depth_at_failure": 5,
+      "reflection_suspected": false,
+      "notes": "This exception was thrown during at least one explored thread interleaving and was never caught. Full exception text and stack trace were recovered for this run. Failed after 5 explored steps -- may only surface under a specific thread interleaving rather than every run."
+    }
+  },
+  {
+    "id": 9,
+    "model": "qwen",
+    "topic": "Returning a static copy of the location set instead of a 'live' one. M3",
+    "classification": "Uncaught Exception",
+    "feedback": {
+      "error_type": "Uncaught Exception",
+      "exception_class": "java.lang.NullPointerException",
+      "wrapper_class": null,
+      "message": "Calling 'modifyCoordinates(Ljava/lang/String;Ljava/lang/String;)Z' on null object",
+      "truncated": false,
+      "exception_chain": [
+        {
+          "exception_class": "java.lang.NullPointerException",
+          "message": "Calling 'modifyCoordinates(Ljava/lang/String;Ljava/lang/String;)Z' on null object",
+          "stack_trace_user_frames": [
+            "Main.lambda$main$0(Main.java:13)",
+            "Main$$Lambda$0.run"
+          ],
+          "stack_trace_internal_frame_count": 0
+        }
+      ],
+      "stack_trace_user_frames": [
+        "Main.lambda$main$0(Main.java:13)",
+        "Main$$Lambda$0.run"
+      ],
+      "stack_trace_internal_frame_count": 0,
+      "max_depth_at_failure": 5,
+      "reflection_suspected": false,
+      "notes": "This exception was thrown during at least one explored thread interleaving and was never caught. Full exception text and stack trace were recovered for this run. Failed after 5 explored steps -- may only surface under a specific thread interleaving rather than every run."
+    }
+  },
+  {
+    "id": 28,
+    "model": "qwen",
+    "topic": "Thread confinement of local primitive and reference variables. M1",
+    "classification": "Uncaught Exception",
+    "feedback": {
+      "error_type": "Uncaught Exception",
+      "exception_class": "java.lang.ClassCastException",
+      "wrapper_class": null,
+      "message": "java.util.Comparator$$Lambda$2 cannot be cast to java.io.Serializable",
+      "truncated": false,
+      "exception_chain": [
+        {
+          "exception_class": "java.lang.ClassCastException",
+          "message": "java.util.Comparator$$Lambda$2 cannot be cast to java.io.Serializable",
+          "stack_trace_user_frames": [
+            "Main.channelTheGrimoire(Main.java:33)",
+            "Main.lambda$main$0(Main.java:14)",
+            "Main$$Lambda$0.run"
+          ],
+          "stack_trace_internal_frame_count": 1
+        }
+      ],
+      "stack_trace_user_frames": [
+        "Main.channelTheGrimoire(Main.java:33)",
+        "Main.lambda$main$0(Main.java:14)",
+        "Main$$Lambda$0.run"
+      ],
+      "stack_trace_internal_frame_count": 1,
+      "max_depth_at_failure": 7,
+      "reflection_suspected": false,
+      "notes": "This exception was thrown during at least one explored thread interleaving and was never caught. Full exception text and stack trace were recovered for this run. Failed after 7 explored steps -- may only surface under a specific thread interleaving rather than every run."
+    }
+  },
+  {
+    "id": 29,
+    "model": "qwen",
+    "topic": "Thread confinement of local primitive and reference variables. M2",
+    "classification": "Uncaught Exception",
+    "feedback": {
+      "error_type": "Uncaught Exception",
+      "exception_class": "java.lang.ClassCastException",
+      "wrapper_class": null,
+      "message": "java.util.Comparator$$Lambda$2 cannot be cast to java.io.Serializable",
+      "truncated": false,
+      "exception_chain": [
+        {
+          "exception_class": "java.lang.ClassCastException",
+          "message": "java.util.Comparator$$Lambda$2 cannot be cast to java.io.Serializable",
+          "stack_trace_user_frames": [
+            "Main.channelTheGrimoire(Main.java:33)",
+            "Main.lambda$main$0(Main.java:14)",
+            "Main$$Lambda$0.run"
+          ],
+          "stack_trace_internal_frame_count": 1
+        }
+      ],
+      "stack_trace_user_frames": [
+        "Main.channelTheGrimoire(Main.java:33)",
+        "Main.lambda$main$0(Main.java:14)",
+        "Main$$Lambda$0.run"
+      ],
+      "stack_trace_internal_frame_count": 1,
+      "max_depth_at_failure": 7,
+      "reflection_suspected": false,
+      "notes": "This exception was thrown during at least one explored thread interleaving and was never caught. Full exception text and stack trace were recovered for this run. Failed after 7 explored steps -- may only surface under a specific thread interleaving rather than every run."
+    }
+  },
+  {
+    "id": 30,
+    "model": "qwen",
+    "topic": "Thread confinement of local primitive and reference variables. M3",
+    "classification": "Uncaught Exception",
+    "feedback": {
+      "error_type": "Uncaught Exception",
+      "exception_class": "java.lang.ClassCastException",
+      "wrapper_class": null,
+      "message": "java.util.Comparator$$Lambda$2 cannot be cast to java.io.Serializable",
+      "truncated": false,
+      "exception_chain": [
+        {
+          "exception_class": "java.lang.ClassCastException",
+          "message": "java.util.Comparator$$Lambda$2 cannot be cast to java.io.Serializable",
+          "stack_trace_user_frames": [
+            "Main.channelTheGrimoire(Main.java:33)",
+            "Main.lambda$main$0(Main.java:14)",
+            "Main$$Lambda$0.run"
+          ],
+          "stack_trace_internal_frame_count": 1
+        }
+      ],
+      "stack_trace_user_frames": [
+        "Main.channelTheGrimoire(Main.java:33)",
+        "Main.lambda$main$0(Main.java:14)",
+        "Main$$Lambda$0.run"
+      ],
+      "stack_trace_internal_frame_count": 1,
+      "max_depth_at_failure": 7,
+      "reflection_suspected": false,
+      "notes": "This exception was thrown during at least one explored thread interleaving and was never caught. Full exception text and stack trace were recovered for this run. Failed after 7 explored steps -- may only surface under a specific thread interleaving rather than every run."
+    }
+  },
+  {
+    "id": 43,
+    "model": "qwen",
+    "topic": "Inducing a lock ordering to avoid deadlock. M1",
+    "classification": "Compilation Errors",
+    "feedback": {
+      "error_type": "Compilation Errors",
+      "errors": [
+        {
+          "file": "/tmp/jpf_validate_qwen_tmp/Main.java",
+          "line": 12,
+          "message": "GoldAmount is abstract; cannot be instantiated"
+        },
+        {
+          "file": "/tmp/jpf_validate_qwen_tmp/Main.java",
+          "line": 19,
+          "message": "GoldAmount is abstract; cannot be instantiated"
+        }
+      ],
+      "error_count": 2,
+      "stack_trace_user_frames": [],
+      "stack_trace_internal_frame_count": 0,
+      "notes": "Not applicable -- compilation failed before the program could run."
+    }
+  },
+  {
+    "id": 44,
+    "model": "qwen",
+    "topic": "Inducing a lock ordering to avoid deadlock. M2",
+    "classification": "Compilation Errors",
+    "feedback": {
+      "error_type": "Compilation Errors",
+      "errors": [
+        {
+          "file": "/tmp/jpf_validate_qwen_tmp/Main.java",
+          "line": 12,
+          "message": "GemAmount is abstract; cannot be instantiated"
+        },
+        {
+          "file": "/tmp/jpf_validate_qwen_tmp/Main.java",
+          "line": 19,
+          "message": "GemAmount is abstract; cannot be instantiated"
+        }
+      ],
+      "error_count": 2,
+      "stack_trace_user_frames": [],
+      "stack_trace_internal_frame_count": 0,
+      "notes": "Not applicable -- compilation failed before the program could run."
+    }
+  },
+  {
+    "id": 45,
+    "model": "qwen",
+    "topic": "Inducing a lock ordering to avoid deadlock. M3",
+    "classification": "Compilation Errors",
+    "feedback": {
+      "error_type": "Compilation Errors",
+      "errors": [
+        {
+          "file": "/tmp/jpf_validate_qwen_tmp/Main.java",
+          "line": 12,
+          "message": "CrystalAmount is abstract; cannot be instantiated"
+        },
+        {
+          "file": "/tmp/jpf_validate_qwen_tmp/Main.java",
+          "line": 19,
+          "message": "CrystalAmount is abstract; cannot be instantiated"
+        }
+      ],
+      "error_count": 2,
+      "stack_trace_user_frames": [],
+      "stack_trace_internal_frame_count": 0,
+      "notes": "Not applicable -- compilation failed before the program could run."
+    }
+  },
+  {
+    "id": 49,
+    "model": "qwen",
+    "topic": "Wrapping a Map with a read-write lock. M1",
+    "classification": "Uncaught Exception",
+    "feedback": {
+      "error_type": "Uncaught Exception",
+      "exception_class": "java.lang.NoSuchFieldException",
+      "wrapper_class": "java.lang.Error",
+      "message": "tid",
+      "truncated": false,
+      "exception_chain": [
+        {
+          "exception_class": "java.lang.Error",
+          "message": "java.lang.NoSuchFieldException: tid",
+          "stack_trace_user_frames": [
+            "CrystalCache.<init>(Main.java:31)",
+            "Main.main(Main.java:9)"
+          ],
+          "stack_trace_internal_frame_count": 1
+        },
+        {
+          "exception_class": "java.lang.NoSuchFieldException",
+          "message": "tid",
+          "stack_trace_user_frames": [
+            "CrystalCache.<init>(Main.java:31)",
+            "Main.main(Main.java:9)"
+          ],
+          "stack_trace_internal_frame_count": 2
+        }
+      ],
+      "stack_trace_user_frames": [
+        "CrystalCache.<init>(Main.java:31)",
+        "Main.main(Main.java:9)"
+      ],
+      "stack_trace_internal_frame_count": 3,
+      "max_depth_at_failure": 1,
+      "reflection_suspected": null,
+      "notes": "This exception was thrown during at least one explored thread interleaving and was never caught. Full exception chain recovered: java.lang.Error wrapping java.lang.NoSuchFieldException, with a real stack trace for each link. Failed almost immediately (maxDepth=1) -- likely an initialization-time bug, not something that depends on a rare thread interleaving. Exception class suggests a reflection-related failure, but the generated code wasn't available to confirm reflection API usage (pass a code-lookup file to check)."
+    }
+  },
+  {
+    "id": 50,
+    "model": "qwen",
+    "topic": "Wrapping a Map with a read-write lock. M2",
+    "classification": "Uncaught Exception",
+    "feedback": {
+      "error_type": "Uncaught Exception",
+      "exception_class": "java.lang.NoSuchFieldException",
+      "wrapper_class": "java.lang.Error",
+      "message": "tid",
+      "truncated": false,
+      "exception_chain": [
+        {
+          "exception_class": "java.lang.Error",
+          "message": "java.lang.NoSuchFieldException: tid",
+          "stack_trace_user_frames": [
+            "SigilLedger.<init>(Main.java:31)",
+            "Main.main(Main.java:9)"
+          ],
+          "stack_trace_internal_frame_count": 1
+        },
+        {
+          "exception_class": "java.lang.NoSuchFieldException",
+          "message": "tid",
+          "stack_trace_user_frames": [
+            "SigilLedger.<init>(Main.java:31)",
+            "Main.main(Main.java:9)"
+          ],
+          "stack_trace_internal_frame_count": 2
+        }
+      ],
+      "stack_trace_user_frames": [
+        "SigilLedger.<init>(Main.java:31)",
+        "Main.main(Main.java:9)"
+      ],
+      "stack_trace_internal_frame_count": 3,
+      "max_depth_at_failure": 1,
+      "reflection_suspected": null,
+      "notes": "This exception was thrown during at least one explored thread interleaving and was never caught. Full exception chain recovered: java.lang.Error wrapping java.lang.NoSuchFieldException, with a real stack trace for each link. Failed almost immediately (maxDepth=1) -- likely an initialization-time bug, not something that depends on a rare thread interleaving. Exception class suggests a reflection-related failure, but the generated code wasn't available to confirm reflection API usage (pass a code-lookup file to check)."
+    }
+  },
+  {
+    "id": 51,
+    "model": "qwen",
+    "topic": "Wrapping a Map with a read-write lock. M3",
+    "classification": "Uncaught Exception",
+    "feedback": {
+      "error_type": "Uncaught Exception",
+      "exception_class": "java.lang.NoSuchFieldException",
+      "wrapper_class": "java.lang.Error",
+      "message": "tid",
+      "truncated": false,
+      "exception_chain": [
+        {
+          "exception_class": "java.lang.Error",
+          "message": "java.lang.NoSuchFieldException: tid",
+          "stack_trace_user_frames": [
+            "EnchantedRegistry.<init>(Main.java:31)",
+            "Main.main(Main.java:9)"
+          ],
+          "stack_trace_internal_frame_count": 1
+        },
+        {
+          "exception_class": "java.lang.NoSuchFieldException",
+          "message": "tid",
+          "stack_trace_user_frames": [
+            "EnchantedRegistry.<init>(Main.java:31)",
+            "Main.main(Main.java:9)"
+          ],
+          "stack_trace_internal_frame_count": 2
+        }
+      ],
+      "stack_trace_user_frames": [
+        "EnchantedRegistry.<init>(Main.java:31)",
+        "Main.main(Main.java:9)"
+      ],
+      "stack_trace_internal_frame_count": 3,
+      "max_depth_at_failure": 1,
+      "reflection_suspected": null,
+      "notes": "This exception was thrown during at least one explored thread interleaving and was never caught. Full exception chain recovered: java.lang.Error wrapping java.lang.NoSuchFieldException, with a real stack trace for each link. Failed almost immediately (maxDepth=1) -- likely an initialization-time bug, not something that depends on a rare thread interleaving. Exception class suggests a reflection-related failure, but the generated code wasn't available to confirm reflection API usage (pass a code-lookup file to check)."
+    }
+  },
+  {
+    "id": 68,
+    "model": "qwen",
+    "topic": "Nonblocking counter using CAS. M2",
+    "classification": "Uncaught Exception",
+    "feedback": {
+      "error_type": "Uncaught Exception",
+      "exception_class": "java.lang.NullPointerException",
+      "wrapper_class": null,
+      "message": "Calling 'growScale()V' on null object",
+      "truncated": false,
+      "exception_chain": [
+        {
+          "exception_class": "java.lang.NullPointerException",
+          "message": "Calling 'growScale()V' on null object",
+          "stack_trace_user_frames": [
+            "Main.lambda$main$0(Main.java:6)",
+            "Main$$Lambda$0.run"
+          ],
+          "stack_trace_internal_frame_count": 0
+        }
+      ],
+      "stack_trace_user_frames": [
+        "Main.lambda$main$0(Main.java:6)",
+        "Main$$Lambda$0.run"
+      ],
+      "stack_trace_internal_frame_count": 0,
+      "max_depth_at_failure": 5,
+      "reflection_suspected": false,
+      "notes": "This exception was thrown during at least one explored thread interleaving and was never caught. Full exception text and stack trace were recovered for this run. Failed after 5 explored steps -- may only surface under a specific thread interleaving rather than every run."
+    }
+  },
+  {
+    "id": 70,
+    "model": "qwen",
+    "topic": "Using a factory method to prevent the this reference from escaping during construction. M1",
+    "classification": "Compilation Errors",
+    "feedback": {
+      "error_type": "Compilation Errors",
+      "errors": [
+        {
+          "file": "/tmp/jpf_validate_qwen_tmp/Main.java",
+          "line": 4,
+          "message": "ArcaneSource is abstract; cannot be instantiated"
+        }
+      ],
+      "error_count": 1,
+      "stack_trace_user_frames": [],
+      "stack_trace_internal_frame_count": 0,
+      "notes": "Not applicable -- compilation failed before the program could run."
+    }
+  },
+  {
+    "id": 73,
+    "model": "qwen",
+    "topic": "",
+    "classification": "Termination Error",
+    "feedback": {
+      "error_type": "Termination Error",
+      "raw_tail_of_log": "ch.DFSearch.search(DFSearch.java:79)\n\tat gov.nasa.jpf.JPF.run(JPF.java:613)\n\tat gov.nasa.jpf.JPF.start(JPF.java:189)\n\tat sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)\n\tat sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)\n\tat sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\n\tat java.lang.reflect.Method.invoke(Method.java:498)\n\tat gov.nasa.jpf.tool.Run.call(Run.java:80)\n\tat gov.nasa.jpf.tool.RunJPF.main(RunJPF.java:116)",
+      "stack_trace_user_frames": [],
+      "stack_trace_internal_frame_count": 14,
+      "notes": "JPF terminated abnormally while exploring this program rather than completing its search or reporting a specific property violation. This can mean the model checker ran out of a resource bound (states/time/depth), or it can mask a genuine concurrency defect (e.g. a livelock) that JPF cannot name directly. Treat as inconclusive rather than a confirmed specific bug; do not assume the code is otherwise correct. The termination trace is entirely inside JPF/JVM internals with no user-code frames, consistent with a resource-bound or search-engine-level termination rather than a bug reachable in the generated code."
+    }
+  },
+  {
+    "id": 74,
+    "model": "qwen",
+    "topic": "",
+    "classification": "Race Condition",
+    "feedback": {
+      "error_type": "Race Condition",
+      "racing_class": "Sleeper",
+      "racing_field": "asleep",
+      "raw_message": "error #1: gov.nasa.jpf.listener.PreciseRaceDetector \"race for field Sleeper@1c0.asleep   pool-1-thread-...\"",
+      "truncated": true,
+      "racing_accesses": [
+        {
+          "thread": "pool-1-thread-1",
+          "location": "Sleeper.tryToSleep(Main.java:1)",
+          "access_type": "READ",
+          "source_line": "import java.util.concurrent.*; class Sleeper { volatile boolean asleep; void tryToSleep() { while (!asleep) countSomeSheep(); } void countSomeSheep() { try { Thread.sleep(1); } catch (InterruptedException e) { Thread.currentThread().interrupt(); } } } public class Main { public static void main(String[] args) throws Exception { Sleeper sleeper = new Sleeper(); ExecutorService es = Executors.newFixedThreadPool(2); es.execute(() -> { sleeper.tryToSleep(); }); es.execute(() -> { try { Thread.sleep(10); } catch (InterruptedException e) { Thread.currentThread().interrupt(); } sleeper.asleep = true; }); es.shutdown(); es.awaitTermination(2, TimeUnit.SECONDS); } }"
+        },
+        {
+          "thread": "pool-1-thread-2",
+          "location": "Main.lambda$main$1(Main.java:1)",
+          "access_type": "WRITE",
+          "source_line": "import java.util.concurrent.*; class Sleeper { volatile boolean asleep; void tryToSleep() { while (!asleep) countSomeSheep(); } void countSomeSheep() { try { Thread.sleep(1); } catch (InterruptedException e) { Thread.currentThread().interrupt(); } } } public class Main { public static void main(String[] args) throws Exception { Sleeper sleeper = new Sleeper(); ExecutorService es = Executors.newFixedThreadPool(2); es.execute(() -> { sleeper.tryToSleep(); }); es.execute(() -> { try { Thread.sleep(10); } catch (InterruptedException e) { Thread.currentThread().interrupt(); } sleeper.asleep = true; }); es.shutdown(); es.awaitTermination(2, TimeUnit.SECONDS); } }"
+        }
+      ],
+      "stack_trace_user_frames": [
+        "[pool-1-thread-1] Sleeper.tryToSleep(Main.java:1)",
+        "[pool-1-thread-2] Main.lambda$main$1(Main.java:1)"
+      ],
+      "stack_trace_internal_frame_count": 0,
+      "notes": "JPF's PreciseRaceDetector flagged this field as accessed by multiple threads without a happens-before ordering between them (missing/incorrect synchronization)."
+    }
+  },
+  {
+    "id": 80,
+    "model": "qwen",
+    "topic": "",
+    "classification": "Termination Error",
+    "feedback": {
+      "error_type": "Termination Error",
+      "raw_tail_of_log": "ch.DFSearch.search(DFSearch.java:79)\n\tat gov.nasa.jpf.JPF.run(JPF.java:613)\n\tat gov.nasa.jpf.JPF.start(JPF.java:189)\n\tat sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)\n\tat sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)\n\tat sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\n\tat java.lang.reflect.Method.invoke(Method.java:498)\n\tat gov.nasa.jpf.tool.Run.call(Run.java:80)\n\tat gov.nasa.jpf.tool.RunJPF.main(RunJPF.java:116)",
+      "stack_trace_user_frames": [],
+      "stack_trace_internal_frame_count": 14,
+      "notes": "JPF terminated abnormally while exploring this program rather than completing its search or reporting a specific property violation. This can mean the model checker ran out of a resource bound (states/time/depth), or it can mask a genuine concurrency defect (e.g. a livelock) that JPF cannot name directly. Treat as inconclusive rather than a confirmed specific bug; do not assume the code is otherwise correct. The termination trace is entirely inside JPF/JVM internals with no user-code frames, consistent with a resource-bound or search-engine-level termination rather than a bug reachable in the generated code."
+    }
+  },
+  {
+    "id": 84,
+    "model": "qwen",
+    "topic": "",
+    "classification": "Uncaught Exception",
+    "feedback": {
+      "error_type": "Uncaught Exception",
+      "exception_class": "java.lang.NullPointerException",
+      "wrapper_class": null,
+      "message": "Calling 'setLocation(Ljava/lang/String;II)V' on null object",
+      "truncated": false,
+      "exception_chain": [
+        {
+          "exception_class": "java.lang.NullPointerException",
+          "message": "Calling 'setLocation(Ljava/lang/String;II)V' on null object",
+          "stack_trace_user_frames": [
+            "Main.lambda$main$0(Main.java:1)",
+            "Main$$Lambda$0.run"
+          ],
+          "stack_trace_internal_frame_count": 2
+        }
+      ],
+      "stack_trace_user_frames": [
+        "Main.lambda$main$0(Main.java:1)",
+        "Main$$Lambda$0.run"
+      ],
+      "stack_trace_internal_frame_count": 2,
+      "max_depth_at_failure": 3000,
+      "reflection_suspected": false,
+      "notes": "This exception was thrown during at least one explored thread interleaving and was never caught. Full exception text and stack trace were recovered for this run. Failed after 3000 explored steps -- may only surface under a specific thread interleaving rather than every run."
+    }
+  },
+  {
+    "id": 85,
+    "model": "qwen",
+    "topic": "",
+    "classification": "Uncaught Exception",
+    "feedback": {
+      "error_type": "Uncaught Exception",
+      "exception_class": "java.lang.NullPointerException",
+      "wrapper_class": null,
+      "message": "Calling 'setLocation(Ljava/lang/String;II)V' on null object",
+      "truncated": false,
+      "exception_chain": [
+        {
+          "exception_class": "java.lang.NullPointerException",
+          "message": "Calling 'setLocation(Ljava/lang/String;II)V' on null object",
+          "stack_trace_user_frames": [
+            "Main.lambda$main$0(Main.java:1)",
+            "Main$$Lambda$0.run"
+          ],
+          "stack_trace_internal_frame_count": 2
+        }
+      ],
+      "stack_trace_user_frames": [
+        "Main.lambda$main$0(Main.java:1)",
+        "Main$$Lambda$0.run"
+      ],
+      "stack_trace_internal_frame_count": 2,
+      "max_depth_at_failure": 3000,
+      "reflection_suspected": false,
+      "notes": "This exception was thrown during at least one explored thread interleaving and was never caught. Full exception text and stack trace were recovered for this run. Failed after 3000 explored steps -- may only surface under a specific thread interleaving rather than every run."
+    }
+  },
+  {
+    "id": 86,
+    "model": "qwen",
+    "topic": "",
+    "classification": "Race Condition",
+    "feedback": {
+      "error_type": "Race Condition",
+      "racing_class": "SafePoint",
+      "racing_field": "x",
+      "raw_message": "error #1: gov.nasa.jpf.listener.PreciseRaceDetector \"race for field SafePoint@1c6.x   pool-1-thread-1 a...\"",
+      "truncated": true,
+      "racing_accesses": [
+        {
+          "thread": "pool-1-thread-1",
+          "location": "PublishingVehicleTracker.setLocation(Main.java:1)",
+          "access_type": "WRITE",
+          "source_line": "import java.util.*; import java.util.concurrent.*; class SafePoint { public volatile int x; public volatile int y; SafePoint(int x, int y) { this.x = x; this.y = y; } } class PublishingVehicleTracker { private final ConcurrentHashMap<String, SafePoint> locations; PublishingVehicleTracker(Map<String, SafePoint> initial) { locations = new ConcurrentHashMap<>(initial); } Map<String, SafePoint> getLocations() { return Collections.unmodifiableMap(locations); } SafePoint getLocation(String id) { SafePoint p = locations.get(id); return p == null ? null : new SafePoint(p.x, p.y); } void setLocation(String id, int x, int y) { SafePoint p = locations.get(id); if (p == null) throw new IllegalArgumentException(); p.x = x; p.y = y; } } public class Main { public static void main(String[] args) throws Exception { Map<String, SafePoint> initial = new HashMap<>(); initial.put(String.valueOf(1), new SafePoint(0, 0)); PublishingVehicleTracker tracker = new PublishingVehicleTracker(initial); ExecutorService es = Executors.newFixedThreadPool(2); es.execute(() -> { tracker.setLocation(String.valueOf(1), 2, 2); }); es.execute(() -> { tracker.getLocation(String.valueOf(1)); }); es.shutdown(); es.awaitTermination(1, TimeUnit.SECONDS); } }"
+        },
+        {
+          "thread": "pool-1-thread-2",
+          "location": "PublishingVehicleTracker.getLocation(Main.java:1)",
+          "access_type": "READ",
+          "source_line": "import java.util.*; import java.util.concurrent.*; class SafePoint { public volatile int x; public volatile int y; SafePoint(int x, int y) { this.x = x; this.y = y; } } class PublishingVehicleTracker { private final ConcurrentHashMap<String, SafePoint> locations; PublishingVehicleTracker(Map<String, SafePoint> initial) { locations = new ConcurrentHashMap<>(initial); } Map<String, SafePoint> getLocations() { return Collections.unmodifiableMap(locations); } SafePoint getLocation(String id) { SafePoint p = locations.get(id); return p == null ? null : new SafePoint(p.x, p.y); } void setLocation(String id, int x, int y) { SafePoint p = locations.get(id); if (p == null) throw new IllegalArgumentException(); p.x = x; p.y = y; } } public class Main { public static void main(String[] args) throws Exception { Map<String, SafePoint> initial = new HashMap<>(); initial.put(String.valueOf(1), new SafePoint(0, 0)); PublishingVehicleTracker tracker = new PublishingVehicleTracker(initial); ExecutorService es = Executors.newFixedThreadPool(2); es.execute(() -> { tracker.setLocation(String.valueOf(1), 2, 2); }); es.execute(() -> { tracker.getLocation(String.valueOf(1)); }); es.shutdown(); es.awaitTermination(1, TimeUnit.SECONDS); } }"
+        }
+      ],
+      "stack_trace_user_frames": [
+        "[pool-1-thread-1] PublishingVehicleTracker.setLocation(Main.java:1)",
+        "[pool-1-thread-2] PublishingVehicleTracker.getLocation(Main.java:1)"
+      ],
+      "stack_trace_internal_frame_count": 0,
+      "notes": "JPF's PreciseRaceDetector flagged this field as accessed by multiple threads without a happens-before ordering between them (missing/incorrect synchronization)."
+    }
+  },
+  {
+    "id": 87,
+    "model": "qwen",
+    "topic": "",
+    "classification": "Termination Error",
+    "feedback": {
+      "error_type": "Termination Error",
+      "raw_tail_of_log": "ch.DFSearch.search(DFSearch.java:79)\n\tat gov.nasa.jpf.JPF.run(JPF.java:613)\n\tat gov.nasa.jpf.JPF.start(JPF.java:189)\n\tat sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)\n\tat sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)\n\tat sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\n\tat java.lang.reflect.Method.invoke(Method.java:498)\n\tat gov.nasa.jpf.tool.Run.call(Run.java:80)\n\tat gov.nasa.jpf.tool.RunJPF.main(RunJPF.java:116)",
+      "stack_trace_user_frames": [],
+      "stack_trace_internal_frame_count": 14,
+      "notes": "JPF terminated abnormally while exploring this program rather than completing its search or reporting a specific property violation. This can mean the model checker ran out of a resource bound (states/time/depth), or it can mask a genuine concurrency defect (e.g. a livelock) that JPF cannot name directly. Treat as inconclusive rather than a confirmed specific bug; do not assume the code is otherwise correct. The termination trace is entirely inside JPF/JVM internals with no user-code frames, consistent with a resource-bound or search-engine-level termination rather than a bug reachable in the generated code."
+    }
+  },
+  {
+    "id": 90,
+    "model": "qwen",
+    "topic": "",
+    "classification": "Race Condition",
+    "feedback": {
+      "error_type": "Race Condition",
+      "racing_class": "PrimeGenerator",
+      "racing_field": "cancelled",
+      "raw_message": "error #1: gov.nasa.jpf.listener.PreciseRaceDetector \"race for field PrimeGenerator@28b.cancelled   main...\"",
+      "truncated": true,
+      "racing_accesses": [
+        {
+          "thread": "main",
+          "location": "PrimeGenerator.cancel(Main.java:1)",
+          "access_type": "WRITE",
+          "source_line": "import java.math.BigInteger; import java.util.*; import java.util.concurrent.*; class PrimeGenerator implements Runnable { private volatile boolean cancelled; private final List<BigInteger> primes = Collections.synchronizedList(new ArrayList<>()); public void run() { BigInteger current = BigInteger.ONE; long end = System.currentTimeMillis() + 1000; while (!cancelled && System.currentTimeMillis() < end) { current = current.nextProbablePrime(); primes.add(current); } } void cancel() { cancelled = true; } List<BigInteger> getPrimes() { return primes; } } public class Main { public static void main(String[] args) throws Exception { ExecutorService es = Executors.newFixedThreadPool(1); PrimeGenerator generator = new PrimeGenerator(); Future<?> future = es.submit(generator); Thread.sleep(1000); generator.cancel(); future.get(); es.shutdown(); generator.getPrimes(); } }"
+        },
+        {
+          "thread": "pool-1-thread-1",
+          "location": "PrimeGenerator.run(Main.java:1)",
+          "access_type": "READ",
+          "source_line": "import java.math.BigInteger; import java.util.*; import java.util.concurrent.*; class PrimeGenerator implements Runnable { private volatile boolean cancelled; private final List<BigInteger> primes = Collections.synchronizedList(new ArrayList<>()); public void run() { BigInteger current = BigInteger.ONE; long end = System.currentTimeMillis() + 1000; while (!cancelled && System.currentTimeMillis() < end) { current = current.nextProbablePrime(); primes.add(current); } } void cancel() { cancelled = true; } List<BigInteger> getPrimes() { return primes; } } public class Main { public static void main(String[] args) throws Exception { ExecutorService es = Executors.newFixedThreadPool(1); PrimeGenerator generator = new PrimeGenerator(); Future<?> future = es.submit(generator); Thread.sleep(1000); generator.cancel(); future.get(); es.shutdown(); generator.getPrimes(); } }"
+        }
+      ],
+      "stack_trace_user_frames": [
+        "[main] PrimeGenerator.cancel(Main.java:1)",
+        "[pool-1-thread-1] PrimeGenerator.run(Main.java:1)"
+      ],
+      "stack_trace_internal_frame_count": 0,
+      "notes": "JPF's PreciseRaceDetector flagged this field as accessed by multiple threads without a happens-before ordering between them (missing/incorrect synchronization)."
+    }
+  },
+  {
+    "id": 91,
+    "model": "qwen",
+    "topic": "",
+    "classification": "Race Condition",
+    "feedback": {
+      "error_type": "Race Condition",
+      "racing_class": "PrimeGenerator",
+      "racing_field": "cancelled",
+      "raw_message": "error #1: gov.nasa.jpf.listener.PreciseRaceDetector \"race for field PrimeGenerator@1c0.cancelled   main...\"",
+      "truncated": true,
+      "racing_accesses": [
+        {
+          "thread": "main",
+          "location": "PrimeGenerator.cancel(Main.java:1)",
+          "access_type": "WRITE",
+          "source_line": "import java.math.BigInteger; import java.util.*; import java.util.concurrent.*; class PrimeGenerator implements Runnable { private volatile boolean cancelled; private final List<BigInteger> primes = Collections.synchronizedList(new ArrayList<>()); private final ExecutorService executor = Executors.newFixedThreadPool(1); public void run() { BigInteger current = BigInteger.ONE; long end = System.currentTimeMillis() + 1000; while (!cancelled && primes.size() < 10 && System.currentTimeMillis() < end) { current = current.nextProbablePrime(); primes.add(current); } } void start() { executor.submit(this); } void cancel() { cancelled = true; executor.shutdown(); } List<BigInteger> getPrimes() { return primes; } } public class Main { public static void main(String[] args) throws Exception { PrimeGenerator generator = new PrimeGenerator(); generator.start(); Thread.sleep(1000); generator.cancel(); generator.getPrimes(); } }"
+        },
+        {
+          "thread": "pool-1-thread-1",
+          "location": "PrimeGenerator.run(Main.java:1)",
+          "access_type": "READ",
+          "source_line": "import java.math.BigInteger; import java.util.*; import java.util.concurrent.*; class PrimeGenerator implements Runnable { private volatile boolean cancelled; private final List<BigInteger> primes = Collections.synchronizedList(new ArrayList<>()); private final ExecutorService executor = Executors.newFixedThreadPool(1); public void run() { BigInteger current = BigInteger.ONE; long end = System.currentTimeMillis() + 1000; while (!cancelled && primes.size() < 10 && System.currentTimeMillis() < end) { current = current.nextProbablePrime(); primes.add(current); } } void start() { executor.submit(this); } void cancel() { cancelled = true; executor.shutdown(); } List<BigInteger> getPrimes() { return primes; } } public class Main { public static void main(String[] args) throws Exception { PrimeGenerator generator = new PrimeGenerator(); generator.start(); Thread.sleep(1000); generator.cancel(); generator.getPrimes(); } }"
+        }
+      ],
+      "stack_trace_user_frames": [
+        "[main] PrimeGenerator.cancel(Main.java:1)",
+        "[pool-1-thread-1] PrimeGenerator.run(Main.java:1)"
+      ],
+      "stack_trace_internal_frame_count": 0,
+      "notes": "JPF's PreciseRaceDetector flagged this field as accessed by multiple threads without a happens-before ordering between them (missing/incorrect synchronization)."
+    }
+  },
+  {
+    "id": 96,
+    "model": "qwen",
+    "topic": "",
+    "classification": "Termination Error",
+    "feedback": {
+      "error_type": "Termination Error",
+      "raw_tail_of_log": "ch.DFSearch.search(DFSearch.java:79)\n\tat gov.nasa.jpf.JPF.run(JPF.java:613)\n\tat gov.nasa.jpf.JPF.start(JPF.java:189)\n\tat sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)\n\tat sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)\n\tat sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\n\tat java.lang.reflect.Method.invoke(Method.java:498)\n\tat gov.nasa.jpf.tool.Run.call(Run.java:80)\n\tat gov.nasa.jpf.tool.RunJPF.main(RunJPF.java:116)",
+      "stack_trace_user_frames": [],
+      "stack_trace_internal_frame_count": 14,
+      "notes": "JPF terminated abnormally while exploring this program rather than completing its search or reporting a specific property violation. This can mean the model checker ran out of a resource bound (states/time/depth), or it can mask a genuine concurrency defect (e.g. a livelock) that JPF cannot name directly. Treat as inconclusive rather than a confirmed specific bug; do not assume the code is otherwise correct. The termination trace is entirely inside JPF/JVM internals with no user-code frames, consistent with a resource-bound or search-engine-level termination rather than a bug reachable in the generated code."
+    }
+  },
+  {
+    "id": 97,
+    "model": "qwen",
+    "topic": "",
+    "classification": "Termination Error",
+    "feedback": {
+      "error_type": "Termination Error",
+      "raw_tail_of_log": "ch.DFSearch.search(DFSearch.java:79)\n\tat gov.nasa.jpf.JPF.run(JPF.java:613)\n\tat gov.nasa.jpf.JPF.start(JPF.java:189)\n\tat sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)\n\tat sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)\n\tat sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\n\tat java.lang.reflect.Method.invoke(Method.java:498)\n\tat gov.nasa.jpf.tool.Run.call(Run.java:80)\n\tat gov.nasa.jpf.tool.RunJPF.main(RunJPF.java:116)",
+      "stack_trace_user_frames": [],
+      "stack_trace_internal_frame_count": 14,
+      "notes": "JPF terminated abnormally while exploring this program rather than completing its search or reporting a specific property violation. This can mean the model checker ran out of a resource bound (states/time/depth), or it can mask a genuine concurrency defect (e.g. a livelock) that JPF cannot name directly. Treat as inconclusive rather than a confirmed specific bug; do not assume the code is otherwise correct. The termination trace is entirely inside JPF/JVM internals with no user-code frames, consistent with a resource-bound or search-engine-level termination rather than a bug reachable in the generated code."
+    }
+  },
+  {
+    "id": 99,
+    "model": "qwen",
+    "topic": "",
+    "classification": "Uncaught Exception",
+    "feedback": {
+      "error_type": "Uncaught Exception",
+      "exception_class": "java.lang.NoSuchFieldException",
+      "wrapper_class": "java.lang.Error",
+      "message": "tid",
+      "truncated": false,
+      "exception_chain": [
+        {
+          "exception_class": "java.lang.Error",
+          "message": "java.lang.NoSuchFieldException: tid",
+          "stack_trace_user_frames": [
+            "ReadWriteMap.<init>(Main.java:1)",
+            "Main.main(Main.java:1)"
+          ],
+          "stack_trace_internal_frame_count": 1
+        },
+        {
+          "exception_class": "java.lang.NoSuchFieldException",
+          "message": "tid",
+          "stack_trace_user_frames": [
+            "ReadWriteMap.<init>(Main.java:1)",
+            "Main.main(Main.java:1)"
+          ],
+          "stack_trace_internal_frame_count": 2
+        }
+      ],
+      "stack_trace_user_frames": [
+        "ReadWriteMap.<init>(Main.java:1)",
+        "Main.main(Main.java:1)"
+      ],
+      "stack_trace_internal_frame_count": 3,
+      "max_depth_at_failure": 1,
+      "reflection_suspected": null,
+      "notes": "This exception was thrown during at least one explored thread interleaving and was never caught. Full exception chain recovered: java.lang.Error wrapping java.lang.NoSuchFieldException, with a real stack trace for each link. Failed almost immediately (maxDepth=1) -- likely an initialization-time bug, not something that depends on a rare thread interleaving. Exception class suggests a reflection-related failure, but the generated code wasn't available to confirm reflection API usage (pass a code-lookup file to check)."
+    }
+  },
+  {
+    "id": 100,
+    "model": "qwen",
+    "topic": "",
+    "classification": "Termination Error",
+    "feedback": {
+      "error_type": "Termination Error",
+      "raw_tail_of_log": "ch.DFSearch.search(DFSearch.java:79)\n\tat gov.nasa.jpf.JPF.run(JPF.java:613)\n\tat gov.nasa.jpf.JPF.start(JPF.java:189)\n\tat sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)\n\tat sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)\n\tat sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\n\tat java.lang.reflect.Method.invoke(Method.java:498)\n\tat gov.nasa.jpf.tool.Run.call(Run.java:80)\n\tat gov.nasa.jpf.tool.RunJPF.main(RunJPF.java:116)",
+      "stack_trace_user_frames": [],
+      "stack_trace_internal_frame_count": 14,
+      "notes": "JPF terminated abnormally while exploring this program rather than completing its search or reporting a specific property violation. This can mean the model checker ran out of a resource bound (states/time/depth), or it can mask a genuine concurrency defect (e.g. a livelock) that JPF cannot name directly. Treat as inconclusive rather than a confirmed specific bug; do not assume the code is otherwise correct. The termination trace is entirely inside JPF/JVM internals with no user-code frames, consistent with a resource-bound or search-engine-level termination rather than a bug reachable in the generated code."
+    }
+  },
+  {
+    "id": 101,
+    "model": "qwen",
+    "topic": "",
+    "classification": "Termination Error",
+    "feedback": {
+      "error_type": "Termination Error",
+      "raw_tail_of_log": "ch.DFSearch.search(DFSearch.java:79)\n\tat gov.nasa.jpf.JPF.run(JPF.java:613)\n\tat gov.nasa.jpf.JPF.start(JPF.java:189)\n\tat sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)\n\tat sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)\n\tat sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\n\tat java.lang.reflect.Method.invoke(Method.java:498)\n\tat gov.nasa.jpf.tool.Run.call(Run.java:80)\n\tat gov.nasa.jpf.tool.RunJPF.main(RunJPF.java:116)",
+      "stack_trace_user_frames": [],
+      "stack_trace_internal_frame_count": 14,
+      "notes": "JPF terminated abnormally while exploring this program rather than completing its search or reporting a specific property violation. This can mean the model checker ran out of a resource bound (states/time/depth), or it can mask a genuine concurrency defect (e.g. a livelock) that JPF cannot name directly. Treat as inconclusive rather than a confirmed specific bug; do not assume the code is otherwise correct. The termination trace is entirely inside JPF/JVM internals with no user-code frames, consistent with a resource-bound or search-engine-level termination rather than a bug reachable in the generated code."
+    }
+  },
+  {
+    "id": 105,
+    "model": "qwen",
+    "topic": "",
+    "classification": "Termination Error",
+    "feedback": {
+      "error_type": "Termination Error",
+      "raw_tail_of_log": "ch.DFSearch.search(DFSearch.java:79)\n\tat gov.nasa.jpf.JPF.run(JPF.java:613)\n\tat gov.nasa.jpf.JPF.start(JPF.java:189)\n\tat sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)\n\tat sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)\n\tat sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\n\tat java.lang.reflect.Method.invoke(Method.java:498)\n\tat gov.nasa.jpf.tool.Run.call(Run.java:80)\n\tat gov.nasa.jpf.tool.RunJPF.main(RunJPF.java:116)",
+      "stack_trace_user_frames": [],
+      "stack_trace_internal_frame_count": 14,
+      "notes": "JPF terminated abnormally while exploring this program rather than completing its search or reporting a specific property violation. This can mean the model checker ran out of a resource bound (states/time/depth), or it can mask a genuine concurrency defect (e.g. a livelock) that JPF cannot name directly. Treat as inconclusive rather than a confirmed specific bug; do not assume the code is otherwise correct. The termination trace is entirely inside JPF/JVM internals with no user-code frames, consistent with a resource-bound or search-engine-level termination rather than a bug reachable in the generated code."
+    }
+  },
+  {
+    "id": 107,
+    "model": "qwen",
+    "topic": "",
+    "classification": "Compilation Errors",
+    "feedback": {
+      "error_type": "Compilation Errors",
+      "errors": [
+        {
+          "file": "/tmp/jpf_validate_qwen_tmp/Main.java",
+          "line": 1,
+          "message": "variable added might not have been initialized"
+        }
+      ],
+      "error_count": 1,
+      "stack_trace_user_frames": [],
+      "stack_trace_internal_frame_count": 0,
+      "notes": "Not applicable -- compilation failed before the program could run."
+    }
+  },
+  {
+    "id": 111,
+    "model": "qwen",
+    "topic": "",
+    "classification": "Compilation Errors",
+    "feedback": {
+      "error_type": "Compilation Errors",
+      "errors": [
+        {
+          "file": "/tmp/jpf_validate_qwen_tmp/BetterAttributeStore.java",
+          "line": 1,
+          "message": "empty character literal"
+        },
+        {
+          "file": "/tmp/jpf_validate_qwen_tmp/BetterAttributeStore.java",
+          "line": 1,
+          "message": "unclosed character literal"
+        },
+        {
+          "file": "/tmp/jpf_validate_qwen_tmp/BetterAttributeStore.java",
+          "line": 1,
+          "message": "')' expected"
+        },
+        {
+          "file": "/tmp/jpf_validate_qwen_tmp/BetterAttributeStore.java",
+          "line": 1,
+          "message": "';' expected"
+        },
+        {
+          "file": "/tmp/jpf_validate_qwen_tmp/BetterAttributeStore.java",
+          "line": 1,
+          "message": "illegal start of expression"
+        }
+      ],
+      "error_count": 5,
+      "stack_trace_user_frames": [],
+      "stack_trace_internal_frame_count": 0,
+      "notes": "Not applicable -- compilation failed before the program could run."
+    }
+  },
+  {
+    "id": 112,
+    "model": "qwen",
+    "topic": "",
+    "classification": "Termination Error",
+    "feedback": {
+      "error_type": "Termination Error",
+      "raw_tail_of_log": "ch.DFSearch.search(DFSearch.java:79)\n\tat gov.nasa.jpf.JPF.run(JPF.java:613)\n\tat gov.nasa.jpf.JPF.start(JPF.java:189)\n\tat sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)\n\tat sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)\n\tat sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\n\tat java.lang.reflect.Method.invoke(Method.java:498)\n\tat gov.nasa.jpf.tool.Run.call(Run.java:80)\n\tat gov.nasa.jpf.tool.RunJPF.main(RunJPF.java:116)",
+      "stack_trace_user_frames": [],
+      "stack_trace_internal_frame_count": 14,
+      "notes": "JPF terminated abnormally while exploring this program rather than completing its search or reporting a specific property violation. This can mean the model checker ran out of a resource bound (states/time/depth), or it can mask a genuine concurrency defect (e.g. a livelock) that JPF cannot name directly. Treat as inconclusive rather than a confirmed specific bug; do not assume the code is otherwise correct. The termination trace is entirely inside JPF/JVM internals with no user-code frames, consistent with a resource-bound or search-engine-level termination rather than a bug reachable in the generated code."
+    }
+  },
+  {
+    "id": 113,
+    "model": "qwen",
+    "topic": "",
+    "classification": "Termination Error",
+    "feedback": {
+      "error_type": "Termination Error",
+      "raw_tail_of_log": "ch.DFSearch.search(DFSearch.java:79)\n\tat gov.nasa.jpf.JPF.run(JPF.java:613)\n\tat gov.nasa.jpf.JPF.start(JPF.java:189)\n\tat sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)\n\tat sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)\n\tat sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\n\tat java.lang.reflect.Method.invoke(Method.java:498)\n\tat gov.nasa.jpf.tool.Run.call(Run.java:80)\n\tat gov.nasa.jpf.tool.RunJPF.main(RunJPF.java:116)",
+      "stack_trace_user_frames": [],
+      "stack_trace_internal_frame_count": 14,
+      "notes": "JPF terminated abnormally while exploring this program rather than completing its search or reporting a specific property violation. This can mean the model checker ran out of a resource bound (states/time/depth), or it can mask a genuine concurrency defect (e.g. a livelock) that JPF cannot name directly. Treat as inconclusive rather than a confirmed specific bug; do not assume the code is otherwise correct. The termination trace is entirely inside JPF/JVM internals with no user-code frames, consistent with a resource-bound or search-engine-level termination rather than a bug reachable in the generated code."
+    }
+  },
+  {
+    "id": 114,
+    "model": "qwen",
+    "topic": "",
+    "classification": "Termination Error",
+    "feedback": {
+      "error_type": "Termination Error",
+      "raw_tail_of_log": "ch.DFSearch.search(DFSearch.java:79)\n\tat gov.nasa.jpf.JPF.run(JPF.java:613)\n\tat gov.nasa.jpf.JPF.start(JPF.java:189)\n\tat sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)\n\tat sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)\n\tat sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\n\tat java.lang.reflect.Method.invoke(Method.java:498)\n\tat gov.nasa.jpf.tool.Run.call(Run.java:80)\n\tat gov.nasa.jpf.tool.RunJPF.main(RunJPF.java:116)",
+      "stack_trace_user_frames": [],
+      "stack_trace_internal_frame_count": 14,
+      "notes": "JPF terminated abnormally while exploring this program rather than completing its search or reporting a specific property violation. This can mean the model checker ran out of a resource bound (states/time/depth), or it can mask a genuine concurrency defect (e.g. a livelock) that JPF cannot name directly. Treat as inconclusive rather than a confirmed specific bug; do not assume the code is otherwise correct. The termination trace is entirely inside JPF/JVM internals with no user-code frames, consistent with a resource-bound or search-engine-level termination rather than a bug reachable in the generated code."
+    }
+  },
+  {
+    "id": 115,
+    "model": "qwen",
+    "topic": "",
+    "classification": "Termination Error",
+    "feedback": {
+      "error_type": "Termination Error",
+      "raw_tail_of_log": "ch.DFSearch.search(DFSearch.java:79)\n\tat gov.nasa.jpf.JPF.run(JPF.java:613)\n\tat gov.nasa.jpf.JPF.start(JPF.java:189)\n\tat sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)\n\tat sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)\n\tat sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\n\tat java.lang.reflect.Method.invoke(Method.java:498)\n\tat gov.nasa.jpf.tool.Run.call(Run.java:80)\n\tat gov.nasa.jpf.tool.RunJPF.main(RunJPF.java:116)",
+      "stack_trace_user_frames": [],
+      "stack_trace_internal_frame_count": 14,
+      "notes": "JPF terminated abnormally while exploring this program rather than completing its search or reporting a specific property violation. This can mean the model checker ran out of a resource bound (states/time/depth), or it can mask a genuine concurrency defect (e.g. a livelock) that JPF cannot name directly. Treat as inconclusive rather than a confirmed specific bug; do not assume the code is otherwise correct. The termination trace is entirely inside JPF/JVM internals with no user-code frames, consistent with a resource-bound or search-engine-level termination rather than a bug reachable in the generated code."
+    }
+  }
+]

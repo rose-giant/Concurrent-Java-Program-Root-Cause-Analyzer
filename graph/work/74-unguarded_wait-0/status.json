@@ -1,0 +1,11 @@
+{
+  "id": "74-unguarded_wait-0",
+  "class": "Main",
+  "compiled": true,
+  "ran": true,
+  "returncode": 0,
+  "timed_out": false,
+  "violation": true,
+  "has_trace": true,
+  "seconds": 0.9
+}

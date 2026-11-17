@@ -1,0 +1,20 @@
+# base.jpf  --  YOU MUST EDIT THIS FILE.
+#
+# Copy into it every line of the .jpf config you used to produce codes_jpf_results.json,
+# EXCEPT `target` and `classpath` (02_run_jpf.py sets those per case).
+# In particular keep the lines that attach your race detector and starvation listener, e.g.:
+#
+#   listener=<fully.qualified.PreciseRaceDetector>,<fully.qualified.StarvationListener>
+#   native_classpath=<jar or dir that contains those listener classes>
+#   (plus any starvation bound / search settings you used)
+#
+# The script appends TraceDump to `listener` and `native_classpath` for you.
+
+search.depth_limit=3000
+vm.store_steps=true
+target=Main
+classpath=/home/razi/jpf/jpf-core/pipeline/graph/work/96-rm_sync_block-2/classes
+listener=TraceDump
+native_classpath=/home/razi/jpf/jpf-core/pipeline/graph/build/TraceDump.jar
+tracedump.out=/home/razi/jpf/jpf-core/pipeline/graph/work/96-rm_sync_block-2/jpf_out
+vm.store_steps=true

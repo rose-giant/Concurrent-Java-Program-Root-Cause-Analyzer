@@ -1,0 +1,11 @@
+{
+  "id": "112-rm_join-0",
+  "class": "ServerStatusBeforeSplit",
+  "compiled": true,
+  "ran": true,
+  "returncode": 0,
+  "timed_out": false,
+  "violation": false,
+  "has_trace": false,
+  "seconds": 1.4
+}
